@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+
+# Local editor state
+.idea/
+.vscode/
+.zed/
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
