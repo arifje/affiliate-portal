@@ -25,6 +25,11 @@ class Partner extends Model
         return $this->hasMany(Feed::class);
     }
 
+    public function feedMappingProfiles(): HasMany
+    {
+        return $this->hasMany(FeedMappingProfile::class);
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

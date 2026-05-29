@@ -34,9 +34,19 @@ class Feed extends Model
         return $this->belongsTo(Partner::class);
     }
 
+    public function mappingProfile(): BelongsTo
+    {
+        return $this->belongsTo(FeedMappingProfile::class, 'mapping_profile_id');
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function importBatches(): HasMany
+    {
+        return $this->hasMany(FeedImportBatch::class);
     }
 
     public function clicks(): HasMany

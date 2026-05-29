@@ -17,8 +17,12 @@ class Product extends Model
     {
         return [
             'metadata' => 'array',
+            'additional_image_urls' => 'array',
+            'raw_payload' => 'array',
             'price' => 'decimal:2',
             'old_price' => 'decimal:2',
+            'shipping_cost' => 'decimal:2',
+            'stock_quantity' => 'integer',
             'imported_at' => 'datetime',
             'published_at' => 'datetime',
             'is_active' => 'boolean',
