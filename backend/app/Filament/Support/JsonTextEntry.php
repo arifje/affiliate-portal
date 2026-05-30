@@ -4,14 +4,16 @@ namespace App\Filament\Support;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Support\Enums\FontFamily;
+use Illuminate\Database\Eloquent\Model;
 
 class JsonTextEntry
 {
     public static function make(string $name): TextEntry
     {
         return TextEntry::make($name)
-            ->formatStateUsing(fn (mixed $state): ?string => self::format($state))
+            ->state(fn (?Model $record): ?string => self::format(data_get($record, $name)))
             ->fontFamily(FontFamily::Mono)
+            ->extraAttributes(['style' => 'white-space: pre-wrap; word-break: break-word;'])
             ->copyable();
     }
 

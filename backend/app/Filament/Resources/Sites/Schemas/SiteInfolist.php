@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources\Sites\Schemas;
 
-use App\Filament\Support\JsonTextEntry;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -36,16 +37,30 @@ class SiteInfolist
                     ->columns(3),
                 Section::make('Presentation')
                     ->schema([
-                        JsonTextEntry::make('theme')
-                            ->placeholder('-'),
-                        JsonTextEntry::make('layout')
-                            ->placeholder('-'),
+                        KeyValueEntry::make('theme')
+                            ->keyLabel('Token')
+                            ->valueLabel('Value')
+                            ->placeholder('No theme values set.'),
+                        KeyValueEntry::make('layout')
+                            ->keyLabel('Setting')
+                            ->valueLabel('Value')
+                            ->placeholder('No layout values set.'),
                     ])
                     ->columns(2),
                 Section::make('Settings')
                     ->schema([
-                        JsonTextEntry::make('settings')
-                            ->placeholder('-')
+                        ImageEntry::make('settings.hero_image')
+                            ->label('Hero image')
+                            ->disk('public')
+                            ->visibility('public')
+                            ->imageHeight(180)
+                            ->placeholder('No hero image uploaded.')
+                            ->columnSpanFull(),
+                        KeyValueEntry::make('settings')
+                            ->label('Homepage content')
+                            ->keyLabel('Setting')
+                            ->valueLabel('Value')
+                            ->placeholder('No homepage settings set.')
                             ->columnSpanFull(),
                         TextEntry::make('created_at')
                             ->dateTime()
