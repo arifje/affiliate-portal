@@ -469,6 +469,8 @@ useHead(() => ({
           </NuxtLink>
         </div>
       </section>
+
+      <SiteFooter :site-name="site.name" :site-slug="site.slug" />
     </template>
   </main>
 </template>

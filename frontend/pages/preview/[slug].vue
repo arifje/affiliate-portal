@@ -114,7 +114,6 @@ const heroStyle = computed(() => {
 const searchPlaceholder = computed(() => site.value?.settings?.search_placeholder || 'Zoek op product, merk of categorie')
 const featuredTitle = computed(() => site.value?.settings?.featured_title || 'Uitgelichte keuzes')
 const categoryTitle = computed(() => site.value?.settings?.category_title || 'Shop op categorie')
-const footerTagline = computed(() => site.value?.settings?.footer_tagline || 'Een gedeelde frontend, afgestemd per domein.')
 
 const visibleProducts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -396,10 +395,7 @@ useHead(() => ({
         </div>
       </section>
 
-      <footer class="site-footer">
-        <strong>{{ site.name }}</strong>
-        <span>{{ footerTagline }}</span>
-      </footer>
+      <SiteFooter :site-name="site.name" :site-slug="site.slug" />
     </template>
   </main>
 </template>
@@ -938,21 +934,6 @@ h1 {
 
 .state {
   margin: 64px auto;
-}
-
-.site-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 26px clamp(20px, 4vw, 56px);
-  color: rgba(255, 255, 255, 0.76);
-  background: #17211f;
-}
-
-.site-footer strong {
-  color: #ffffff;
 }
 
 .variant-compact .hero {
