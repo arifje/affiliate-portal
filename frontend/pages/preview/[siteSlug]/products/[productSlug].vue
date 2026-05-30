@@ -85,6 +85,7 @@ const product = computed(() => data.value?.product)
 const relatedProducts = computed(() => data.value?.related_products ?? [])
 const trackedViewKey = ref<string | null>(null)
 const recentlyViewedProducts = ref<ProductCard[]>([])
+const { allowsAnalytics, allowsAffiliate, allowsPreferences } = useCookieConsent()
 let stopSiteVisitHeartbeat: (() => void) | null = null
 
 const themeStyle = computed(() => {
@@ -159,7 +160,7 @@ function recentlyViewedStorageKey(): string | null {
 function readRecentlyViewedProducts(): ProductCard[] {
   const key = recentlyViewedStorageKey()
 
-  if (!key) {
+  if (!key || !allowsPreferences.value) {
     return []
   }
 
@@ -200,7 +201,9 @@ function productCardPayload(productDetail: ProductDetail): ProductCard {
 }
 
 function rememberProductView(): void {
-  if (!site.value || !product.value) {
+  if (!site.value || !product.value || !allowsPreferences.value) {
+    recentlyViewedProducts.value = []
+
     return
   }
 
@@ -226,7 +229,7 @@ function rememberProductView(): void {
 }
 
 function trackProductView(): void {
-  if (!site.value || !product.value) {
+  if (!site.value || !product.value || !allowsAnalytics.value) {
     return
   }
 
@@ -257,7 +260,7 @@ function trackProductView(): void {
 }
 
 function trackOutboundClick(): void {
-  if (!site.value || !product.value) {
+  if (!site.value || !product.value || !allowsAffiliate.value) {
     return
   }
 
@@ -284,8 +287,11 @@ onMounted(() => {
     stopSiteVisitHeartbeat = currentSite ? startSiteVisitHeartbeat(currentSite.slug) : null
   }, { immediate: true })
 
-  watch(product, () => {
+  watch([product, allowsPreferences], () => {
     rememberProductView()
+  }, { immediate: true })
+
+  watch([product, allowsAnalytics], () => {
     trackProductView()
   }, { immediate: true })
 })
@@ -471,6 +477,7 @@ useHead(() => ({
       </section>
 
       <SiteFooter :site-name="site.name" :site-slug="site.slug" />
+      <CookieConsent :site-name="site.name" />
     </template>
   </main>
 </template>

@@ -76,7 +76,7 @@ const legalContent = computed(() => {
         },
         {
           title: 'Welke cookies gebruiken wij?',
-          body: 'Wij gebruiken functionele cookies voor de werking van de website, analytische gegevens om prestaties te meten en affiliate-gerelateerde gegevens om klikken naar partners correct te registreren.',
+          body: 'Wij gebruiken noodzakelijke opslag voor de werking van de website en consent opslag. Alleen met jouw toestemming gebruiken we analytische opslag, affiliate meting en voorkeuren zoals onlangs bekeken producten.',
         },
         {
           title: 'Affiliate tracking',
@@ -84,7 +84,7 @@ const legalContent = computed(() => {
         },
         {
           title: 'Cookies beheren',
-          body: 'Je kunt cookies verwijderen of blokkeren via de instellingen van je browser. Sommige onderdelen van de website werken dan mogelijk minder goed.',
+          body: 'Je kunt je keuze wijzigen via Cookie-instellingen in de footer. Je kunt cookies en lokale opslag ook verwijderen of blokkeren via je browser. Sommige onderdelen van de website werken dan mogelijk minder goed.',
         },
       ],
     }
@@ -219,6 +219,7 @@ useHead(() => ({
       </section>
 
       <SiteFooter :site-name="site.name" :site-slug="site.slug" />
+      <CookieConsent :site-name="site.name" />
     </template>
   </main>
 </template>

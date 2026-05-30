@@ -20,6 +20,12 @@ const links = computed(() => [
     to: `/preview/${props.siteSlug}/gebruikersvoorwaarden`,
   },
 ])
+
+function openCookieSettings(): void {
+  if (import.meta.client) {
+    window.dispatchEvent(new CustomEvent('affiliate-portal:open-cookie-settings'))
+  }
+}
 </script>
 
 <template>
@@ -35,6 +41,10 @@ const links = computed(() => [
           {{ link.label }}
         </NuxtLink>
       </template>
+      <span class="separator" aria-hidden="true">/</span>
+      <button type="button" @click="openCookieSettings">
+        Cookie-instellingen
+      </button>
     </nav>
   </footer>
 </template>
@@ -65,15 +75,25 @@ const links = computed(() => [
 }
 
 .site-footer a,
+.site-footer button,
 .separator {
   display: inline-flex;
   align-items: center;
 }
 
-.site-footer a {
+.site-footer a,
+.site-footer button {
   color: inherit;
   font-weight: 800;
   text-decoration: none;
+}
+
+.site-footer button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
 }
 
 .separator {
@@ -81,7 +101,8 @@ const links = computed(() => [
   font-weight: 800;
 }
 
-.site-footer a:hover {
+.site-footer a:hover,
+.site-footer button:hover {
   color: var(--site-primary, #0f766e);
 }
 

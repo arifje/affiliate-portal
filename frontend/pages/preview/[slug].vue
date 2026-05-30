@@ -396,6 +396,7 @@ useHead(() => ({
       </section>
 
       <SiteFooter :site-name="site.name" :site-slug="site.slug" />
+      <CookieConsent :site-name="site.name" />
     </template>
   </main>
 </template>

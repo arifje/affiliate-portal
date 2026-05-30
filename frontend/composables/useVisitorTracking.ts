@@ -18,13 +18,8 @@ export function getOrCreateVisitorId(): string {
   return visitorId
 }
 
-export function trackSiteVisit(siteSlug: string | null | undefined): void {
-  if (import.meta.server || !siteSlug) {
-    return
-  }
-
-  const config = useRuntimeConfig()
-  const endpoint = `${config.public.apiBase}/sites/preview/${siteSlug}/visits`
+function sendSiteVisit(siteSlug: string, apiBase: string): void {
+  const endpoint = `${apiBase}/sites/preview/${siteSlug}/visits`
   const body = new URLSearchParams({
     visitor_id: getOrCreateVisitorId(),
     path: window.location.pathname,
@@ -44,16 +39,60 @@ export function trackSiteVisit(siteSlug: string | null | undefined): void {
   }).catch(() => {})
 }
 
+export function trackSiteVisit(siteSlug: string | null | undefined): void {
+  if (import.meta.server || !siteSlug) {
+    return
+  }
+
+  const { allowsAnalytics } = useCookieConsent()
+
+  if (!allowsAnalytics.value) {
+    return
+  }
+
+  const config = useRuntimeConfig()
+
+  sendSiteVisit(siteSlug, config.public.apiBase)
+}
+
 export function startSiteVisitHeartbeat(siteSlug: string, intervalMs = 60000): () => void {
   if (import.meta.server) {
     return () => {}
   }
 
-  trackSiteVisit(siteSlug)
+  const { allowsAnalytics } = useCookieConsent()
+  const config = useRuntimeConfig()
+  const apiBase = config.public.apiBase
+  let interval: number | null = null
 
-  const interval = window.setInterval(() => {
-    trackSiteVisit(siteSlug)
-  }, intervalMs)
+  const stopInterval = (): void => {
+    if (interval === null) {
+      return
+    }
 
-  return () => window.clearInterval(interval)
+    window.clearInterval(interval)
+    interval = null
+  }
+
+  const startInterval = (): void => {
+    stopInterval()
+
+    if (!allowsAnalytics.value) {
+      return
+    }
+
+    sendSiteVisit(siteSlug, apiBase)
+    interval = window.setInterval(() => {
+      if (allowsAnalytics.value) {
+        sendSiteVisit(siteSlug, apiBase)
+      }
+    }, intervalMs)
+  }
+
+  const stopConsentWatcher = watch(allowsAnalytics, startInterval, { immediate: true })
+
+  return () => {
+    stopConsentWatcher()
+    stopInterval()
+  }
 }
