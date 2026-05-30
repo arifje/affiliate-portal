@@ -48,6 +48,11 @@ stock quantity, delivery time, and variant attributes are columns. Less common
 attributes stay in `metadata`, while `raw_payload` can retain the original source
 row for traceability.
 
+Filament exposes products under `Catalog > Products`. The product admin is meant
+for review and curation after import: filter by site, partner, feed, category,
+brand, availability, active state, and published state; then adjust product
+content, pricing, media URLs, and publishing status when needed.
+
 ## Clicks
 
 Clicks record outbound redirect attempts. The table stores site/product/feed
