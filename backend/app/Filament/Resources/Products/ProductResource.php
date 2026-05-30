@@ -29,6 +29,15 @@ class ProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    public static function getPreviewUrl(Product $record): string
+    {
+        $record->loadMissing('site:id,slug');
+
+        return rtrim((string) config('app.frontend_url'), '/')
+            .'/preview/'.rawurlencode($record->site->slug)
+            .'/products/'.rawurlencode($record->slug);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ProductForm::configure($schema);
