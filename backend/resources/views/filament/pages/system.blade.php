@@ -7,7 +7,7 @@
 @endphp
 
 <x-filament-panels::page>
-    <div class="mt-4 space-y-6">
+    <div class="admin-utility-page">
         <x-filament::section
             heading="Application info"
             description="Runtime, framework and service details for this installation."
@@ -109,4 +109,12 @@
             </div>
         </x-filament::section>
     </div>
+
+    <style>
+        .admin-utility-page {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+    </style>
 </x-filament-panels::page>
