@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ProductClickController;
 use App\Http\Controllers\Api\ProductViewController;
 use App\Http\Controllers\Api\SitePreviewController;
 use App\Http\Controllers\Api\SitePreviewProductController;
@@ -14,6 +15,9 @@ Route::get('/sites/preview/{site:slug}/products', SitePreviewProductIndexControl
 
 Route::get('/sites/preview/{site:slug}/products/{productSlug}', SitePreviewProductController::class)
     ->name('api.sites.preview.products.show');
+
+Route::post('/sites/preview/{site:slug}/products/{productSlug}/clicks', ProductClickController::class)
+    ->name('api.sites.preview.products.clicks.store');
 
 Route::post('/sites/preview/{site:slug}/products/{productSlug}/views', ProductViewController::class)
     ->name('api.sites.preview.products.views.store');

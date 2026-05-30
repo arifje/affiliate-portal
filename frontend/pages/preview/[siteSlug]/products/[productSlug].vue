@@ -268,6 +268,28 @@ function trackProductView(): void {
   })
 }
 
+function trackOutboundClick(): void {
+  if (!site.value || !product.value) {
+    return
+  }
+
+  const endpoint = `${config.public.apiBase}/sites/preview/${site.value.slug}/products/${product.value.slug}/clicks`
+  const body = new URLSearchParams({
+    visitor_id: getOrCreateVisitorId(),
+    path: window.location.pathname,
+    target_url: product.value.affiliate_url,
+  })
+
+  if (navigator.sendBeacon?.(endpoint, body)) {
+    return
+  }
+
+  void $fetch(endpoint, {
+    method: 'POST',
+    body,
+  }).catch(() => {})
+}
+
 onMounted(() => {
   watch(product, () => {
     rememberProductView()
@@ -356,6 +378,7 @@ useHead(() => ({
             :href="product.affiliate_url"
             target="_blank"
             rel="noopener sponsored nofollow"
+            @click="trackOutboundClick"
           >
             Bekijk aanbieding
           </a>
