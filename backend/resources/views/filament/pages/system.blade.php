@@ -7,7 +7,7 @@
 @endphp
 
 <x-filament-panels::page>
-    <div class="space-y-6">
+    <div class="mt-4 space-y-6">
         <x-filament::section
             heading="Application info"
             description="Runtime, framework and service details for this installation."

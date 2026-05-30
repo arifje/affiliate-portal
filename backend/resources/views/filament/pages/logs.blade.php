@@ -6,7 +6,7 @@
 @endphp
 
 <x-filament-panels::page>
-    <div class="space-y-6">
+    <div class="mt-4 space-y-6">
         <x-filament::section
             heading="Debug info"
             description="Runtime information and the currently selected Laravel log file."
