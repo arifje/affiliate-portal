@@ -79,6 +79,7 @@ const site = computed(() => data.value?.site)
 const product = computed(() => data.value?.product)
 const relatedProducts = computed(() => data.value?.related_products ?? [])
 const trackedViewKey = ref<string | null>(null)
+const recentlyViewedProducts = ref<ProductCard[]>([])
 
 const themeStyle = computed(() => {
   const theme = site.value?.theme ?? {}
@@ -159,6 +160,83 @@ function getOrCreateVisitorId(): string {
   return visitorId
 }
 
+function recentlyViewedStorageKey(): string | null {
+  if (!site.value) {
+    return null
+  }
+
+  return `affiliate_portal_recently_viewed:${site.value.slug}`
+}
+
+function readRecentlyViewedProducts(): ProductCard[] {
+  const key = recentlyViewedStorageKey()
+
+  if (!key) {
+    return []
+  }
+
+  try {
+    const storedProducts = JSON.parse(window.localStorage.getItem(key) || '[]')
+
+    if (!Array.isArray(storedProducts)) {
+      return []
+    }
+
+    return storedProducts.filter((storedProduct): storedProduct is ProductCard => (
+      typeof storedProduct === 'object'
+      && storedProduct !== null
+      && typeof storedProduct.id === 'number'
+      && typeof storedProduct.title === 'string'
+      && typeof storedProduct.slug === 'string'
+    ))
+  } catch {
+    return []
+  }
+}
+
+function productCardPayload(productDetail: ProductDetail): ProductCard {
+  return {
+    id: productDetail.id,
+    brand: productDetail.brand,
+    title: productDetail.title,
+    slug: productDetail.slug,
+    image_url: productDetail.image_url,
+    affiliate_url: productDetail.affiliate_url,
+    price: productDetail.price,
+    old_price: productDetail.old_price,
+    currency: productDetail.currency,
+    availability: productDetail.availability,
+    partner: productDetail.partner,
+    category: productDetail.category,
+  }
+}
+
+function rememberProductView(): void {
+  if (!site.value || !product.value) {
+    return
+  }
+
+  const key = recentlyViewedStorageKey()
+  const currentProduct = productCardPayload(product.value)
+  const previousProducts = readRecentlyViewedProducts()
+    .filter((storedProduct) => storedProduct.slug !== currentProduct.slug)
+
+  recentlyViewedProducts.value = previousProducts.slice(0, 4)
+
+  if (!key) {
+    return
+  }
+
+  try {
+    window.localStorage.setItem(
+      key,
+      JSON.stringify([currentProduct, ...previousProducts].slice(0, 8)),
+    )
+  } catch {
+    // Browsers can block localStorage in strict privacy modes; the page should still work.
+  }
+}
+
 function trackProductView(): void {
   if (!site.value || !product.value) {
     return
@@ -191,7 +269,10 @@ function trackProductView(): void {
 }
 
 onMounted(() => {
-  watch(product, () => trackProductView(), { immediate: true })
+  watch(product, () => {
+    rememberProductView()
+    trackProductView()
+  }, { immediate: true })
 })
 
 useHead(() => ({
@@ -323,6 +404,40 @@ useHead(() => ({
               <h3>{{ relatedProduct.title }}</h3>
               <p class="card-price">
                 {{ formatPrice(relatedProduct.price, relatedProduct.currency) }}
+              </p>
+            </div>
+          </NuxtLink>
+        </div>
+      </section>
+
+      <section v-if="recentlyViewedProducts.length" class="recently-viewed">
+        <div class="section-heading">
+          <p class="eyebrow">Historie</p>
+          <h2>Onlangs bekeken</h2>
+        </div>
+
+        <div class="product-grid">
+          <NuxtLink
+            v-for="recentProduct in recentlyViewedProducts"
+            :key="recentProduct.id"
+            class="product-card"
+            :to="`/preview/${site.slug}/products/${recentProduct.slug}`"
+          >
+            <div class="card-image">
+              <img
+                v-if="recentProduct.image_url"
+                :src="recentProduct.image_url"
+                :alt="recentProduct.title"
+              >
+              <span v-else>No image</span>
+            </div>
+            <div class="card-body">
+              <p v-if="recentProduct.brand" class="card-brand">
+                {{ recentProduct.brand }}
+              </p>
+              <h3>{{ recentProduct.title }}</h3>
+              <p class="card-price">
+                {{ formatPrice(recentProduct.price, recentProduct.currency) }}
               </p>
             </div>
           </NuxtLink>
@@ -513,7 +628,8 @@ h1 {
 }
 
 .details-band,
-.related {
+.related,
+.recently-viewed {
   padding: clamp(36px, 6vw, 72px) clamp(20px, 4vw, 56px);
 }
 
@@ -523,6 +639,10 @@ h1 {
 
 .related {
   background: #ffffff;
+}
+
+.recently-viewed {
+  background: #f5f7f2;
 }
 
 .section-heading {
