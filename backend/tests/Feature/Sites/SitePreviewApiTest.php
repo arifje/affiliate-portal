@@ -63,6 +63,69 @@ class SitePreviewApiTest extends TestCase
             ->assertJsonPath('categories.0.products_count', 1);
     }
 
+    public function test_it_returns_manually_featured_products_for_the_homepage(): void
+    {
+        $site = Site::query()->create([
+            'name' => 'Hartslagmeters',
+            'slug' => 'hartslagmeters-nl',
+            'primary_domain' => 'hartslagmeters.nl',
+        ]);
+
+        $partner = Partner::query()->create([
+            'name' => 'Example Merchant',
+            'slug' => 'example-merchant',
+            'provider' => 'awin',
+        ]);
+
+        Product::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'title' => 'Latest non-featured product',
+            'slug' => 'latest-non-featured-product',
+            'affiliate_url' => 'https://example.com/latest',
+            'is_active' => true,
+        ]);
+
+        Product::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'title' => 'Second featured product',
+            'slug' => 'second-featured-product',
+            'affiliate_url' => 'https://example.com/featured-2',
+            'is_active' => true,
+            'is_featured' => true,
+            'featured_sort_order' => 20,
+        ]);
+
+        Product::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'title' => 'First featured product',
+            'slug' => 'first-featured-product',
+            'affiliate_url' => 'https://example.com/featured-1',
+            'is_active' => true,
+            'is_featured' => true,
+            'featured_sort_order' => 10,
+        ]);
+
+        Product::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'title' => 'Inactive featured product',
+            'slug' => 'inactive-featured-product',
+            'affiliate_url' => 'https://example.com/inactive',
+            'is_active' => false,
+            'is_featured' => true,
+            'featured_sort_order' => 1,
+        ]);
+
+        $this->getJson('/api/sites/preview/hartslagmeters-nl')
+            ->assertOk()
+            ->assertJsonCount(2, 'featured_products')
+            ->assertJsonPath('featured_products.0.slug', 'first-featured-product')
+            ->assertJsonPath('featured_products.1.slug', 'second-featured-product');
+    }
+
     public function test_it_returns_a_site_scoped_product_preview_page(): void
     {
         $site = Site::query()->create([

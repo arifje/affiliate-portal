@@ -26,6 +26,8 @@ class Product extends Model
             'imported_at' => 'datetime',
             'published_at' => 'datetime',
             'is_active' => 'boolean',
+            'is_featured' => 'boolean',
+            'featured_sort_order' => 'integer',
         ];
     }
 

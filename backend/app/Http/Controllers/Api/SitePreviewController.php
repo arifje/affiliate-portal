@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\Site;
 use Illuminate\Http\JsonResponse;
 
@@ -12,27 +14,38 @@ class SitePreviewController extends Controller
     {
         $site->loadCount(['categories', 'feeds', 'products']);
 
+        $productColumns = [
+            'id',
+            'site_id',
+            'partner_id',
+            'category_id',
+            'brand',
+            'title',
+            'slug',
+            'image_url',
+            'affiliate_url',
+            'price',
+            'old_price',
+            'currency',
+            'availability',
+            'published_at',
+        ];
+
         $products = $site->products()
             ->with(['partner:id,name', 'category:id,name'])
             ->where('is_active', true)
             ->latest('updated_at')
             ->limit(24)
-            ->get([
-                'id',
-                'site_id',
-                'partner_id',
-                'category_id',
-                'brand',
-                'title',
-                'slug',
-                'image_url',
-                'affiliate_url',
-                'price',
-                'old_price',
-                'currency',
-                'availability',
-                'published_at',
-            ]);
+            ->get($productColumns);
+
+        $featuredProducts = $site->products()
+            ->with(['partner:id,name', 'category:id,name'])
+            ->where('is_active', true)
+            ->where('is_featured', true)
+            ->orderBy('featured_sort_order')
+            ->latest('updated_at')
+            ->limit(4)
+            ->get($productColumns);
 
         $categories = $site->categories()
             ->withCount(['products' => fn ($query) => $query->where('is_active', true)])
@@ -62,22 +75,9 @@ class SitePreviewController extends Controller
                     'products' => $site->products_count,
                 ],
             ],
-            'products' => $products->map(fn ($product): array => [
-                'id' => $product->id,
-                'brand' => $product->brand,
-                'title' => $product->title,
-                'slug' => $product->slug,
-                'image_url' => $product->image_url,
-                'affiliate_url' => $product->affiliate_url,
-                'price' => $product->price,
-                'old_price' => $product->old_price,
-                'currency' => $product->currency,
-                'availability' => $product->availability,
-                'published_at' => $product->published_at?->toISOString(),
-                'partner' => $product->partner?->only(['id', 'name']),
-                'category' => $product->category?->only(['id', 'name']),
-            ])->values(),
-            'categories' => $categories->map(fn ($category): array => [
+            'products' => $products->map(fn (Product $product): array => $this->productPayload($product))->values(),
+            'featured_products' => $featuredProducts->map(fn (Product $product): array => $this->productPayload($product))->values(),
+            'categories' => $categories->map(fn (Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'slug' => $category->slug,
@@ -85,5 +85,24 @@ class SitePreviewController extends Controller
                 'products_count' => $category->products_count,
             ])->values(),
         ]);
+    }
+
+    private function productPayload(Product $product): array
+    {
+        return [
+            'id' => $product->id,
+            'brand' => $product->brand,
+            'title' => $product->title,
+            'slug' => $product->slug,
+            'image_url' => $product->image_url,
+            'affiliate_url' => $product->affiliate_url,
+            'price' => $product->price,
+            'old_price' => $product->old_price,
+            'currency' => $product->currency,
+            'availability' => $product->availability,
+            'published_at' => $product->published_at?->toISOString(),
+            'partner' => $product->partner?->only(['id', 'name']),
+            'category' => $product->category?->only(['id', 'name']),
+        ];
     }
 }

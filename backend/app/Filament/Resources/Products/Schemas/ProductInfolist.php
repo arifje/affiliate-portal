@@ -128,6 +128,12 @@ class ProductInfolist
                     ->schema([
                         IconEntry::make('is_active')
                             ->boolean(),
+                        IconEntry::make('is_featured')
+                            ->label('Featured')
+                            ->boolean(),
+                        TextEntry::make('featured_sort_order')
+                            ->label('Featured order')
+                            ->numeric(),
                         TextEntry::make('published_at')
                             ->dateTime()
                             ->placeholder('Draft'),
@@ -135,7 +141,7 @@ class ProductInfolist
                             ->dateTime()
                             ->placeholder('-'),
                     ])
-                    ->columns(3),
+                    ->columns(5),
                 Section::make('Metadata')
                     ->schema([
                         JsonTextEntry::make('metadata')

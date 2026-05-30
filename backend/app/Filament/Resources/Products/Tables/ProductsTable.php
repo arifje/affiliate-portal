@@ -51,6 +51,15 @@ class ProductsTable
                 TextColumn::make('product_type')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_featured')
+                    ->label('Featured')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('featured_sort_order')
+                    ->label('Featured order')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('published_at')
@@ -105,6 +114,8 @@ class ProductsTable
                         'backorder' => 'Backorder',
                     ]),
                 TernaryFilter::make('is_active'),
+                TernaryFilter::make('is_featured')
+                    ->label('Featured'),
                 TernaryFilter::make('published_at')
                     ->label('Published')
                     ->nullable(),

@@ -6,8 +6,8 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -152,6 +152,20 @@ class ProductForm
                         DateTimePicker::make('imported_at'),
                     ])
                     ->columns(3),
+                Section::make('Merchandising')
+                    ->schema([
+                        Toggle::make('is_featured')
+                            ->label('Featured')
+                            ->helperText('Show this product in the Aanbevolen section on the storefront homepage.'),
+                        TextInput::make('featured_sort_order')
+                            ->label('Featured sort order')
+                            ->numeric()
+                            ->integer()
+                            ->minValue(0)
+                            ->default(0)
+                            ->helperText('Lower numbers are shown first.'),
+                    ])
+                    ->columns(2),
                 Section::make('Metadata')
                     ->schema([
                         KeyValue::make('metadata')

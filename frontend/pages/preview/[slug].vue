@@ -43,6 +43,7 @@ type SitePreviewResponse = {
     }
   }
   products: SitePreviewProduct[]
+  featured_products: SitePreviewProduct[]
   categories: SitePreviewCategory[]
 }
 
@@ -58,8 +59,11 @@ const { data, error, pending } = await useFetch<SitePreviewResponse>(
 
 const site = computed(() => data.value?.site)
 const products = computed(() => data.value?.products ?? [])
+const manualFeaturedProducts = computed(() => data.value?.featured_products ?? [])
 const categories = computed(() => data.value?.categories ?? [])
-const featuredProducts = computed(() => products.value.slice(0, 4))
+const featuredProducts = computed(() => manualFeaturedProducts.value.length
+  ? manualFeaturedProducts.value
+  : products.value.slice(0, 4))
 const saleProducts = computed(() => products.value.filter((product) => product.old_price).slice(0, 4))
 
 const themeStyle = computed(() => {
