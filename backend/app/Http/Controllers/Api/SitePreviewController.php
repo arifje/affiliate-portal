@@ -16,7 +16,7 @@ class SitePreviewController extends Controller
             ->with(['partner:id,name', 'category:id,name'])
             ->where('is_active', true)
             ->latest('updated_at')
-            ->limit(12)
+            ->limit(24)
             ->get([
                 'id',
                 'site_id',
@@ -33,6 +33,14 @@ class SitePreviewController extends Controller
                 'availability',
                 'published_at',
             ]);
+
+        $categories = $site->categories()
+            ->withCount(['products' => fn ($query) => $query->where('is_active', true)])
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->limit(12)
+            ->get(['id', 'name', 'slug', 'description']);
 
         return response()->json([
             'site' => [
@@ -68,6 +76,13 @@ class SitePreviewController extends Controller
                 'published_at' => $product->published_at?->toISOString(),
                 'partner' => $product->partner?->only(['id', 'name']),
                 'category' => $product->category?->only(['id', 'name']),
+            ])->values(),
+            'categories' => $categories->map(fn ($category): array => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'description' => $category->description,
+                'products_count' => $category->products_count,
             ])->values(),
         ]);
     }

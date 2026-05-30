@@ -31,9 +31,18 @@ class SitePreviewApiTest extends TestCase
             'provider' => 'awin',
         ]);
 
+        $category = Category::query()->create([
+            'site_id' => $site->id,
+            'name' => 'Sporthorloges',
+            'slug' => 'sporthorloges',
+            'description' => 'GPS watches and heart-rate wearables.',
+            'sort_order' => 10,
+        ]);
+
         Product::query()->create([
             'site_id' => $site->id,
             'partner_id' => $partner->id,
+            'category_id' => $category->id,
             'provider_product_id' => 'HRM-1',
             'title' => 'Running heart rate monitor',
             'slug' => 'running-heart-rate-monitor',
@@ -49,7 +58,9 @@ class SitePreviewApiTest extends TestCase
             ->assertJsonPath('site.slug', 'hartslagmeters-nl')
             ->assertJsonPath('site.is_active', false)
             ->assertJsonPath('site.theme.primary_color', '#0f766e')
-            ->assertJsonPath('products.0.title', 'Running heart rate monitor');
+            ->assertJsonPath('products.0.title', 'Running heart rate monitor')
+            ->assertJsonPath('categories.0.name', 'Sporthorloges')
+            ->assertJsonPath('categories.0.products_count', 1);
     }
 
     public function test_it_returns_a_site_scoped_product_preview_page(): void
