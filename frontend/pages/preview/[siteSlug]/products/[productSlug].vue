@@ -69,10 +69,10 @@ const config = useRuntimeConfig()
 
 const siteSlug = computed(() => String(route.params.siteSlug))
 const productSlug = computed(() => String(route.params.productSlug))
+const apiBase = computed(() => import.meta.server ? config.apiBase : config.public.apiBase)
 
 const { data, error, pending } = await useFetch<SitePreviewProductResponse>(
-  () => `${config.public.apiBase}/sites/preview/${siteSlug.value}/products/${productSlug.value}`,
-  { server: false },
+  () => `${apiBase.value}/sites/preview/${siteSlug.value}/products/${productSlug.value}`,
 )
 
 const site = computed(() => data.value?.site)

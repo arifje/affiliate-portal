@@ -27,6 +27,7 @@ services:
     ports:
       - "3000:3000"
     environment:
+      NUXT_API_BASE: http://nginx/api
       NUXT_PUBLIC_API_BASE: http://localhost:8080/api
     volumes:
       - ./frontend:/var/www/frontend

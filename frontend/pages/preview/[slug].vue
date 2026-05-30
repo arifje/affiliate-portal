@@ -49,12 +49,11 @@ type SitePreviewResponse = {
 const route = useRoute()
 const config = useRuntimeConfig()
 const searchQuery = ref('')
-const selectedCategory = ref<string | null>(null)
 
 const slug = computed(() => String(route.params.slug))
+const apiBase = computed(() => import.meta.server ? config.apiBase : config.public.apiBase)
 const { data, error, pending } = await useFetch<SitePreviewResponse>(
-  () => `${config.public.apiBase}/sites/preview/${slug.value}`,
-  { server: false },
+  () => `${apiBase.value}/sites/preview/${slug.value}`,
 )
 
 const site = computed(() => data.value?.site)
@@ -98,14 +97,6 @@ const visibleProducts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
 
   return products.value.filter((product) => {
-    const matchesCategory = selectedCategory.value
-      ? product.category?.name === selectedCategory.value
-      : true
-
-    if (!matchesCategory) {
-      return false
-    }
-
     if (!query) {
       return true
     }
@@ -143,8 +134,34 @@ function productPath(product: SitePreviewProduct): string {
   return `/preview/${site.value?.slug}/products/${product.slug}`
 }
 
-function selectCategory(categoryName: string | null): void {
-  selectedCategory.value = selectedCategory.value === categoryName ? null : categoryName
+function categoryPath(category: SitePreviewCategory): string {
+  return `/preview/${site.value?.slug}/categories/${category.slug}`
+}
+
+function slugify(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function brandPath(brand: string): string {
+  return `/preview/${site.value?.slug}/brands/${slugify(brand)}`
+}
+
+function submitSearch(): void {
+  const query = searchQuery.value.trim()
+
+  if (!query || !site.value) {
+    return
+  }
+
+  navigateTo({
+    path: `/preview/${site.value.slug}/search`,
+    query: { q: query },
+  })
 }
 
 useHead(() => ({
@@ -170,9 +187,9 @@ useHead(() => ({
           <strong>{{ site.name }}</strong>
         </NuxtLink>
         <nav class="nav-links" aria-label="Main navigation">
-          <a href="#categories">Categorieen</a>
-          <a href="#featured">Aanbiedingen</a>
-          <a href="#catalog">Producten</a>
+          <NuxtLink :to="`/preview/${site.slug}/categories`">Categorieen</NuxtLink>
+          <NuxtLink :to="`/preview/${site.slug}/deals`">Aanbiedingen</NuxtLink>
+          <NuxtLink :to="`/preview/${site.slug}/products`">Producten</NuxtLink>
         </nav>
         <div class="preview-pill">
           <span>{{ site.is_active ? 'Active' : 'Inactive' }}</span>
@@ -186,7 +203,7 @@ useHead(() => ({
           <h1>{{ heroTitle }}</h1>
           <p>{{ heroIntro }}</p>
 
-          <form class="search-panel" @submit.prevent>
+          <form class="search-panel" @submit.prevent="submitSearch">
             <label for="storefront-search">Search</label>
             <div class="search-box">
               <span aria-hidden="true">/</span>
@@ -197,6 +214,7 @@ useHead(() => ({
                 :placeholder="searchPlaceholder"
                 autocomplete="off"
               >
+              <button type="submit">Zoeken</button>
             </div>
           </form>
         </div>
@@ -227,17 +245,16 @@ useHead(() => ({
         </div>
 
         <div v-if="categories.length" class="category-grid">
-          <button
+          <NuxtLink
             v-for="category in categories"
             :key="category.id"
-            type="button"
-            :class="['category-tile', selectedCategory === category.name ? 'is-selected' : '']"
-            @click="selectCategory(category.name)"
+            class="category-tile"
+            :to="categoryPath(category)"
           >
             <span>{{ category.name }}</span>
             <strong>{{ category.products_count }} producten</strong>
             <small>{{ category.description || 'Bekijk de beste keuzes in deze categorie.' }}</small>
-          </button>
+          </NuxtLink>
         </div>
       </section>
 
@@ -295,21 +312,20 @@ useHead(() => ({
             <p class="eyebrow">Catalogus</p>
             <h2>{{ visibleProducts.length }} producten gevonden</h2>
           </div>
-          <button v-if="selectedCategory || searchQuery" type="button" class="clear-button" @click="selectedCategory = null; searchQuery = ''">
+          <button v-if="searchQuery" type="button" class="clear-button" @click="searchQuery = ''">
             Reset filters
           </button>
         </div>
 
         <div v-if="topBrands.length" class="brand-row">
           <span>Merken</span>
-          <button
+          <NuxtLink
             v-for="brand in topBrands"
             :key="brand"
-            type="button"
-            @click="searchQuery = brand"
+            :to="brandPath(brand)"
           >
             {{ brand }}
-          </button>
+          </NuxtLink>
         </div>
 
         <div v-if="visibleProducts.length" class="product-grid">
@@ -394,6 +410,7 @@ useHead(() => ({
 }
 
 .brand-mark strong,
+.category-tile,
 .preview-pill strong {
   font-weight: 900;
 }
@@ -495,10 +512,10 @@ h1 {
 .search-box {
   min-height: 64px;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 12px;
   align-items: center;
-  padding: 0 18px;
+  padding: 0 10px 0 18px;
   border: 1px solid #cfd9d5;
   border-radius: 8px;
   background: #ffffff;
@@ -518,6 +535,22 @@ h1 {
   color: var(--site-text);
   font: inherit;
   font-size: 1.05rem;
+}
+
+.search-box button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--site-primary);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+}
+
+.search-box button:hover {
+  background: var(--site-primary-dark);
 }
 
 .hero-panel {
@@ -597,18 +630,18 @@ h1 {
 }
 
 .category-tile {
+  display: block;
   min-height: 160px;
   padding: 18px;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: #ffffff;
   color: var(--site-text);
-  cursor: pointer;
   text-align: left;
+  text-decoration: none;
 }
 
-.category-tile:hover,
-.category-tile.is-selected {
+.category-tile:hover {
   border-color: var(--site-primary);
   background: var(--site-soft);
 }
@@ -769,17 +802,23 @@ h1 {
 }
 
 .clear-button,
-.brand-row button {
+.brand-row a {
   min-height: 36px;
+  display: inline-flex;
+  align-items: center;
   padding: 0 12px;
   border: 1px solid #cfd9d5;
   border-radius: 999px;
   background: #ffffff;
   color: var(--site-text);
-  cursor: pointer;
   font: inherit;
   font-size: 0.88rem;
   font-weight: 850;
+  text-decoration: none;
+}
+
+.clear-button {
+  cursor: pointer;
 }
 
 .brand-row {
@@ -957,7 +996,18 @@ h1 {
   }
 
   .search-box {
+    grid-template-columns: auto 1fr;
     min-height: 56px;
+    padding-bottom: 12px;
+  }
+
+  .search-box span,
+  .search-box input {
+    padding-top: 12px;
+  }
+
+  .search-box button {
+    grid-column: 1 / -1;
   }
 }
 </style>
