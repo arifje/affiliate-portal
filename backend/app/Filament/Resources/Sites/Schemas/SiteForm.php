@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Sites\Schemas;
 
-use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -54,40 +56,92 @@ class SiteForm
                     ])
                     ->columns(3),
                 Section::make('Presentation')
-                    ->description('Optional frontend variables. Leave empty to use the default clean storefront.')
+                    ->description('Theme and layout controls for the shared storefront.')
                     ->schema([
-                        KeyValue::make('theme')
-                            ->keyLabel('Token')
-                            ->valueLabel('Value')
-                            ->helperText('Useful tokens: primary_color, accent_color, background_color, surface_color, text_color, font_family.')
-                            ->default([
-                                'primary_color' => '#0f766e',
-                                'accent_color' => '#d97706',
-                                'background_color' => '#f6f8f4',
-                                'surface_color' => '#ffffff',
-                            ]),
-                        KeyValue::make('layout')
-                            ->keyLabel('Template key')
-                            ->valueLabel('Template value')
-                            ->helperText('Useful keys: home_variant. Supported values: clean, compact, bold.')
-                            ->default([
-                                'home_variant' => 'clean',
-                            ]),
-                    ])
-                    ->columns(2),
-                Section::make('Settings')
-                    ->description('Optional text overrides for the shared frontend.')
-                    ->schema([
-                        KeyValue::make('settings')
-                            ->keyLabel('Setting')
-                            ->valueLabel('Value')
-                            ->helperText('Useful settings: hero_title, hero_intro, hero_badge, search_placeholder, featured_title, category_title, footer_tagline.')
-                            ->default([
-                                'hero_badge' => 'Onafhankelijke affiliate vergelijking',
-                                'search_placeholder' => 'Zoek op product, merk of categorie',
+                        ColorPicker::make('theme.primary_color')
+                            ->label('Primary color')
+                            ->hex()
+                            ->default('#0f766e'),
+                        ColorPicker::make('theme.primary_dark')
+                            ->label('Primary dark')
+                            ->hex()
+                            ->default('#134e4a'),
+                        ColorPicker::make('theme.accent_color')
+                            ->label('Accent color')
+                            ->hex()
+                            ->default('#d97706'),
+                        ColorPicker::make('theme.background_color')
+                            ->label('Background color')
+                            ->hex()
+                            ->default('#f6f8f4'),
+                        ColorPicker::make('theme.muted_color')
+                            ->label('Muted color')
+                            ->hex()
+                            ->default('#e7eee9'),
+                        ColorPicker::make('theme.surface_color')
+                            ->label('Surface color')
+                            ->hex()
+                            ->default('#ffffff'),
+                        ColorPicker::make('theme.text_color')
+                            ->label('Text color')
+                            ->hex()
+                            ->default('#17211f'),
+                        ColorPicker::make('theme.soft_color')
+                            ->label('Soft background')
+                            ->hex()
+                            ->default('#edf7f4'),
+                        Select::make('theme.font_family')
+                            ->label('Font')
+                            ->options([
+                                'Inter, ui-sans-serif, system-ui, sans-serif' => 'Inter / modern sans',
+                                'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' => 'System sans',
+                                'Arial, Helvetica, sans-serif' => 'Arial / neutral sans',
+                                '"Trebuchet MS", Arial, sans-serif' => 'Trebuchet / friendly sans',
+                                'Georgia, "Times New Roman", serif' => 'Georgia / editorial serif',
                             ])
+                            ->default('Inter, ui-sans-serif, system-ui, sans-serif'),
+                        Select::make('layout.home_variant')
+                            ->label('Homepage variant')
+                            ->options([
+                                'clean' => 'Clean',
+                                'compact' => 'Compact',
+                                'bold' => 'Bold',
+                            ])
+                            ->default('clean'),
+                    ])
+                    ->columns(4)
+                    ->columnSpanFull(),
+                Section::make('Settings')
+                    ->description('Text overrides for the shared storefront.')
+                    ->schema([
+                        TextInput::make('settings.hero_badge')
+                            ->label('Hero badge')
+                            ->default('Onafhankelijke affiliate vergelijking')
+                            ->maxLength(255),
+                        TextInput::make('settings.hero_title')
+                            ->label('Hero title')
+                            ->maxLength(255),
+                        Textarea::make('settings.hero_intro')
+                            ->label('Hero intro')
+                            ->rows(3)
                             ->columnSpanFull(),
-                    ]),
+                        TextInput::make('settings.search_placeholder')
+                            ->label('Search placeholder')
+                            ->default('Zoek op product, merk of categorie')
+                            ->maxLength(255),
+                        TextInput::make('settings.featured_title')
+                            ->label('Featured section title')
+                            ->maxLength(255),
+                        TextInput::make('settings.category_title')
+                            ->label('Category section title')
+                            ->maxLength(255),
+                        TextInput::make('settings.footer_tagline')
+                            ->label('Footer tagline')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
             ]);
     }
 }
