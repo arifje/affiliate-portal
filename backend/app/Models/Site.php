@@ -49,6 +49,11 @@ class Site extends Model
         return $this->hasMany(ProductView::class);
     }
 
+    public function siteVisits(): HasMany
+    {
+        return $this->hasMany(SiteVisit::class);
+    }
+
     public function clicks(): HasMany
     {
         return $this->hasMany(Click::class);

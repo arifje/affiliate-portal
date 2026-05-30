@@ -121,6 +121,7 @@ const categories = computed(() => data.value?.categories ?? [])
 const brands = computed(() => data.value?.brands ?? [])
 const meta = computed(() => data.value?.meta)
 const pageTitle = computed(() => props.mode === 'categories' ? 'Categorieen' : meta.value?.title)
+let stopSiteVisitHeartbeat: (() => void) | null = null
 
 const themeStyle = computed(() => {
   const theme = site.value?.theme ?? {}
@@ -207,6 +208,17 @@ watch(sort, () => {
   }
 
   navigateTo({ path: route.path, query })
+})
+
+onMounted(() => {
+  watch(site, (currentSite) => {
+    stopSiteVisitHeartbeat?.()
+    stopSiteVisitHeartbeat = currentSite ? startSiteVisitHeartbeat(currentSite.slug) : null
+  }, { immediate: true })
+})
+
+onBeforeUnmount(() => {
+  stopSiteVisitHeartbeat?.()
 })
 
 useHead(() => ({

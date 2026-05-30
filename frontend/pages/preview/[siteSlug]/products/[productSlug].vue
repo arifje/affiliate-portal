@@ -85,6 +85,7 @@ const product = computed(() => data.value?.product)
 const relatedProducts = computed(() => data.value?.related_products ?? [])
 const trackedViewKey = ref<string | null>(null)
 const recentlyViewedProducts = ref<ProductCard[]>([])
+let stopSiteVisitHeartbeat: (() => void) | null = null
 
 const themeStyle = computed(() => {
   const theme = site.value?.theme ?? {}
@@ -145,25 +146,6 @@ function formatPrice(amount: string | number | null, currency: string): string {
 
 function formatAvailability(value: string | null): string | null {
   return value?.replaceAll('_', ' ') ?? null
-}
-
-function getOrCreateVisitorId(): string {
-  const key = 'affiliate_portal_visitor_id'
-  const visitorId = window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
-
-  try {
-    const existing = window.localStorage.getItem(key)
-
-    if (existing) {
-      return existing
-    }
-
-    window.localStorage.setItem(key, visitorId)
-  } catch {
-    return visitorId
-  }
-
-  return visitorId
 }
 
 function recentlyViewedStorageKey(): string | null {
@@ -297,10 +279,19 @@ function trackOutboundClick(): void {
 }
 
 onMounted(() => {
+  watch(site, (currentSite) => {
+    stopSiteVisitHeartbeat?.()
+    stopSiteVisitHeartbeat = currentSite ? startSiteVisitHeartbeat(currentSite.slug) : null
+  }, { immediate: true })
+
   watch(product, () => {
     rememberProductView()
     trackProductView()
   }, { immediate: true })
+})
+
+onBeforeUnmount(() => {
+  stopSiteVisitHeartbeat?.()
 })
 
 useHead(() => ({

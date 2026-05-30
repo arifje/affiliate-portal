@@ -70,6 +70,7 @@ const featuredProducts = computed(() => manualFeaturedProducts.value.length
   ? manualFeaturedProducts.value
   : products.value.slice(0, 4))
 const saleProducts = computed(() => products.value.filter((product) => product.old_price).slice(0, 4))
+let stopSiteVisitHeartbeat: (() => void) | null = null
 
 const themeStyle = computed(() => {
   const theme = site.value?.theme ?? {}
@@ -200,6 +201,17 @@ function submitSearch(): void {
     query: { q: query },
   })
 }
+
+onMounted(() => {
+  watch(site, (currentSite) => {
+    stopSiteVisitHeartbeat?.()
+    stopSiteVisitHeartbeat = currentSite ? startSiteVisitHeartbeat(currentSite.slug) : null
+  }, { immediate: true })
+})
+
+onBeforeUnmount(() => {
+  stopSiteVisitHeartbeat?.()
+})
 
 useHead(() => ({
   title: site.value ? `${site.value.name} | Vergelijk producten` : 'Site preview',
