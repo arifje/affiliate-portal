@@ -30,6 +30,11 @@ class SiteResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getPreviewUrl(Site $record): string
+    {
+        return rtrim((string) config('app.frontend_url'), '/') . '/preview/' . $record->slug;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SiteForm::configure($schema);

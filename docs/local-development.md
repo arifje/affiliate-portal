@@ -27,6 +27,17 @@ Useful URLs:
 - MariaDB: `localhost:3306`
 - Redis: `localhost:6379`
 
+## Site Preview
+
+Sites can be previewed before DNS is configured. In the admin panel, open a Site
+and use the `Preview` action, or visit:
+
+`http://localhost:3000/preview/{site-slug}`
+
+For example, a site with slug `hartslagmeters_nl` can be previewed at:
+
+`http://localhost:3000/preview/hartslagmeters_nl`
+
 Run Laravel commands through the PHP service:
 
 ```bash

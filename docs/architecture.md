@@ -10,6 +10,11 @@ primary domain, optional aliases, locale, currency, theme tokens, and layout
 settings. The Nuxt SSR app can read the request host and request the matching
 site configuration from the backend.
 
+For local review and pre-DNS work, the frontend also supports preview URLs in
+the form `/preview/{site-slug}`. This resolves a site by slug through the backend
+API and renders the same Site configuration without requiring the real domain to
+point at the application yet.
+
 Example sites:
 
 - `maskers.nl`
