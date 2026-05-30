@@ -1,4 +1,5 @@
 @php
+    $serverInfo = $this->getServerInfo();
     $applicationInfo = $this->getApplicationInfo();
     $requirements = $this->getRequirements();
     $phpExtensions = $this->getPhpExtensions();
@@ -8,6 +9,24 @@
 
 <x-filament-panels::page>
     <div class="admin-utility-page">
+        <x-filament::section
+            heading="Server info"
+            description="Basic resource snapshot for the backend container or server."
+        >
+            <div class="server-info-grid">
+                @foreach ($serverInfo as $item)
+                    <div class="server-info-card">
+                        <p class="server-info-label">{{ $item['label'] }}</p>
+                        <p class="server-info-value">{{ $item['value'] }}</p>
+
+                        @if ($item['description'])
+                            <p class="server-info-description">{{ $item['description'] }}</p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </x-filament::section>
+
         <x-filament::section
             heading="Application info"
             description="Runtime, framework and service details for this installation."
@@ -115,6 +134,60 @@
             display: grid;
             gap: 1.5rem;
             margin-top: 1rem;
+        }
+
+        .server-info-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        }
+
+        .server-info-card {
+            background: rgb(255 255 255);
+            border: 1px solid rgb(229 231 235);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .server-info-label {
+            color: rgb(75 85 99);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem;
+        }
+
+        .server-info-value {
+            color: rgb(17 24 39);
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .server-info-description {
+            color: rgb(107 114 128);
+            font-size: 0.8125rem;
+            line-height: 1.45;
+            margin: 0.5rem 0 0;
+            overflow-wrap: anywhere;
+        }
+
+        .dark .server-info-card {
+            background: rgb(17 24 39);
+            border-color: rgb(255 255 255 / 10%);
+        }
+
+        .dark .server-info-label {
+            color: rgb(209 213 219);
+        }
+
+        .dark .server-info-value {
+            color: rgb(255 255 255);
+        }
+
+        .dark .server-info-description {
+            color: rgb(156 163 175);
         }
     </style>
 </x-filament-panels::page>

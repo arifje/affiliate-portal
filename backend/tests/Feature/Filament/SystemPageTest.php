@@ -20,6 +20,8 @@ class SystemPageTest extends TestCase
             ->actingAs($user)
             ->get('/admin/system')
             ->assertOk()
+            ->assertSee('Server info')
+            ->assertSee('Load average')
             ->assertSee('Application info')
             ->assertSee('Requirements')
             ->assertSee('PHP version')

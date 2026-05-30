@@ -25,6 +25,14 @@ class System extends Page
     protected string $view = 'filament.pages.system';
 
     /**
+     * @return array<int, array{label: string, value: string, description: string|null}>
+     */
+    public function getServerInfo(): array
+    {
+        return $this->inspector()->serverInfo();
+    }
+
+    /**
      * @return array<int, array{label: string, value: string}>
      */
     public function getApplicationInfo(): array

@@ -12,6 +12,49 @@ use Throwable;
 class SystemInspector
 {
     /**
+     * @return array<int, array{label: string, value: string, description: string|null}>
+     */
+    public function serverInfo(): array
+    {
+        $memory = $this->memoryInfo();
+        $swap = $this->swapInfo();
+        $disk = $this->diskInfo(base_path());
+
+        return [
+            [
+                'label' => 'Load average',
+                'value' => $this->loadAverage(),
+                'description' => '1, 5 and 15 minute averages.',
+            ],
+            [
+                'label' => 'CPU usage',
+                'value' => $this->cpuUsage(),
+                'description' => 'Short live estimate from the operating system.',
+            ],
+            [
+                'label' => 'CPU cores',
+                'value' => $this->cpuCores(),
+                'description' => 'Logical cores visible to PHP.',
+            ],
+            [
+                'label' => 'Memory usage',
+                'value' => $memory['value'],
+                'description' => $memory['description'],
+            ],
+            [
+                'label' => 'Swap usage',
+                'value' => $swap['value'],
+                'description' => $swap['description'],
+            ],
+            [
+                'label' => 'Free disk space',
+                'value' => $disk['value'],
+                'description' => $disk['description'],
+            ],
+        ];
+    }
+
+    /**
      * @return array<int, array{label: string, value: string}>
      */
     public function applicationInfo(): array
@@ -268,6 +311,237 @@ class SystemInspector
                 return 'Unavailable';
             }
         }
+    }
+
+    private function loadAverage(): string
+    {
+        if (! function_exists('sys_getloadavg')) {
+            return 'Unavailable';
+        }
+
+        $load = sys_getloadavg();
+
+        if ($load === false) {
+            return 'Unavailable';
+        }
+
+        return collect($load)
+            ->take(3)
+            ->map(fn (float $value): string => number_format($value, 2))
+            ->implode(' / ');
+    }
+
+    private function cpuUsage(): string
+    {
+        $firstSample = $this->procCpuSample();
+
+        if ($firstSample === null) {
+            return 'Unavailable';
+        }
+
+        usleep(100000);
+
+        $secondSample = $this->procCpuSample();
+
+        if ($secondSample === null) {
+            return 'Unavailable';
+        }
+
+        $totalDelta = $secondSample['total'] - $firstSample['total'];
+        $idleDelta = $secondSample['idle'] - $firstSample['idle'];
+
+        if ($totalDelta <= 0) {
+            return 'Unavailable';
+        }
+
+        $usage = max(0, min(100, (1 - ($idleDelta / $totalDelta)) * 100));
+
+        return number_format($usage, 1).'%';
+    }
+
+    private function cpuCores(): string
+    {
+        if (is_readable('/proc/cpuinfo')) {
+            $cpuInfo = File::get('/proc/cpuinfo');
+            preg_match_all('/^processor\s*:/m', $cpuInfo, $matches);
+            $cores = count($matches[0]);
+
+            if ($cores > 0) {
+                return (string) $cores;
+            }
+        }
+
+        if (function_exists('shell_exec')) {
+            $cores = trim((string) @shell_exec('getconf _NPROCESSORS_ONLN 2>/dev/null'));
+
+            if (ctype_digit($cores) && (int) $cores > 0) {
+                return $cores;
+            }
+        }
+
+        return 'Unavailable';
+    }
+
+    /**
+     * @return array{value: string, description: string|null}
+     */
+    private function memoryInfo(): array
+    {
+        $meminfo = $this->procMeminfo();
+
+        if (! isset($meminfo['MemTotal'], $meminfo['MemAvailable'])) {
+            return [
+                'value' => 'Unavailable',
+                'description' => 'Memory totals are not exposed by this operating system.',
+            ];
+        }
+
+        $total = $meminfo['MemTotal'] * 1024;
+        $available = $meminfo['MemAvailable'] * 1024;
+        $used = max(0, $total - $available);
+
+        return [
+            'value' => $this->formatBytes($used).' / '.$this->formatBytes($total).' ('.$this->formatPercent($used, $total).')',
+            'description' => $this->formatBytes($available).' available.',
+        ];
+    }
+
+    /**
+     * @return array{value: string, description: string|null}
+     */
+    private function swapInfo(): array
+    {
+        $meminfo = $this->procMeminfo();
+
+        if (! isset($meminfo['SwapTotal'], $meminfo['SwapFree'])) {
+            return [
+                'value' => 'Unavailable',
+                'description' => 'Swap totals are not exposed by this operating system.',
+            ];
+        }
+
+        $total = $meminfo['SwapTotal'] * 1024;
+        $free = $meminfo['SwapFree'] * 1024;
+
+        if ($total <= 0) {
+            return [
+                'value' => 'No swap configured',
+                'description' => '0 B total.',
+            ];
+        }
+
+        $used = max(0, $total - $free);
+
+        return [
+            'value' => $this->formatBytes($used).' / '.$this->formatBytes($total).' ('.$this->formatPercent($used, $total).')',
+            'description' => $this->formatBytes($free).' available.',
+        ];
+    }
+
+    /**
+     * @return array{value: string, description: string|null}
+     */
+    private function diskInfo(string $path): array
+    {
+        $total = disk_total_space($path);
+        $free = disk_free_space($path);
+
+        if ($total === false || $free === false || $total <= 0) {
+            return [
+                'value' => 'Unavailable',
+                'description' => $path,
+            ];
+        }
+
+        $used = max(0, $total - $free);
+
+        return [
+            'value' => $this->formatBytes($free).' free',
+            'description' => $this->formatBytes($total).' total, '.$this->formatPercent($used, $total).' used at '.$path.'.',
+        ];
+    }
+
+    /**
+     * @return array{idle: int, total: int}|null
+     */
+    private function procCpuSample(): ?array
+    {
+        if (! is_readable('/proc/stat')) {
+            return null;
+        }
+
+        $line = strtok(File::get('/proc/stat'), "\n");
+
+        if (! is_string($line) || ! str_starts_with($line, 'cpu ')) {
+            return null;
+        }
+
+        $parts = preg_split('/\s+/', trim($line));
+
+        if (! is_array($parts)) {
+            return null;
+        }
+
+        $values = collect($parts)
+            ->skip(1)
+            ->map(fn (string $value): int => (int) $value)
+            ->values();
+
+        if ($values->count() < 4) {
+            return null;
+        }
+
+        $idle = (int) $values->get(3) + (int) $values->get(4, 0);
+
+        return [
+            'idle' => $idle,
+            'total' => $values->sum(),
+        ];
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function procMeminfo(): array
+    {
+        if (! is_readable('/proc/meminfo')) {
+            return [];
+        }
+
+        $info = [];
+
+        foreach (explode("\n", File::get('/proc/meminfo')) as $line) {
+            if (! preg_match('/^([A-Za-z_()]+):\s+(\d+)\s+kB$/', $line, $matches)) {
+                continue;
+            }
+
+            $info[$matches[1]] = (int) $matches[2];
+        }
+
+        return $info;
+    }
+
+    private function formatBytes(float|int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $value = max(0, (float) $bytes);
+        $unit = 0;
+
+        while ($value >= 1024 && $unit < count($units) - 1) {
+            $value /= 1024;
+            $unit++;
+        }
+
+        return number_format($value, $unit === 0 ? 0 : 1).' '.$units[$unit];
+    }
+
+    private function formatPercent(float|int $used, float|int $total): string
+    {
+        if ($total <= 0) {
+            return '0%';
+        }
+
+        return number_format(($used / $total) * 100, 1).'%';
     }
 
     private function imageDriverVersion(): string
