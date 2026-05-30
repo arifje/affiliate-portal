@@ -87,6 +87,7 @@ const themeStyle = computed(() => {
   return {
     '--site-primary': theme.primary_color || theme.primary || '#0f766e',
     '--site-accent': theme.accent_color || theme.accent || '#d97706',
+    '--site-eyebrow': theme.eyebrow_color || theme.accent_color || theme.accent || '#d97706',
     '--site-surface': theme.surface_color || theme.surface || '#ffffff',
     '--site-font': theme.font_family || theme.font || 'Inter, ui-sans-serif, system-ui, sans-serif',
   }
@@ -559,7 +560,7 @@ useHead(() => ({
 
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--site-accent);
+  color: var(--site-eyebrow);
   font-size: 0.78rem;
   font-weight: 850;
   letter-spacing: 0;

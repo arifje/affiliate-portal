@@ -73,6 +73,7 @@ const themeStyle = computed(() => {
     '--site-primary': theme.primary_color || theme.primary || '#0f766e',
     '--site-primary-dark': theme.primary_dark || '#134e4a',
     '--site-accent': theme.accent_color || theme.accent || '#d97706',
+    '--site-eyebrow': theme.eyebrow_color || theme.accent_color || theme.accent || '#d97706',
     '--site-bg': theme.background_color || theme.background || '#f6f8f4',
     '--site-muted': theme.muted_color || theme.muted || '#e7eee9',
     '--site-surface': theme.surface_color || theme.surface || '#ffffff',
@@ -471,7 +472,7 @@ useHead(() => ({
 
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--site-accent);
+  color: var(--site-eyebrow);
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0;
