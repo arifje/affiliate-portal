@@ -6,6 +6,7 @@ use App\Filament\Resources\Sites\Pages\CreateSite;
 use App\Filament\Resources\Sites\Pages\EditSite;
 use App\Filament\Resources\Sites\Pages\ListSites;
 use App\Filament\Resources\Sites\Pages\ViewSite;
+use App\Filament\Resources\Sites\RelationManagers\FeedsRelationManager;
 use App\Filament\Resources\Sites\Schemas\SiteForm;
 use App\Filament\Resources\Sites\Schemas\SiteInfolist;
 use App\Filament\Resources\Sites\Tables\SitesTable;
@@ -47,7 +48,7 @@ class SiteResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            FeedsRelationManager::class,
         ];
     }
 

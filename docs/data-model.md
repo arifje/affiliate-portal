@@ -17,6 +17,10 @@ provider type, URL, credentials/config, scheduling, and last import state.
 Feeds can point to a reusable mapping profile, which describes how source fields
 from Daisycon, Awin, TradeTracker, or custom feeds are normalized.
 
+A feed belongs to one site. This keeps category mapping, product selection, and
+frontend publishing site-specific even when multiple domains use the same
+affiliate network.
+
 ## Feed Mapping
 
 `canonical_fields` stores the universal product vocabulary. `feed_mapping_profiles`

@@ -105,6 +105,8 @@ Expected next importer steps:
 
 Filament exposes the mapping setup under the `Feed imports` navigation group:
 
+- `Partners`: manage affiliate networks or merchants.
+- `Feeds`: attach a partner feed to a site and select a mapping profile.
 - `Canonical fields`: manage the universal product vocabulary.
 - `Feed mapping profiles`: manage provider templates and scoped mappings.
 - `Feed field mappings`: inspect or edit mappings across all profiles.
@@ -112,6 +114,21 @@ Filament exposes the mapping setup under the `Feed imports` navigation group:
 
 Most day-to-day work should happen from a mapping profile. Open a profile and
 edit its field mappings there so the mapping context stays visible.
+
+## Attaching a Feed to a Site
+
+The setup order is:
+
+1. Create or confirm the `Site`, for example `hartslagmeters.nl`.
+2. Create a `Partner` for the network or merchant, for example an Awin advertiser.
+3. Create a `Feed`.
+4. Select the Site, Partner, provider, source type, source URL, and mapping profile.
+5. Keep the feed active when it is ready for imports.
+
+You can create feeds from the global `Feeds` section or from a site's detail page
+under the site's `Feeds` relation tab. A feed belongs to exactly one site, so the
+same source feed should be added separately when multiple domains need different
+category strategy, product selection, or mapping overrides.
 
 ## Product Schema Boundary
 
