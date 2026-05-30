@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Partner;
 use App\Models\Product;
 use App\Models\Site;
+use App\Support\PlatformSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -190,5 +191,20 @@ class SitePreviewApiTest extends TestCase
 
         $this->getJson('/api/sites/preview/hartslagmeters-nl/products/unknown-product')
             ->assertNotFound();
+    }
+
+    public function test_it_returns_service_unavailable_when_the_website_is_offline(): void
+    {
+        PlatformSettings::setWebsiteIsOnline(false);
+
+        Site::query()->create([
+            'name' => 'Hartslagmeters',
+            'slug' => 'hartslagmeters-nl',
+            'primary_domain' => 'hartslagmeters.nl',
+        ]);
+
+        $this->getJson('/api/sites/preview/hartslagmeters-nl')
+            ->assertServiceUnavailable()
+            ->assertJsonPath('message', 'Website is offline.');
     }
 }

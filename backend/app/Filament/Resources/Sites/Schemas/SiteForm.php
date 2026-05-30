@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Sites\Schemas;
 
+use App\Models\Site;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
@@ -157,7 +159,11 @@ class SiteForm
                             ->image()
                             ->imageEditor()
                             ->disk('public')
-                            ->directory('site-heroes')
+                            ->directory(fn (Get $get, ?Site $record = null): string => Site::storageDirectoryFor(
+                                $record?->slug ?: $get('slug'),
+                                $record?->id,
+                                'hero',
+                            ))
                             ->visibility('public')
                             ->maxSize(4096)
                             ->columnSpanFull(),

@@ -37,6 +37,10 @@ php artisan storage:link --relative
 The backend `APP_URL` should match the Nginx URL above so Filament file uploads
 can preview files from `/storage/...`.
 
+Site-owned uploads are stored below `storage/app/public/sites/{site-slug}/`.
+For example, a homepage hero image for `hartslagmeters_nl` lives in
+`storage/app/public/sites/hartslagmeters_nl/hero/`.
+
 ## Site Preview
 
 Sites can be previewed before DNS is configured. In the admin panel, open a Site

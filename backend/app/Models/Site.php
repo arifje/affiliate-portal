@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Site extends Model
 {
@@ -51,5 +52,23 @@ class Site extends Model
     public function clicks(): HasMany
     {
         return $this->hasMany(Click::class);
+    }
+
+    public function storageDirectory(?string $subdirectory = null): string
+    {
+        return self::storageDirectoryFor($this->slug, $this->id, $subdirectory);
+    }
+
+    public static function storageDirectoryFor(?string $slug, ?int $id = null, ?string $subdirectory = null): string
+    {
+        $keySource = $slug ?: ($id ? "site-{$id}" : 'site');
+        $siteKey = (string) Str::of($keySource)
+            ->lower()
+            ->replaceMatches('/[^a-z0-9_-]+/', '-')
+            ->trim('-_');
+
+        $basePath = 'sites/'.($siteKey ?: 'site');
+
+        return filled($subdirectory) ? "{$basePath}/{$subdirectory}" : $basePath;
     }
 }

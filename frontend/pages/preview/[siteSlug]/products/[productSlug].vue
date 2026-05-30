@@ -75,6 +75,11 @@ const { data, error, pending } = await useFetch<SitePreviewProductResponse>(
   () => `${apiBase.value}/sites/preview/${siteSlug.value}/products/${productSlug.value}`,
 )
 
+const isWebsiteOffline = computed(() => {
+  const fetchError = error.value as { status?: number; statusCode?: number } | null
+
+  return (fetchError?.statusCode ?? fetchError?.status) === 503
+})
 const site = computed(() => data.value?.site)
 const product = computed(() => data.value?.product)
 const relatedProducts = computed(() => data.value?.related_products ?? [])
@@ -307,6 +312,12 @@ useHead(() => ({
   <main class="product-page" :style="themeStyle">
     <section v-if="pending" class="state">
       <p>Loading product...</p>
+    </section>
+
+    <section v-else-if="isWebsiteOffline" class="state">
+      <p class="eyebrow">Offline</p>
+      <h1>Website tijdelijk offline</h1>
+      <p>Deze website is momenteel niet publiek beschikbaar.</p>
     </section>
 
     <section v-else-if="error || !site || !product" class="state">
