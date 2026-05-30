@@ -35,10 +35,11 @@ Core relationships:
 
 ## Feed Normalization
 
-Daisycon, Awin, TradeTracker, and custom sources should be imported through
-provider-specific adapters that map raw feed rows into the shared `products`
-schema. Provider identifiers remain available for deduplication and debugging,
-while public rendering uses normalized fields.
+Daisycon, Awin, TradeTracker, and custom sources should be imported through a
+data-driven mapping layer. Provider templates map raw feed rows into a canonical
+field registry first, and that canonical row is then written into the shared
+`products` schema. Provider identifiers remain available for deduplication and
+debugging, while public rendering uses normalized fields.
 
 ## Search
 
