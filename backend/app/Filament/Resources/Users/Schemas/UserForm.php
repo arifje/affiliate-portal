@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -25,6 +26,9 @@ class UserForm
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         DateTimePicker::make('email_verified_at'),
+                        Toggle::make('is_active')
+                            ->required()
+                            ->default(true),
                     ])
                     ->columns(2),
                 Section::make('Password')

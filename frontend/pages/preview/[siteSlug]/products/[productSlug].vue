@@ -78,6 +78,7 @@ const { data, error, pending } = await useFetch<SitePreviewProductResponse>(
 const site = computed(() => data.value?.site)
 const product = computed(() => data.value?.product)
 const relatedProducts = computed(() => data.value?.related_products ?? [])
+const trackedViewKey = ref<string | null>(null)
 
 const themeStyle = computed(() => {
   const theme = site.value?.theme ?? {}
@@ -138,6 +139,60 @@ function formatPrice(amount: string | number | null, currency: string): string {
 function formatAvailability(value: string | null): string | null {
   return value?.replaceAll('_', ' ') ?? null
 }
+
+function getOrCreateVisitorId(): string {
+  const key = 'affiliate_portal_visitor_id'
+  const visitorId = window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+  try {
+    const existing = window.localStorage.getItem(key)
+
+    if (existing) {
+      return existing
+    }
+
+    window.localStorage.setItem(key, visitorId)
+  } catch {
+    return visitorId
+  }
+
+  return visitorId
+}
+
+function trackProductView(): void {
+  if (!site.value || !product.value) {
+    return
+  }
+
+  const viewKey = `${site.value.slug}:${product.value.slug}`
+
+  if (trackedViewKey.value === viewKey) {
+    return
+  }
+
+  trackedViewKey.value = viewKey
+
+  const endpoint = `${config.public.apiBase}/sites/preview/${site.value.slug}/products/${product.value.slug}/views`
+  const body = new URLSearchParams({
+    visitor_id: getOrCreateVisitorId(),
+    path: window.location.pathname,
+  })
+
+  if (navigator.sendBeacon?.(endpoint, body)) {
+    return
+  }
+
+  void $fetch(endpoint, {
+    method: 'POST',
+    body,
+  }).catch(() => {
+    trackedViewKey.value = null
+  })
+}
+
+onMounted(() => {
+  watch(product, () => trackProductView(), { immediate: true })
+})
 
 useHead(() => ({
   title: product.value && site.value ? `${product.value.title} | ${site.value.name}` : 'Product preview',
