@@ -22,10 +22,20 @@ docker compose up -d
 
 Useful URLs:
 
-- Backend via Nginx: `http://localhost:8080`
+- Backend via Nginx: `http://127.0.0.1:8080`
 - Frontend: `http://localhost:3000`
 - MariaDB: `localhost:3306`
 - Redis: `localhost:6379`
+
+Expose uploaded public files:
+
+```bash
+cd backend
+php artisan storage:link --relative
+```
+
+The backend `APP_URL` should match the Nginx URL above so Filament file uploads
+can preview files from `/storage/...`.
 
 ## Site Preview
 

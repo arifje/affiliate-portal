@@ -94,6 +94,17 @@ const heroTitle = computed(() => site.value?.settings?.hero_title || `Vind de be
 const heroIntro = computed(() => site.value?.settings?.hero_intro || 'Vergelijk zorgvuldig geselecteerde producten, bekijk actuele aanbiedingen en klik direct door naar de winkel.')
 const heroBadge = computed(() => site.value?.settings?.hero_badge || 'Onafhankelijke affiliate vergelijking')
 const heroImageUrl = computed(() => mediaUrl(site.value?.settings?.hero_image_url || site.value?.settings?.hero_image))
+const heroStyle = computed(() => {
+  if (!heroImageUrl.value) {
+    return {}
+  }
+
+  const imageUrl = heroImageUrl.value.replaceAll('"', '\\"')
+
+  return {
+    backgroundImage: `linear-gradient(90deg, rgba(11, 18, 17, 0.78), rgba(11, 18, 17, 0.5) 48%, rgba(11, 18, 17, 0.2)), url("${imageUrl}")`,
+  }
+})
 const searchPlaceholder = computed(() => site.value?.settings?.search_placeholder || 'Zoek op product, merk of categorie')
 const featuredTitle = computed(() => site.value?.settings?.featured_title || 'Uitgelichte keuzes')
 const categoryTitle = computed(() => site.value?.settings?.category_title || 'Shop op categorie')
@@ -218,7 +229,7 @@ useHead(() => ({
         </div>
       </header>
 
-      <section class="hero" :class="{ 'hero-has-image': heroImageUrl }">
+      <section class="hero" :class="{ 'hero-has-image': heroImageUrl }" :style="heroStyle">
         <div class="hero-copy">
           <p class="eyebrow">{{ heroBadge }}</p>
           <h1>{{ heroTitle }}</h1>
@@ -238,10 +249,6 @@ useHead(() => ({
               <button type="submit">Zoeken</button>
             </div>
           </form>
-        </div>
-
-        <div v-if="heroImageUrl" class="hero-visual">
-          <img :src="heroImageUrl" :alt="`${site.name} header image`">
         </div>
       </section>
 
@@ -469,7 +476,11 @@ useHead(() => ({
 }
 
 .hero-has-image {
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 460px);
+  min-height: 72vh;
+  color: #ffffff;
+  background-color: var(--site-primary-dark);
+  background-position: center;
+  background-size: cover;
 }
 
 .hero-copy {
@@ -506,6 +517,15 @@ h1 {
   color: #43534f;
   font-size: clamp(1rem, 2vw, 1.22rem);
   line-height: 1.65;
+}
+
+.hero-has-image .eyebrow {
+  color: #ffdda3;
+}
+
+.hero-has-image .hero-copy > p:not(.eyebrow),
+.hero-has-image .search-panel label {
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .search-panel {
@@ -562,27 +582,6 @@ h1 {
 
 .search-box button:hover {
   background: var(--site-primary-dark);
-}
-
-.hero-visual {
-  min-height: 390px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--site-muted);
-  box-shadow: 0 24px 70px rgba(23, 33, 31, 0.16);
-}
-
-.hero-visual img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 390px;
-  object-fit: cover;
-}
-
-.variant-compact .hero-visual,
-.variant-compact .hero-visual img {
-  min-height: 300px;
 }
 
 .category-band,
@@ -937,7 +936,7 @@ h1 {
   min-height: 52vh;
 }
 
-.variant-bold .hero {
+.variant-bold .hero:not(.hero-has-image) {
   background:
     linear-gradient(135deg, rgba(19, 78, 74, 0.92), rgba(23, 33, 31, 0.86)),
     var(--site-primary);
