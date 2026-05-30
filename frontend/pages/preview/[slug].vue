@@ -93,6 +93,7 @@ const siteLabel = computed(() => site.value?.name.replace(/\.[^.]+$/, '') || 'pr
 const heroTitle = computed(() => site.value?.settings?.hero_title || `Vind de beste ${siteLabel.value}`)
 const heroIntro = computed(() => site.value?.settings?.hero_intro || 'Vergelijk zorgvuldig geselecteerde producten, bekijk actuele aanbiedingen en klik direct door naar de winkel.')
 const heroBadge = computed(() => site.value?.settings?.hero_badge || 'Onafhankelijke affiliate vergelijking')
+const heroImageUrl = computed(() => mediaUrl(site.value?.settings?.hero_image_url || site.value?.settings?.hero_image))
 const searchPlaceholder = computed(() => site.value?.settings?.search_placeholder || 'Zoek op product, merk of categorie')
 const featuredTitle = computed(() => site.value?.settings?.featured_title || 'Uitgelichte keuzes')
 const categoryTitle = computed(() => site.value?.settings?.category_title || 'Shop op categorie')
@@ -156,6 +157,21 @@ function brandPath(brand: string): string {
   return `/preview/${site.value?.slug}/brands/${slugify(brand)}`
 }
 
+function mediaUrl(path: string | null | undefined): string | null {
+  if (!path) {
+    return null
+  }
+
+  if (/^https?:\/\//.test(path)) {
+    return path
+  }
+
+  const publicBackendBase = config.public.apiBase.replace(/\/api\/?$/, '')
+  const cleanPath = path.replace(/^\/?(storage\/)?/, '')
+
+  return `${publicBackendBase}/storage/${cleanPath}`
+}
+
 function submitSearch(): void {
   const query = searchQuery.value.trim()
 
@@ -202,7 +218,7 @@ useHead(() => ({
         </div>
       </header>
 
-      <section class="hero">
+      <section class="hero" :class="{ 'hero-has-image': heroImageUrl }">
         <div class="hero-copy">
           <p class="eyebrow">{{ heroBadge }}</p>
           <h1>{{ heroTitle }}</h1>
@@ -224,23 +240,9 @@ useHead(() => ({
           </form>
         </div>
 
-        <aside class="hero-panel" aria-label="Site summary">
-          <dl>
-            <div>
-              <dt>Producten</dt>
-              <dd>{{ site.counts.products }}</dd>
-            </div>
-            <div>
-              <dt>Categorieen</dt>
-              <dd>{{ site.counts.categories }}</dd>
-            </div>
-            <div>
-              <dt>Feeds</dt>
-              <dd>{{ site.counts.feeds }}</dd>
-            </div>
-          </dl>
-          <p>{{ site.primary_domain }}</p>
-        </aside>
+        <div v-if="heroImageUrl" class="hero-visual">
+          <img :src="heroImageUrl" :alt="`${site.name} header image`">
+        </div>
       </section>
 
       <section id="categories" class="category-band">
@@ -456,14 +458,18 @@ useHead(() => ({
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(28px, 5vw, 72px);
-  align-items: end;
+  align-items: center;
   min-height: 68vh;
   padding: clamp(64px, 9vw, 124px) clamp(20px, 4vw, 56px) clamp(42px, 6vw, 76px);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(237, 247, 244, 0.62)),
     var(--site-bg);
+}
+
+.hero-has-image {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 460px);
 }
 
 .hero-copy {
@@ -558,45 +564,25 @@ h1 {
   background: var(--site-primary-dark);
 }
 
-.hero-panel {
-  padding: 24px;
-  border: 1px solid rgba(19, 78, 74, 0.18);
+.hero-visual {
+  min-height: 390px;
   border-radius: 8px;
-  background: var(--site-primary-dark);
-  color: #ffffff;
-}
-
-.hero-panel dl {
-  display: grid;
-  gap: 1px;
-  margin: 0 0 18px;
   overflow: hidden;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--site-muted);
+  box-shadow: 0 24px 70px rgba(23, 33, 31, 0.16);
 }
 
-.hero-panel div {
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.09);
+.hero-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 390px;
+  object-fit: cover;
 }
 
-.hero-panel dt {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.76rem;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.hero-panel dd {
-  margin: 5px 0 0;
-  font-size: 1.8rem;
-  font-weight: 900;
-}
-
-.hero-panel p {
-  margin-bottom: 0;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 800;
+.variant-compact .hero-visual,
+.variant-compact .hero-visual img {
+  min-height: 300px;
 }
 
 .category-band,

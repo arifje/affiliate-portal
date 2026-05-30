@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Sites\Schemas;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -149,6 +150,16 @@ class SiteForm
                         Textarea::make('settings.hero_intro')
                             ->label('Hero intro')
                             ->rows(3)
+                            ->columnSpanFull(),
+                        FileUpload::make('settings.hero_image')
+                            ->label('Hero image')
+                            ->helperText('Shown on the homepage hero instead of the old product/category/feed stats block.')
+                            ->image()
+                            ->imageEditor()
+                            ->disk('public')
+                            ->directory('site-heroes')
+                            ->visibility('public')
+                            ->maxSize(4096)
                             ->columnSpanFull(),
                         TextInput::make('settings.search_placeholder')
                             ->label('Search placeholder')
