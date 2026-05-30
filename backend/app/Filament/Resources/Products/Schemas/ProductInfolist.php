@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Filament\Support\JsonTextEntry;
 use App\Models\Product;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -138,12 +138,10 @@ class ProductInfolist
                     ->columns(3),
                 Section::make('Metadata')
                     ->schema([
-                        CodeEntry::make('metadata')
-                            ->grammar('json')
+                        JsonTextEntry::make('metadata')
                             ->placeholder('-')
                             ->columnSpanFull(),
-                        CodeEntry::make('raw_payload')
-                            ->grammar('json')
+                        JsonTextEntry::make('raw_payload')
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Sites\Schemas;
 
-use Filament\Infolists\Components\CodeEntry;
+use App\Filament\Support\JsonTextEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -36,18 +36,15 @@ class SiteInfolist
                     ->columns(3),
                 Section::make('Presentation')
                     ->schema([
-                        CodeEntry::make('theme')
-                            ->grammar('json')
+                        JsonTextEntry::make('theme')
                             ->placeholder('-'),
-                        CodeEntry::make('layout')
-                            ->grammar('json')
+                        JsonTextEntry::make('layout')
                             ->placeholder('-'),
                     ])
                     ->columns(2),
                 Section::make('Settings')
                     ->schema([
-                        CodeEntry::make('settings')
-                            ->grammar('json')
+                        JsonTextEntry::make('settings')
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('created_at')

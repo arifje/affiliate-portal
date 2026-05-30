@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\FeedImportBatches\RelationManagers;
 
+use App\Filament\Support\JsonTextEntry;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -25,15 +25,12 @@ class RowErrorsRelationManager extends RelationManager
                     ->numeric(),
                 TextEntry::make('external_id')
                     ->placeholder('-'),
-                CodeEntry::make('errors')
-                    ->grammar('json')
+                JsonTextEntry::make('errors')
                     ->columnSpanFull(),
-                CodeEntry::make('source_payload')
-                    ->grammar('json')
+                JsonTextEntry::make('source_payload')
                     ->placeholder('-')
                     ->columnSpanFull(),
-                CodeEntry::make('mapped_payload')
-                    ->grammar('json')
+                JsonTextEntry::make('mapped_payload')
                     ->placeholder('-')
                     ->columnSpanFull(),
                 TextEntry::make('created_at')

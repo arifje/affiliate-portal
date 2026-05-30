@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources\Sites\RelationManagers;
 
+use App\Filament\Support\JsonTextEntry;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Infolists\Components\CodeEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -129,8 +129,7 @@ class FeedsRelationManager extends RelationManager
                     ]),
                 Section::make('Mapping and import state')
                     ->schema([
-                        CodeEntry::make('mapping')
-                            ->grammar('json')
+                        JsonTextEntry::make('mapping')
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('schedule')

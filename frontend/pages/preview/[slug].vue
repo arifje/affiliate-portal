@@ -136,7 +136,12 @@ useHead(() => ({
         </div>
 
         <div v-if="products.length" class="product-grid">
-          <article v-for="product in products" :key="product.id" class="product-card">
+          <NuxtLink
+            v-for="product in products"
+            :key="product.id"
+            class="product-card"
+            :to="`/preview/${site.slug}/products/${product.slug}`"
+          >
             <div class="product-image">
               <img v-if="product.image_url" :src="product.image_url" :alt="product.title">
               <span v-else>No image</span>
@@ -149,7 +154,7 @@ useHead(() => ({
                 {{ product.availability.replaceAll('_', ' ') }}
               </p>
             </div>
-          </article>
+          </NuxtLink>
         </div>
 
         <div v-else class="empty">
@@ -310,10 +315,19 @@ h1 {
 }
 
 .product-card {
+  display: block;
   overflow: hidden;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: var(--site-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.product-card:hover {
+  border-color: var(--site-primary);
+  transform: translateY(-2px);
 }
 
 .product-image {
