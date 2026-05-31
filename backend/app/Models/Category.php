@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Category extends Model
 {
@@ -38,5 +39,17 @@ class Category extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function storageDirectory(?string $subdirectory = null): string
+    {
+        $this->loadMissing('site:id,slug');
+
+        $categoryKey = (string) Str::of($this->slug ?: "category-{$this->id}")
+            ->lower()
+            ->replaceMatches('/[^a-z0-9_-]+/', '-')
+            ->trim('-_');
+
+        return $this->site->storageDirectory('categories/'.($categoryKey ?: 'category').($subdirectory ? "/{$subdirectory}" : ''));
     }
 }

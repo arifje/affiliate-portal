@@ -31,6 +31,7 @@ class SitePreviewProductIndexApiTest extends TestCase
             'site_id' => $site->id,
             'name' => 'Sporthorloges',
             'slug' => 'sporthorloges',
+            'hero_image' => 'sites/hartslagmeters-nl/categories/sporthorloges/hero/header.jpg',
             'is_active' => true,
         ]);
 
@@ -70,7 +71,8 @@ class SitePreviewProductIndexApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'products')
             ->assertJsonPath('products.0.title', 'HeartPilot Sportwatch 42mm')
-            ->assertJsonPath('meta.category.slug', 'sporthorloges');
+            ->assertJsonPath('meta.category.slug', 'sporthorloges')
+            ->assertJsonPath('meta.category.hero_image', 'sites/hartslagmeters-nl/categories/sporthorloges/hero/header.jpg');
 
         $this->getJson('/api/sites/preview/hartslagmeters_nl/products?brand=heartpilot')
             ->assertOk()

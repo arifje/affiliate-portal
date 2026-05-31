@@ -51,6 +51,7 @@ return [
         'first_row_is_header' => 'Eerste rij is kopregel',
         'gender' => 'Geslacht',
         'homepage_content' => 'Homepage-inhoud',
+        'hero_image' => 'Hero-afbeelding',
         'image' => 'Afbeelding',
         'image_url' => 'Afbeeldings-URL',
         'imported_at' => 'Geimporteerd op',
@@ -73,6 +74,8 @@ return [
         'mapping' => 'Mapping',
         'mapping_profile' => 'Mappingprofiel',
         'material' => 'Materiaal',
+        'meta_description' => 'Meta-beschrijving',
+        'meta_title' => 'Meta-titel',
         'metadata' => 'Metadata',
         'metadata_path' => 'Metadata-pad',
         'metrics' => 'Metrics',
@@ -81,6 +84,7 @@ return [
         'old_price' => 'Oude prijs',
         'options' => 'Opties',
         'partner' => 'Partner',
+        'parent_category' => 'Hoofdcategorie',
         'pattern' => 'Patroon',
         'price' => 'Prijs',
         'primary_domain' => 'Primair domein',
@@ -130,6 +134,7 @@ return [
     ],
 
     'helpers' => [
+        'category_hero_image' => 'Wordt paginabreed bovenaan deze categoriepagina getoond.',
         'featured_product' => 'Toon dit product in de sectie Aanbevolen op de storefront-homepage.',
         'featured_sort_order' => 'Lagere nummers worden eerst getoond.',
         'site_hero_image' => 'Wordt getoond in de homepage-hero in plaats van het oude product/categorie/feed-statistiekenblok.',
@@ -254,6 +259,7 @@ return [
         'mapping' => 'Mapping',
         'mapping_and_import_state' => 'Mapping en importstatus',
         'mapping_and_schedule' => 'Mapping en planning',
+        'media' => 'Media',
         'media_urls' => 'Media en URLs',
         'merchandising' => 'Merchandising',
         'metadata' => 'Metadata',
@@ -267,6 +273,7 @@ return [
         'publishing' => 'Publicatie',
         'result' => 'Resultaat',
         'settings' => 'Instellingen',
+        'seo' => 'SEO',
         'site_identity' => 'Site-identiteit',
         'source' => 'Bron',
         'timestamps' => 'Tijdstempels',
@@ -657,6 +664,12 @@ return [
             'model_label' => 'Canoniek veld',
             'plural_label' => 'Canonieke velden',
             'navigation_label' => 'Canonieke velden',
+        ],
+
+        'categories' => [
+            'model_label' => 'Categorie',
+            'plural_label' => 'Categorieen',
+            'navigation_label' => 'Categorieen',
         ],
 
         'feed_field_mappings' => [

@@ -51,6 +51,7 @@ return [
         'first_row_is_header' => 'First row is header',
         'gender' => 'Gender',
         'homepage_content' => 'Homepage content',
+        'hero_image' => 'Hero image',
         'image' => 'Image',
         'image_url' => 'Image URL',
         'imported_at' => 'Imported at',
@@ -73,6 +74,8 @@ return [
         'mapping' => 'Mapping',
         'mapping_profile' => 'Mapping profile',
         'material' => 'Material',
+        'meta_description' => 'Meta description',
+        'meta_title' => 'Meta title',
         'metadata' => 'Metadata',
         'metadata_path' => 'Metadata path',
         'metrics' => 'Metrics',
@@ -81,6 +84,7 @@ return [
         'old_price' => 'Old price',
         'options' => 'Options',
         'partner' => 'Partner',
+        'parent_category' => 'Parent category',
         'pattern' => 'Pattern',
         'price' => 'Price',
         'primary_domain' => 'Primary domain',
@@ -130,6 +134,7 @@ return [
     ],
 
     'helpers' => [
+        'category_hero_image' => 'Shown full-width at the top of this category page.',
         'featured_product' => 'Show this product in the Aanbevolen section on the storefront homepage.',
         'featured_sort_order' => 'Lower numbers are shown first.',
         'site_hero_image' => 'Shown on the homepage hero instead of the old product/category/feed stats block.',
@@ -254,6 +259,7 @@ return [
         'mapping' => 'Mapping',
         'mapping_and_import_state' => 'Mapping and import state',
         'mapping_and_schedule' => 'Mapping and schedule',
+        'media' => 'Media',
         'media_urls' => 'Media and URLs',
         'merchandising' => 'Merchandising',
         'metadata' => 'Metadata',
@@ -267,6 +273,7 @@ return [
         'publishing' => 'Publishing',
         'result' => 'Result',
         'settings' => 'Settings',
+        'seo' => 'SEO',
         'site_identity' => 'Site identity',
         'source' => 'Source',
         'timestamps' => 'Timestamps',
@@ -657,6 +664,12 @@ return [
             'model_label' => 'Canonical field',
             'plural_label' => 'Canonical fields',
             'navigation_label' => 'Canonical fields',
+        ],
+
+        'categories' => [
+            'model_label' => 'Category',
+            'plural_label' => 'Categories',
+            'navigation_label' => 'Categories',
         ],
 
         'feed_field_mappings' => [

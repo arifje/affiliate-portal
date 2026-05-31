@@ -19,6 +19,7 @@ type PreviewCategory = {
   name: string
   slug: string
   description: string | null
+  hero_image: string | null
   products_count: number
 }
 
@@ -55,7 +56,7 @@ type PreviewProductIndexResponse = {
   meta: {
     title: string
     search: string
-    category: { id: number; name: string; slug: string; description: string | null } | null
+    category: { id: number; name: string; slug: string; description: string | null; hero_image: string | null } | null
     brand: { name: string; slug: string } | null
     deals: boolean
     sort: string
@@ -121,6 +122,18 @@ const categories = computed(() => data.value?.categories ?? [])
 const brands = computed(() => data.value?.brands ?? [])
 const meta = computed(() => data.value?.meta)
 const pageTitle = computed(() => props.mode === 'categories' ? 'Categorieen' : meta.value?.title)
+const categoryHeroImageUrl = computed(() => props.mode === 'category' ? mediaUrl(meta.value?.category?.hero_image) : null)
+const listingHeroStyle = computed(() => {
+  if (!categoryHeroImageUrl.value) {
+    return {}
+  }
+
+  const imageUrl = categoryHeroImageUrl.value.replaceAll('"', '\\"')
+
+  return {
+    backgroundImage: `linear-gradient(90deg, rgba(11, 18, 17, 0.76), rgba(11, 18, 17, 0.48) 52%, rgba(11, 18, 17, 0.2)), url("${imageUrl}")`,
+  }
+})
 let stopSiteVisitHeartbeat: (() => void) | null = null
 
 const themeStyle = computed(() => {
@@ -194,6 +207,21 @@ function productPath(product: PreviewProduct): string {
   return `/preview/${site.value?.slug}/products/${product.slug}`
 }
 
+function mediaUrl(path: string | null | undefined): string | null {
+  if (!path) {
+    return null
+  }
+
+  if (/^https?:\/\//.test(path)) {
+    return path
+  }
+
+  const publicBackendBase = config.public.apiBase.replace(/\/api\/?$/, '')
+  const cleanPath = path.replace(/^\/?(storage\/)?/, '')
+
+  return `${publicBackendBase}/storage/${cleanPath}`
+}
+
 watch(sort, () => {
   if (!site.value) {
     return
@@ -262,7 +290,11 @@ useHead(() => ({
         </nav>
       </header>
 
-      <section class="listing-hero">
+      <section
+        class="listing-hero"
+        :class="{ 'has-hero-image': categoryHeroImageUrl }"
+        :style="listingHeroStyle"
+      >
         <div>
           <p class="eyebrow">{{ site.primary_domain }}</p>
           <h1>{{ pageTitle }}</h1>
@@ -438,6 +470,25 @@ useHead(() => ({
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(237, 247, 244, 0.66)),
     var(--site-bg);
+  background-position: center;
+  background-size: cover;
+}
+
+.listing-hero.has-hero-image {
+  min-height: clamp(360px, 48vw, 560px);
+  color: #ffffff;
+}
+
+.listing-hero.has-hero-image .eyebrow {
+  color: #ffffff;
+}
+
+.listing-hero.has-hero-image p:not(.eyebrow) {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.listing-hero.has-hero-image .search-panel label {
+  color: #ffffff;
 }
 
 .eyebrow {

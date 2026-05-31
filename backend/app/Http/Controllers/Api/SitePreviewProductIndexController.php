@@ -65,7 +65,7 @@ class SitePreviewProductIndexController extends Controller
             'meta' => [
                 'title' => $this->title($site, $search, $category, $brand, $dealsOnly),
                 'search' => $search,
-                'category' => $category?->only(['id', 'name', 'slug', 'description']),
+                'category' => $category ? $this->categoryPayload($category) : null,
                 'brand' => $brand ? [
                     'name' => $brand,
                     'slug' => Str::slug($brand),
@@ -161,16 +161,24 @@ class SitePreviewProductIndexController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get(['id', 'name', 'slug', 'description'])
+            ->get(['id', 'name', 'slug', 'description', 'hero_image'])
             ->map(fn (Category $category): array => [
-                'id' => $category->id,
-                'name' => $category->name,
-                'slug' => $category->slug,
-                'description' => $category->description,
+                ...$this->categoryPayload($category),
                 'products_count' => $category->products_count,
             ])
             ->values()
             ->all();
+    }
+
+    private function categoryPayload(Category $category): array
+    {
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'description' => $category->description,
+            'hero_image' => $category->hero_image,
+        ];
     }
 
     private function brandsPayload(Site $site): array
