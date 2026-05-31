@@ -7,6 +7,7 @@ use App\Models\AppSetting;
 use App\Models\User;
 use App\Support\PlatformSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -26,7 +27,8 @@ class SettingsPageTest extends TestCase
             ->assertSee('Website status')
             ->assertSee('Website online')
             ->assertSee('Authentication')
-            ->assertSee('Email connector');
+            ->assertSee('Email connector')
+            ->assertSee('Send test email');
     }
 
     public function test_admin_settings_can_be_saved(): void
@@ -92,5 +94,56 @@ class SettingsPageTest extends TestCase
 
         $this->assertSame(PlatformSettings::MAIL_DRIVER_SENDMAIL, $mailConnector['driver']);
         $this->assertSame('/usr/sbin/sendmail -bs -i', $mailConnector['sendmail_path']);
+    }
+
+    public function test_test_email_can_be_sent_from_email_connector_settings(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->create([
+            'is_active' => true,
+            'email' => 'admin@example.com',
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Settings::class)
+            ->set('data.website_is_online', true)
+            ->set('data.admin_login_method', PlatformSettings::LOGIN_METHOD_PASSWORD)
+            ->set('data.login_code_ttl_minutes', 10)
+            ->set('data.login_code_length', 6)
+            ->set('data.mail_driver', PlatformSettings::MAIL_DRIVER_LOG)
+            ->set('data.mail_from_name', 'Affiliate Portal')
+            ->set('data.mail_from_email', 'noreply@example.com')
+            ->set('data.mail_test_recipient', 'receiver@example.com')
+            ->call('sendTestEmail')
+            ->assertHasNoErrors();
+
+        $mailConnector = PlatformSettings::mailConnector();
+
+        $this->assertSame(PlatformSettings::MAIL_DRIVER_LOG, $mailConnector['driver']);
+        $this->assertSame('noreply@example.com', $mailConnector['from_email']);
+        Mail::assertNothingQueued();
+    }
+
+    public function test_test_email_requires_a_recipient(): void
+    {
+        $user = User::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Settings::class)
+            ->set('data.website_is_online', true)
+            ->set('data.admin_login_method', PlatformSettings::LOGIN_METHOD_PASSWORD)
+            ->set('data.login_code_ttl_minutes', 10)
+            ->set('data.login_code_length', 6)
+            ->set('data.mail_driver', PlatformSettings::MAIL_DRIVER_LOG)
+            ->set('data.mail_from_name', 'Affiliate Portal')
+            ->set('data.mail_from_email', 'noreply@example.com')
+            ->set('data.mail_test_recipient', null)
+            ->call('sendTestEmail')
+            ->assertHasErrors(['data.mail_test_recipient']);
     }
 }

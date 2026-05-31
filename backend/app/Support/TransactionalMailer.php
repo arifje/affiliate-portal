@@ -11,6 +11,24 @@ use InvalidArgumentException;
 
 class TransactionalMailer
 {
+    public function sendTestEmail(string $toEmail, ?string $toName = null): void
+    {
+        $appName = (string) config('app.name', 'Affiliate Portal');
+        $subject = __('admin.auth.test_email.subject', ['app' => $appName]);
+        $text = __('admin.auth.test_email.body', [
+            'app' => $appName,
+            'sent_at' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $this->send(
+            toEmail: $toEmail,
+            toName: $toName,
+            subject: $subject,
+            text: $text,
+            html: nl2br(e($text)),
+        );
+    }
+
     public function sendLoginCode(User $user, string $code, CarbonInterface $expiresAt): void
     {
         $subject = __('admin.auth.login_code.subject');

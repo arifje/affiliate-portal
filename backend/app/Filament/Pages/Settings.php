@@ -3,9 +3,11 @@
 namespace App\Filament\Pages;
 
 use App\Support\PlatformSettings;
+use App\Support\TransactionalMailer;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -22,6 +24,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Throwable;
 use UnitEnum;
 
 /**
@@ -72,6 +75,7 @@ class Settings extends Page
             'smtp_password' => $mailConnector['smtp_password'],
             'sendmail_path' => $mailConnector['sendmail_path'],
             'mail_api_key' => $mailConnector['api_key'],
+            'mail_test_recipient' => Filament::auth()->user()?->email,
         ]);
     }
 
@@ -191,6 +195,20 @@ class Settings extends Page
                                             ->password()
                                             ->revealable()
                                             ->maxLength(255),
+                                        TextInput::make('mail_test_recipient')
+                                            ->label(__('admin.pages.settings.fields.mail_test_recipient'))
+                                            ->helperText(__('admin.pages.settings.help.mail_test_recipient'))
+                                            ->email()
+                                            ->maxLength(255)
+                                            ->columnSpan(2),
+                                        Actions::make([
+                                            Action::make('sendTestEmail')
+                                                ->label(__('admin.pages.settings.actions.send_test_email'))
+                                                ->icon(Heroicon::OutlinedPaperAirplane)
+                                                ->color('gray')
+                                                ->action('sendTestEmail'),
+                                        ])
+                                            ->columnSpanFull(),
                                     ])
                                     ->columns(3),
                             ]),
@@ -205,6 +223,53 @@ class Settings extends Page
     {
         $data = $this->form->getState();
 
+        $this->persistSettings($data);
+
+        Notification::make()
+            ->success()
+            ->title(__('admin.pages.settings.notifications.saved'))
+            ->send();
+    }
+
+    public function sendTestEmail(): void
+    {
+        $data = $this->form->getState();
+        $recipient = (string) ($data['mail_test_recipient'] ?? '');
+
+        if (blank($recipient)) {
+            $this->addError('data.mail_test_recipient', __('admin.pages.settings.validation.mail_test_recipient_required'));
+
+            return;
+        }
+
+        $this->persistSettings($data);
+
+        try {
+            app(TransactionalMailer::class)->sendTestEmail($recipient, Filament::auth()->user()?->name);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Notification::make()
+                ->danger()
+                ->title(__('admin.pages.settings.notifications.test_email_failed'))
+                ->body($exception->getMessage())
+                ->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->success()
+            ->title(__('admin.pages.settings.notifications.test_email_sent'))
+            ->body(__('admin.pages.settings.notifications.test_email_sent_body', ['email' => $recipient]))
+            ->send();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function persistSettings(array $data): void
+    {
         PlatformSettings::setWebsiteIsOnline((bool) ($data['website_is_online'] ?? true));
         PlatformSettings::setAdminLoginMethod((string) ($data['admin_login_method'] ?? PlatformSettings::LOGIN_METHOD_PASSWORD));
         PlatformSettings::setLoginCodeTtlMinutes((int) ($data['login_code_ttl_minutes'] ?? 10));
@@ -221,11 +286,6 @@ class Settings extends Page
             'sendmail_path' => $data['sendmail_path'] ?? null,
             'api_key' => $data['mail_api_key'] ?? null,
         ]);
-
-        Notification::make()
-            ->success()
-            ->title(__('admin.pages.settings.notifications.saved'))
-            ->send();
     }
 
     public function content(Schema $schema): Schema

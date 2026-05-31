@@ -303,6 +303,10 @@ return [
                 'failed' => 'The login code could not be sent. Check the email connector settings.',
             ],
         ],
+        'test_email' => [
+            'subject' => 'Test email from :app',
+            'body' => "This is a test email from :app.\n\nIf you received this message, the selected email connector is able to send transactional email.\n\nSent at: :sent_at",
+        ],
     ],
 
     'pages' => [
@@ -385,6 +389,7 @@ return [
                 'mail_driver' => 'Email provider',
                 'mail_from_email' => 'From email',
                 'mail_from_name' => 'From name',
+                'mail_test_recipient' => 'Test recipient',
                 'smtp_host' => 'SMTP host',
                 'smtp_password' => 'SMTP password',
                 'smtp_port' => 'SMTP port',
@@ -397,14 +402,19 @@ return [
                 'admin_login_method' => 'Passwordless email codes can replace passwords, or run next to passwords during rollout.',
                 'login_code_length' => 'Use 6 to 10 digits. Six is user-friendly; longer is stricter.',
                 'login_code_ttl_minutes' => 'Use a short lifetime for codes. The default is 10 minutes.',
+                'mail_test_recipient' => 'The test email is sent after saving the current connector settings.',
                 'sendmail_path' => 'Path used by Laravel sendmail transport. Default: /usr/sbin/sendmail -bs -i.',
                 'website_online' => 'When disabled, public website API requests return an offline response.',
             ],
             'notifications' => [
                 'saved' => 'Settings saved',
+                'test_email_failed' => 'Test email could not be sent',
+                'test_email_sent' => 'Test email sent',
+                'test_email_sent_body' => 'A test email was sent to :email.',
             ],
             'actions' => [
                 'save' => 'Save settings',
+                'send_test_email' => 'Send test email',
             ],
             'options' => [
                 'login_methods' => [
@@ -427,6 +437,7 @@ return [
             ],
             'validation' => [
                 'mail_api_key_required' => 'An API key is required for this email provider.',
+                'mail_test_recipient_required' => 'Enter an email address to send the test email to.',
             ],
         ],
 

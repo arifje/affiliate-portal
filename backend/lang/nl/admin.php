@@ -303,6 +303,10 @@ return [
                 'failed' => 'De logincode kon niet worden verstuurd. Controleer de e-mailconnectorinstellingen.',
             ],
         ],
+        'test_email' => [
+            'subject' => 'Testmail van :app',
+            'body' => "Dit is een testmail van :app.\n\nAls je dit bericht hebt ontvangen, kan de geselecteerde e-mailconnector transactionele e-mail versturen.\n\nVerstuurd op: :sent_at",
+        ],
     ],
 
     'pages' => [
@@ -385,6 +389,7 @@ return [
                 'mail_driver' => 'E-mailprovider',
                 'mail_from_email' => 'Afzender e-mail',
                 'mail_from_name' => 'Afzender naam',
+                'mail_test_recipient' => 'Testontvanger',
                 'smtp_host' => 'SMTP-host',
                 'smtp_password' => 'SMTP-wachtwoord',
                 'smtp_port' => 'SMTP-poort',
@@ -397,14 +402,19 @@ return [
                 'admin_login_method' => 'Wachtwoordloze e-mailcodes kunnen wachtwoorden vervangen, of tijdelijk naast wachtwoorden werken.',
                 'login_code_length' => 'Gebruik 6 tot 10 cijfers. Zes is gebruiksvriendelijk; langer is strenger.',
                 'login_code_ttl_minutes' => 'Gebruik een korte geldigheid voor codes. Standaard is 10 minuten.',
+                'mail_test_recipient' => 'De testmail wordt verstuurd nadat de huidige connectorinstellingen zijn opgeslagen.',
                 'sendmail_path' => 'Pad dat Laravel gebruikt voor sendmail. Standaard: /usr/sbin/sendmail -bs -i.',
                 'website_online' => 'Wanneer dit is uitgeschakeld, geven publieke website-API-verzoeken een offline reactie terug.',
             ],
             'notifications' => [
                 'saved' => 'Instellingen opgeslagen',
+                'test_email_failed' => 'Testmail kon niet worden verstuurd',
+                'test_email_sent' => 'Testmail verstuurd',
+                'test_email_sent_body' => 'Er is een testmail verstuurd naar :email.',
             ],
             'actions' => [
                 'save' => 'Instellingen opslaan',
+                'send_test_email' => 'Testmail versturen',
             ],
             'options' => [
                 'login_methods' => [
@@ -427,6 +437,7 @@ return [
             ],
             'validation' => [
                 'mail_api_key_required' => 'Voor deze e-mailprovider is een API-sleutel verplicht.',
+                'mail_test_recipient_required' => 'Vul een e-mailadres in om de testmail naartoe te sturen.',
             ],
         ],
 
