@@ -155,6 +155,7 @@ class SiteForm
                             ->label(__('admin.pages.sites.content.hero_image'))
                             ->helperText(__('admin.helpers.site_hero_image'))
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->imageEditor()
                             ->disk('public')
                             ->directory(fn (Get $get, ?Site $record = null): string => Site::storageDirectoryFor(
@@ -163,7 +164,7 @@ class SiteForm
                                 'hero',
                             ))
                             ->visibility('public')
-                            ->maxSize(4096)
+                            ->maxSize(10240)
                             ->columnSpanFull(),
                         TextInput::make('settings.search_placeholder')
                             ->label(__('admin.pages.sites.content.search_placeholder'))

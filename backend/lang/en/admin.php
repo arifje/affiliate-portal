@@ -134,10 +134,10 @@ return [
     ],
 
     'helpers' => [
-        'category_hero_image' => 'Shown full-width at the top of this category page.',
+        'category_hero_image' => 'Shown full-width at the top of this category page. Use JPG, PNG or WebP up to 10 MB.',
         'featured_product' => 'Show this product in the Aanbevolen section on the storefront homepage.',
         'featured_sort_order' => 'Lower numbers are shown first.',
-        'site_hero_image' => 'Shown on the homepage hero instead of the old product/category/feed stats block.',
+        'site_hero_image' => 'Shown on the homepage hero instead of the old product/category/feed stats block. Use JPG, PNG or WebP up to 10 MB.',
         'section_label_color' => 'Used for small uppercase labels such as the hero badge.',
     ],
 

@@ -67,11 +67,12 @@ class CategoryForm
                             ->label(__('admin.fields.hero_image'))
                             ->helperText(__('admin.helpers.category_hero_image'))
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->imageEditor()
                             ->disk('public')
                             ->directory(fn (Get $get, ?Category $record = null): string => self::heroDirectory($get, $record))
                             ->visibility('public')
-                            ->maxSize(4096)
+                            ->maxSize(10240)
                             ->columnSpanFull(),
                     ]),
                 Section::make(__('admin.sections.seo'))

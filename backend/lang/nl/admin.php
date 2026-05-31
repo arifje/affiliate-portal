@@ -134,10 +134,10 @@ return [
     ],
 
     'helpers' => [
-        'category_hero_image' => 'Wordt paginabreed bovenaan deze categoriepagina getoond.',
+        'category_hero_image' => 'Wordt paginabreed bovenaan deze categoriepagina getoond. Gebruik JPG, PNG of WebP tot 10 MB.',
         'featured_product' => 'Toon dit product in de sectie Aanbevolen op de storefront-homepage.',
         'featured_sort_order' => 'Lagere nummers worden eerst getoond.',
-        'site_hero_image' => 'Wordt getoond in de homepage-hero in plaats van het oude product/categorie/feed-statistiekenblok.',
+        'site_hero_image' => 'Wordt getoond in de homepage-hero in plaats van het oude product/categorie/feed-statistiekenblok. Gebruik JPG, PNG of WebP tot 10 MB.',
         'section_label_color' => 'Gebruikt voor kleine labels in hoofdletters, zoals de hero-badge.',
     ],
 
