@@ -9,43 +9,29 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class UserResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
+    protected static string $translationKey = 'users';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.administration';
+
     protected static ?int $navigationSort = 90;
 
     protected static ?string $recordTitleAttribute = 'name';
-
-    public static function getNavigationGroup(): string|UnitEnum|null
-    {
-        return __('admin.navigation.administration');
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('admin.users.model_label');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('admin.users.plural_label');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('admin.users.navigation_label');
-    }
 
     public static function form(Schema $schema): Schema
     {

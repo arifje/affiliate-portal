@@ -16,6 +16,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 
 /**
@@ -25,18 +26,27 @@ class Settings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Administration';
-
-    protected static ?string $navigationLabel = 'Settings';
-
     protected static ?int $navigationSort = 100;
-
-    protected static ?string $title = 'Settings';
 
     /**
      * @var array<string, mixed> | null
      */
     public ?array $data = [];
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('admin.navigation.administration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.pages.settings.navigation_label');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('admin.pages.settings.title');
+    }
 
     public function mount(): void
     {
@@ -49,12 +59,12 @@ class Settings extends Page
     {
         return $schema
             ->components([
-                Section::make('Website status')
-                    ->description('Control whether the public storefront is available. The admin panel remains available while the website is offline.')
+                Section::make(__('admin.pages.settings.sections.website_status'))
+                    ->description(__('admin.pages.settings.descriptions.website_status'))
                     ->schema([
                         Toggle::make('website_is_online')
-                            ->label('Website online')
-                            ->helperText('When disabled, public website API requests return an offline response.')
+                            ->label(__('admin.pages.settings.fields.website_online'))
+                            ->helperText(__('admin.pages.settings.help.website_online'))
                             ->default(true)
                             ->required(),
                     ]),
@@ -70,7 +80,7 @@ class Settings extends Page
 
         Notification::make()
             ->success()
-            ->title('Settings saved')
+            ->title(__('admin.pages.settings.notifications.saved'))
             ->send();
     }
 
@@ -102,7 +112,7 @@ class Settings extends Page
     {
         return [
             Action::make('save')
-                ->label('Save settings')
+                ->label(__('admin.pages.settings.actions.save'))
                 ->submit('save')
                 ->keyBindings(['mod+s']),
         ];

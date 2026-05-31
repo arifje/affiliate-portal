@@ -10,21 +10,25 @@ use App\Filament\Resources\FeedImportBatches\RelationManagers\RowErrorsRelationM
 use App\Filament\Resources\FeedImportBatches\Schemas\FeedImportBatchForm;
 use App\Filament\Resources\FeedImportBatches\Schemas\FeedImportBatchInfolist;
 use App\Filament\Resources\FeedImportBatches\Tables\FeedImportBatchesTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\FeedImportBatch;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class FeedImportBatchResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = FeedImportBatch::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloudArrowDown;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Feed imports';
+    protected static string $translationKey = 'feed_import_batches';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';
 
     protected static ?int $navigationSort = 40;
 

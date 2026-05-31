@@ -10,21 +10,25 @@ use App\Filament\Resources\Sites\RelationManagers\FeedsRelationManager;
 use App\Filament\Resources\Sites\Schemas\SiteForm;
 use App\Filament\Resources\Sites\Schemas\SiteInfolist;
 use App\Filament\Resources\Sites\Tables\SitesTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\Site;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class SiteResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = Site::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Platform';
+    protected static string $translationKey = 'sites';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.platform';
 
     protected static ?int $navigationSort = 10;
 
@@ -32,7 +36,7 @@ class SiteResource extends Resource
 
     public static function getPreviewUrl(Site $record): string
     {
-        return rtrim((string) config('app.frontend_url'), '/') . '/preview/' . $record->slug;
+        return rtrim((string) config('app.frontend_url'), '/').'/preview/'.$record->slug;
     }
 
     public static function form(Schema $schema): Schema

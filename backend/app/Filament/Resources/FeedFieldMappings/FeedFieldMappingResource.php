@@ -9,21 +9,25 @@ use App\Filament\Resources\FeedFieldMappings\Pages\ViewFeedFieldMapping;
 use App\Filament\Resources\FeedFieldMappings\Schemas\FeedFieldMappingForm;
 use App\Filament\Resources\FeedFieldMappings\Schemas\FeedFieldMappingInfolist;
 use App\Filament\Resources\FeedFieldMappings\Tables\FeedFieldMappingsTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\FeedFieldMapping;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class FeedFieldMappingResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = FeedFieldMapping::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Feed imports';
+    protected static string $translationKey = 'feed_field_mappings';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';
 
     protected static ?int $navigationSort = 30;
 

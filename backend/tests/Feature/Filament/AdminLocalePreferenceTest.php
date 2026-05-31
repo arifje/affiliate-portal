@@ -21,9 +21,15 @@ class AdminLocalePreferenceTest extends TestCase
             ->actingAs($user)
             ->get('/admin/users')
             ->assertOk()
+            ->assertSee('Overzicht')
+            ->assertSee('Feed-imports')
+            ->assertSee('Catalogus')
+            ->assertSee('Producten')
             ->assertSee('Gebruikers')
             ->assertSee('E-mailadres')
-            ->assertSee('Beheertaal');
+            ->assertSee('Beheertaal')
+            ->assertSee('Instellingen')
+            ->assertSee('Systeem');
 
         $this->assertSame('nl', app()->getLocale());
     }

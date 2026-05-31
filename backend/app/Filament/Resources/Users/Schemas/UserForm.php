@@ -16,36 +16,36 @@ class UserForm
     {
         return $schema
             ->components([
-                Section::make(__('admin.users.sections.user'))
+                Section::make(__('admin.resources.users.sections.user'))
                     ->schema([
                         TextInput::make('name')
-                            ->label(__('admin.users.fields.name'))
+                            ->label(__('admin.resources.users.fields.name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('email')
-                            ->label(__('admin.users.fields.email'))
+                            ->label(__('admin.resources.users.fields.email'))
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         Select::make('admin_locale')
-                            ->label(__('admin.users.fields.admin_locale'))
+                            ->label(__('admin.resources.users.fields.admin_locale'))
                             ->options(User::ADMIN_LOCALES)
                             ->default('en')
                             ->required()
                             ->native(false),
                         DateTimePicker::make('email_verified_at')
-                            ->label(__('admin.users.fields.email_verified_at')),
+                            ->label(__('admin.resources.users.fields.email_verified_at')),
                         Toggle::make('is_active')
-                            ->label(__('admin.users.fields.is_active'))
+                            ->label(__('admin.resources.users.fields.is_active'))
                             ->required()
                             ->default(true),
                     ])
                     ->columns(2),
-                Section::make(__('admin.users.sections.password'))
+                Section::make(__('admin.resources.users.sections.password'))
                     ->schema([
                         TextInput::make('password')
-                            ->label(__('admin.users.fields.password'))
+                            ->label(__('admin.resources.users.fields.password'))
                             ->password()
                             ->revealable()
                             ->autocomplete('new-password')

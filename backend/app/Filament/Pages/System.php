@@ -6,23 +6,33 @@ use App\Support\SystemInspector;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 
 class System extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServerStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Administration';
-
-    protected static ?string $navigationLabel = 'System';
-
     protected static ?int $navigationSort = 102;
 
     protected static ?string $slug = 'system';
 
-    protected static ?string $title = 'System';
-
     protected string $view = 'filament.pages.system';
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('admin.navigation.administration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.pages.system.navigation_label');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('admin.pages.system.title');
+    }
 
     /**
      * @return array<int, array{label: string, value: string, description: string|null}>

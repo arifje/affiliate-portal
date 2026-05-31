@@ -9,21 +9,25 @@ use App\Filament\Resources\Feeds\Pages\ViewFeed;
 use App\Filament\Resources\Feeds\Schemas\FeedForm;
 use App\Filament\Resources\Feeds\Schemas\FeedInfolist;
 use App\Filament\Resources\Feeds\Tables\FeedsTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\Feed;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class FeedResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = Feed::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCloudArrowDown;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Feed imports';
+    protected static string $translationKey = 'feeds';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';
 
     protected static ?int $navigationSort = 6;
 

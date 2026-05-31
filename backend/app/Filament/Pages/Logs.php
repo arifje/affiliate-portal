@@ -6,21 +6,16 @@ use App\Support\LaravelLogReader;
 use BackedEnum;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use UnitEnum;
 
 class Logs extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentMagnifyingGlass;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Administration';
-
-    protected static ?string $navigationLabel = 'Logs';
-
     protected static ?int $navigationSort = 101;
 
     protected static ?string $slug = 'logs';
-
-    protected static ?string $title = 'Logs';
 
     protected string $view = 'filament.pages.logs';
 
@@ -31,6 +26,21 @@ class Logs extends Page
     public ?string $date = null;
 
     public ?string $search = null;
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('admin.navigation.administration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.pages.logs.navigation_label');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('admin.pages.logs.title');
+    }
 
     public function mount(): void
     {

@@ -9,21 +9,25 @@ use App\Filament\Resources\Partners\Pages\ViewPartner;
 use App\Filament\Resources\Partners\Schemas\PartnerForm;
 use App\Filament\Resources\Partners\Schemas\PartnerInfolist;
 use App\Filament\Resources\Partners\Tables\PartnersTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\Partner;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class PartnerResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = Partner::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Feed imports';
+    protected static string $translationKey = 'partners';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';
 
     protected static ?int $navigationSort = 5;
 

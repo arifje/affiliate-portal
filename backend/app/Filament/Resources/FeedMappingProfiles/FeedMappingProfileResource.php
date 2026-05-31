@@ -10,21 +10,25 @@ use App\Filament\Resources\FeedMappingProfiles\RelationManagers\FieldMappingsRel
 use App\Filament\Resources\FeedMappingProfiles\Schemas\FeedMappingProfileForm;
 use App\Filament\Resources\FeedMappingProfiles\Schemas\FeedMappingProfileInfolist;
 use App\Filament\Resources\FeedMappingProfiles\Tables\FeedMappingProfilesTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\FeedMappingProfile;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class FeedMappingProfileResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = FeedMappingProfile::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Feed imports';
+    protected static string $translationKey = 'feed_mapping_profiles';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';
 
     protected static ?int $navigationSort = 20;
 

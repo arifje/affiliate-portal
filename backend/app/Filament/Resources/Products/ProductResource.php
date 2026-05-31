@@ -9,21 +9,25 @@ use App\Filament\Resources\Products\Pages\ViewProduct;
 use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Schemas\ProductInfolist;
 use App\Filament\Resources\Products\Tables\ProductsTable;
+use App\Filament\Support\HasTranslatedResourceNavigation;
 use App\Models\Product;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class ProductResource extends Resource
 {
+    use HasTranslatedResourceNavigation;
+
     protected static ?string $model = Product::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Catalog';
+    protected static string $translationKey = 'products';
+
+    protected static string $navigationGroupTranslationKey = 'admin.navigation.catalog';
 
     protected static ?int $navigationSort = 10;
 
