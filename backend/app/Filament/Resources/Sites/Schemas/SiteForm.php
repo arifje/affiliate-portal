@@ -95,7 +95,7 @@ class SiteForm
                             ->default('#d97706'),
                         ColorPicker::make('theme.eyebrow_color')
                             ->label('Section label color')
-                            ->helperText('Used for small uppercase labels such as Onafhankelijke affiliate vergelijking, Navigatie, Aanbevolen and Catalogus.')
+                            ->helperText('Used for small uppercase labels such as the hero badge.')
                             ->hex()
                             ->default('#d97706'),
                         ColorPicker::make('theme.background_color')

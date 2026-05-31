@@ -66,10 +66,13 @@ const site = computed(() => data.value?.site)
 const products = computed(() => data.value?.products ?? [])
 const manualFeaturedProducts = computed(() => data.value?.featured_products ?? [])
 const categories = computed(() => data.value?.categories ?? [])
-const featuredProducts = computed(() => manualFeaturedProducts.value.length
-  ? manualFeaturedProducts.value
-  : products.value.slice(0, 4))
-const saleProducts = computed(() => products.value.filter((product) => product.old_price).slice(0, 4))
+const featuredProducts = computed(() => {
+  const source = manualFeaturedProducts.value.length ? manualFeaturedProducts.value : products.value
+
+  return source.slice(0, 10)
+})
+const saleProducts = computed(() => products.value.filter((product) => product.old_price).slice(0, 10))
+const latestProducts = computed(() => products.value.slice(0, 10))
 let stopSiteVisitHeartbeat: (() => void) | null = null
 
 const themeStyle = computed(() => {
@@ -115,32 +118,6 @@ const searchPlaceholder = computed(() => site.value?.settings?.search_placeholde
 const featuredTitle = computed(() => site.value?.settings?.featured_title || 'Uitgelichte keuzes')
 const categoryTitle = computed(() => site.value?.settings?.category_title || 'Shop op categorie')
 
-const visibleProducts = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase()
-
-  return products.value.filter((product) => {
-    if (!query) {
-      return true
-    }
-
-    return [
-      product.title,
-      product.brand,
-      product.category?.name,
-      product.partner?.name,
-      product.availability,
-    ].filter(Boolean).some((value) => String(value).toLowerCase().includes(query))
-  })
-})
-
-const topBrands = computed(() => {
-  const brands = products.value
-    .map((product) => product.brand)
-    .filter((brand): brand is string => Boolean(brand))
-
-  return [...new Set(brands)].slice(0, 8)
-})
-
 function formatPrice(amount: string | number | null, currency: string): string {
   if (amount === null || amount === '') {
     return '-'
@@ -158,19 +135,6 @@ function productPath(product: SitePreviewProduct): string {
 
 function categoryPath(category: SitePreviewCategory): string {
   return `/preview/${site.value?.slug}/categories/${category.slug}`
-}
-
-function slugify(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
-
-function brandPath(brand: string): string {
-  return `/preview/${site.value?.slug}/brands/${slugify(brand)}`
 }
 
 function mediaUrl(path: string | null | undefined): string | null {
@@ -245,10 +209,6 @@ useHead(() => ({
           <NuxtLink :to="`/preview/${site.slug}/deals`">Aanbiedingen</NuxtLink>
           <NuxtLink :to="`/preview/${site.slug}/products`">Producten</NuxtLink>
         </nav>
-        <div class="preview-pill">
-          <span>{{ site.is_active ? 'Active' : 'Inactive' }}</span>
-          <strong>Preview</strong>
-        </div>
       </header>
 
       <section class="hero" :class="{ 'hero-has-image': heroImageUrl }" :style="heroStyle">
@@ -276,11 +236,10 @@ useHead(() => ({
 
       <section id="categories" class="category-band">
         <div class="section-heading">
-          <p class="eyebrow">Navigatie</p>
           <h2>{{ categoryTitle }}</h2>
         </div>
 
-        <div v-if="categories.length" class="category-grid">
+        <div v-if="categories.length" class="slider-row category-slider">
           <NuxtLink
             v-for="category in categories"
             :key="category.id"
@@ -296,77 +255,65 @@ useHead(() => ({
 
       <section id="featured" class="featured-band">
         <div class="section-heading">
-          <p class="eyebrow">Aanbevolen</p>
           <h2>{{ featuredTitle }}</h2>
         </div>
 
-        <div v-if="featuredProducts.length" class="feature-layout">
-          <NuxtLink class="feature-main" :to="productPath(featuredProducts[0])">
-            <img v-if="featuredProducts[0].image_url" :src="featuredProducts[0].image_url" :alt="featuredProducts[0].title">
-            <div>
-              <p v-if="featuredProducts[0].brand" class="brand">{{ featuredProducts[0].brand }}</p>
-              <h3>{{ featuredProducts[0].title }}</h3>
-              <p class="feature-price">{{ formatPrice(featuredProducts[0].price, featuredProducts[0].currency) }}</p>
+        <div v-if="featuredProducts.length" class="slider-row product-slider">
+          <NuxtLink
+            v-for="product in featuredProducts"
+            :key="product.id"
+            class="product-card"
+            :to="productPath(product)"
+          >
+            <div class="product-image">
+              <img v-if="product.image_url" :src="product.image_url" :alt="product.title">
+              <span v-else>No image</span>
+            </div>
+            <div class="product-body">
+              <p v-if="product.brand" class="brand">{{ product.brand }}</p>
+              <h3>{{ product.title }}</h3>
+              <div class="price-row">
+                <p class="price">{{ formatPrice(product.price, product.currency) }}</p>
+                <p v-if="product.old_price" class="old-price">{{ formatPrice(product.old_price, product.currency) }}</p>
+              </div>
             </div>
           </NuxtLink>
-
-          <div class="feature-list">
-            <NuxtLink
-              v-for="product in featuredProducts.slice(1)"
-              :key="product.id"
-              class="feature-row"
-              :to="productPath(product)"
-            >
-              <span v-if="product.brand">{{ product.brand }}</span>
-              <strong>{{ product.title }}</strong>
-              <em>{{ formatPrice(product.price, product.currency) }}</em>
-            </NuxtLink>
-          </div>
         </div>
       </section>
 
       <section v-if="saleProducts.length" class="sale-strip">
-        <div>
-          <p class="eyebrow">Prijsvoordeel</p>
+        <div class="section-heading">
           <h2>Producten met korting</h2>
         </div>
-        <div class="sale-list">
+
+        <div class="slider-row sale-list">
           <NuxtLink
             v-for="product in saleProducts"
             :key="product.id"
+            class="sale-card"
             :to="productPath(product)"
           >
-            <span>{{ product.brand || product.category?.name }}</span>
-            <strong>{{ formatPrice(product.price, product.currency) }}</strong>
+            <span class="sale-thumb">
+              <img v-if="product.image_url" :src="product.image_url" :alt="product.title">
+              <span v-else>No image</span>
+            </span>
+            <span class="sale-copy">
+              <small>{{ product.brand || product.category?.name }}</small>
+              <strong>{{ product.title }}</strong>
+              <em>{{ formatPrice(product.price, product.currency) }}</em>
+            </span>
           </NuxtLink>
         </div>
       </section>
 
       <section id="catalog" class="catalog-band">
-        <div class="section-heading catalog-heading">
-          <div>
-            <p class="eyebrow">Catalogus</p>
-            <h2>{{ visibleProducts.length }} producten gevonden</h2>
-          </div>
-          <button v-if="searchQuery" type="button" class="clear-button" @click="searchQuery = ''">
-            Reset filters
-          </button>
+        <div class="section-heading">
+          <h2>Latest products</h2>
         </div>
 
-        <div v-if="topBrands.length" class="brand-row">
-          <span>Merken</span>
+        <div v-if="latestProducts.length" class="slider-row product-slider">
           <NuxtLink
-            v-for="brand in topBrands"
-            :key="brand"
-            :to="brandPath(brand)"
-          >
-            {{ brand }}
-          </NuxtLink>
-        </div>
-
-        <div v-if="visibleProducts.length" class="product-grid">
-          <NuxtLink
-            v-for="product in visibleProducts"
+            v-for="product in latestProducts"
             :key="product.id"
             class="product-card"
             :to="productPath(product)"
@@ -391,7 +338,7 @@ useHead(() => ({
 
         <div v-else class="empty">
           <h3>Geen producten gevonden</h3>
-          <p>Pas je zoekterm of categorie aan om meer producten te zien.</p>
+          <p>Er zijn nog geen producten beschikbaar voor deze site.</p>
         </div>
       </section>
 
@@ -414,7 +361,7 @@ useHead(() => ({
   top: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto;
   gap: 24px;
   align-items: center;
   padding: 14px clamp(20px, 4vw, 56px);
@@ -444,19 +391,17 @@ useHead(() => ({
 }
 
 .brand-mark strong,
-.category-tile,
-.preview-pill strong {
+.category-tile {
   font-weight: 900;
 }
 
 .nav-links {
   display: flex;
   gap: 8px;
-  justify-content: center;
+  justify-content: end;
 }
 
-.nav-links a,
-.preview-pill {
+.nav-links a {
   min-height: 36px;
   display: inline-flex;
   align-items: center;
@@ -470,17 +415,6 @@ useHead(() => ({
 
 .nav-links a:hover {
   background: var(--site-muted);
-}
-
-.preview-pill {
-  justify-self: end;
-  gap: 8px;
-  border: 1px solid #d9e1dd;
-  background: #ffffff;
-}
-
-.preview-pill span {
-  color: var(--site-primary);
 }
 
 .hero {
@@ -621,11 +555,8 @@ h1 {
 }
 
 .section-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
+  text-align: left;
 }
 
 .section-heading h2 {
@@ -633,27 +564,51 @@ h1 {
   font-size: clamp(1.9rem, 4vw, 3rem);
 }
 
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+.slider-row {
+  display: flex;
   gap: 14px;
+  margin-inline: -2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 2px 2px 16px;
+  scroll-padding-inline: 2px;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: rgba(101, 114, 111, 0.35) transparent;
+  scrollbar-width: thin;
+}
+
+.slider-row::-webkit-scrollbar {
+  height: 8px;
+}
+
+.slider-row::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.slider-row::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(101, 114, 111, 0.28);
 }
 
 .category-tile {
   display: block;
+  flex: 0 0 clamp(230px, 27vw, 320px);
   min-height: 160px;
   padding: 18px;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: #ffffff;
   color: var(--site-text);
+  scroll-snap-align: start;
   text-align: left;
   text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
 .category-tile:hover {
   border-color: var(--site-primary);
   background: var(--site-soft);
+  transform: translateY(-2px);
 }
 
 .category-tile span,
@@ -680,68 +635,12 @@ h1 {
   line-height: 1.5;
 }
 
-.feature-layout {
-  display: grid;
-  grid-template-columns: minmax(280px, 1.2fr) minmax(260px, 0.8fr);
-  gap: 18px;
-}
-
-.feature-main,
-.feature-row,
 .product-card,
-.sale-list a {
+.sale-card {
   color: inherit;
   text-decoration: none;
 }
 
-.feature-main {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.82fr) 1fr;
-  gap: 22px;
-  align-items: center;
-  padding: clamp(18px, 3vw, 28px);
-  border: 1px solid #d9e1dd;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.feature-main img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 8px;
-  background: var(--site-muted);
-  object-fit: contain;
-}
-
-.feature-main h3 {
-  margin-bottom: 16px;
-  font-size: clamp(1.6rem, 4vw, 3rem);
-  line-height: 1.02;
-}
-
-.feature-price {
-  margin-bottom: 0;
-  font-size: 1.7rem;
-  font-weight: 900;
-}
-
-.feature-list {
-  display: grid;
-  gap: 12px;
-}
-
-.feature-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px 16px;
-  align-items: center;
-  padding: 18px;
-  border: 1px solid #d9e1dd;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.feature-row span,
 .brand {
   color: var(--site-primary);
   font-size: 0.76rem;
@@ -749,28 +648,9 @@ h1 {
   text-transform: uppercase;
 }
 
-.feature-row strong {
-  line-height: 1.35;
-}
-
-.feature-row em {
-  grid-row: span 2;
-  color: var(--site-text);
-  font-style: normal;
-  font-weight: 900;
-}
-
 .sale-strip {
-  display: grid;
-  grid-template-columns: minmax(220px, 320px) 1fr;
-  gap: 24px;
-  align-items: center;
   background: var(--site-primary-dark);
   color: #ffffff;
-}
-
-.sale-strip .eyebrow {
-  color: #ffdda3;
 }
 
 .sale-strip h2 {
@@ -779,93 +659,93 @@ h1 {
 }
 
 .sale-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
+  scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
 }
 
-.sale-list a {
-  padding: 14px;
+.sale-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.sale-card {
+  display: grid;
+  flex: 0 0 clamp(270px, 31vw, 380px);
+  grid-template-columns: 88px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.09);
+  scroll-snap-align: start;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
-.sale-list span,
-.sale-list strong {
-  display: block;
-}
-
-.sale-list span {
-  margin-bottom: 6px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.78rem;
-  font-weight: 850;
-}
-
-.sale-list strong {
-  font-size: 1.2rem;
-}
-
-.catalog-heading {
-  align-items: center;
-}
-
-.clear-button,
-.brand-row a {
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  border: 1px solid #cfd9d5;
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--site-text);
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 850;
-  text-decoration: none;
-}
-
-.clear-button {
-  cursor: pointer;
-}
-
-.brand-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.brand-row span {
-  margin-right: 4px;
-  color: #65726f;
-  font-size: 0.84rem;
-  font-weight: 900;
-}
-
-.product-grid {
+.sale-thumb {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 18px;
+  place-items: center;
+  width: 88px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #65726f;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.sale-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sale-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sale-copy small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sale-copy strong {
+  overflow: hidden;
+  font-size: 0.96rem;
+  line-height: 1.32;
+  text-overflow: ellipsis;
+}
+
+.sale-copy em {
+  font-style: normal;
+  font-weight: 900;
+  font-size: 1.15rem;
 }
 
 .product-card {
-  display: block;
+  display: flex;
+  flex: 0 0 clamp(230px, 24vw, 285px);
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: var(--site-surface);
+  scroll-snap-align: start;
   transition: border-color 160ms ease, transform 160ms ease;
 }
 
 .product-card:hover,
-.feature-main:hover,
-.feature-row:hover {
+.sale-card:hover {
   border-color: var(--site-primary);
   transform: translateY(-2px);
+}
+
+.sale-card:hover {
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .product-image {
@@ -884,6 +764,9 @@ h1 {
 }
 
 .product-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 16px;
 }
 
@@ -903,6 +786,7 @@ h1 {
   flex-wrap: wrap;
   gap: 8px;
   align-items: baseline;
+  margin-top: auto;
 }
 
 .price {
@@ -954,10 +838,7 @@ h1 {
 
 @media (max-width: 900px) {
   .site-header,
-  .hero,
-  .feature-layout,
-  .feature-main,
-  .sale-strip {
+  .hero {
     grid-template-columns: 1fr;
   }
 
@@ -970,24 +851,28 @@ h1 {
     overflow-x: auto;
   }
 
-  .preview-pill {
-    justify-self: start;
-  }
-
   .hero {
     min-height: auto;
   }
 }
 
 @media (max-width: 640px) {
-  .section-heading,
-  .catalog-heading {
-    align-items: start;
-    flex-direction: column;
-  }
-
   .nav-links {
     width: 100%;
+  }
+
+  .category-tile,
+  .product-card,
+  .sale-card {
+    flex-basis: min(82vw, 320px);
+  }
+
+  .sale-card {
+    grid-template-columns: 76px 1fr;
+  }
+
+  .sale-thumb {
+    width: 76px;
   }
 
   .search-box {
