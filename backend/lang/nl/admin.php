@@ -276,6 +276,28 @@ return [
         'variants' => 'Varianten',
     ],
 
+    'auth' => [
+        'login_code' => [
+            'subheading' => 'Vul je e-mailadres in, vraag een code aan en log daarna in met de ontvangen code.',
+            'mixed_subheading' => 'Log in met je wachtwoord, of vraag een eenmalige code per e-mail aan.',
+            'subject' => 'Je admin-logincode',
+            'body' => "Je admin-logincode is :code.\n\nDeze code verloopt over :minutes minuten.",
+            'form' => [
+                'code' => 'E-mailcode',
+                'code_help' => 'Vul de nieuwste code in die naar je e-mailadres is verstuurd.',
+            ],
+            'actions' => [
+                'send_code' => 'Code versturen',
+                'authenticate' => 'Inloggen',
+            ],
+            'notifications' => [
+                'sent' => 'Logincode verstuurd',
+                'sent_body' => 'Als dit e-mailadres toegang heeft tot het beheerpaneel, is er een nieuwe code verstuurd.',
+                'failed' => 'De logincode kon niet worden verstuurd. Controleer de e-mailconnectorinstellingen.',
+            ],
+        ],
+    ],
+
     'pages' => [
         'dashboard' => [
             'navigation_label' => 'Overzicht',
@@ -332,16 +354,41 @@ return [
         'settings' => [
             'navigation_label' => 'Instellingen',
             'title' => 'Instellingen',
+            'tabs' => [
+                'settings' => 'Instellingen',
+                'website' => 'Website',
+                'authentication' => 'Authenticatie',
+                'email' => 'E-mailconnector',
+            ],
             'sections' => [
+                'admin_login' => 'Admin-login',
+                'email_connector' => 'E-mailconnector',
                 'website_status' => 'Websitestatus',
             ],
             'descriptions' => [
+                'admin_login' => 'Kies hoe beheerders inloggen en hoe lang eenmalige e-mailcodes geldig blijven.',
+                'email_connector' => 'Configureer transactionele e-mail voor logincodes en toekomstige platformmeldingen.',
                 'website_status' => 'Bepaal of de publieke website beschikbaar is. Het beheerpaneel blijft beschikbaar wanneer de website offline is.',
             ],
             'fields' => [
+                'admin_login_method' => 'Loginmethode',
+                'login_code_length' => 'Codelengte',
+                'login_code_ttl_minutes' => 'Codegeldigheid',
+                'mail_api_key' => 'API-sleutel',
+                'mail_driver' => 'E-mailprovider',
+                'mail_from_email' => 'Afzender e-mail',
+                'mail_from_name' => 'Afzender naam',
+                'smtp_host' => 'SMTP-host',
+                'smtp_password' => 'SMTP-wachtwoord',
+                'smtp_port' => 'SMTP-poort',
+                'smtp_scheme' => 'SMTP-beveiliging',
+                'smtp_username' => 'SMTP-gebruikersnaam',
                 'website_online' => 'Website online',
             ],
             'help' => [
+                'admin_login_method' => 'Wachtwoordloze e-mailcodes kunnen wachtwoorden vervangen, of tijdelijk naast wachtwoorden werken.',
+                'login_code_length' => 'Gebruik 6 tot 10 cijfers. Zes is gebruiksvriendelijk; langer is strenger.',
+                'login_code_ttl_minutes' => 'Gebruik een korte geldigheid voor codes. Standaard is 10 minuten.',
                 'website_online' => 'Wanneer dit is uitgeschakeld, geven publieke website-API-verzoeken een offline reactie terug.',
             ],
             'notifications' => [
@@ -349,6 +396,54 @@ return [
             ],
             'actions' => [
                 'save' => 'Instellingen opslaan',
+            ],
+            'options' => [
+                'login_methods' => [
+                    'password' => 'Wachtwoord',
+                    'email_code' => 'Alleen e-mailcode',
+                    'password_or_email_code' => 'Wachtwoord of e-mailcode',
+                ],
+                'mail_drivers' => [
+                    'log' => 'Alleen loggen',
+                    'smtp' => 'SMTP',
+                    'mailersend_api' => 'MailerSend API',
+                    'sendgrid_api' => 'SendGrid API',
+                ],
+                'smtp_schemes' => [
+                    'default' => 'Standaard',
+                    'smtp' => 'STARTTLS / poort 587',
+                    'smtps' => 'SSL / poort 465',
+                ],
+            ],
+            'validation' => [
+                'mail_api_key_required' => 'Voor deze e-mailprovider is een API-sleutel verplicht.',
+            ],
+        ],
+
+        'profile' => [
+            'navigation_label' => 'Profiel',
+            'title' => 'Profiel',
+            'sections' => [
+                'profile' => 'Profiel',
+                'password' => 'Wachtwoord',
+            ],
+            'descriptions' => [
+                'profile' => 'Werk je beheerdersaccount en voorkeurstaal bij.',
+                'password' => 'Laat deze velden leeg om je huidige wachtwoord te behouden.',
+            ],
+            'fields' => [
+                'current_password' => 'Huidig wachtwoord',
+                'new_password' => 'Nieuw wachtwoord',
+                'confirm_password' => 'Bevestig wachtwoord',
+            ],
+            'validation' => [
+                'current_password' => 'Het huidige wachtwoord is onjuist.',
+            ],
+            'notifications' => [
+                'saved' => 'Profiel bijgewerkt',
+            ],
+            'actions' => [
+                'save' => 'Profiel opslaan',
             ],
         ],
 

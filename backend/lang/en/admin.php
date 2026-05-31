@@ -276,6 +276,28 @@ return [
         'variants' => 'Variants',
     ],
 
+    'auth' => [
+        'login_code' => [
+            'subheading' => 'Enter your email address, request a code, then sign in with the code you receive.',
+            'mixed_subheading' => 'Sign in with your password, or request a one-time code by email.',
+            'subject' => 'Your admin login code',
+            'body' => "Your admin login code is :code.\n\nThis code expires in :minutes minutes.",
+            'form' => [
+                'code' => 'Email code',
+                'code_help' => 'Enter the latest code sent to your email address.',
+            ],
+            'actions' => [
+                'send_code' => 'Send code',
+                'authenticate' => 'Sign in',
+            ],
+            'notifications' => [
+                'sent' => 'Login code sent',
+                'sent_body' => 'If this email address can access the admin panel, a fresh code has been sent.',
+                'failed' => 'The login code could not be sent. Check the email connector settings.',
+            ],
+        ],
+    ],
+
     'pages' => [
         'dashboard' => [
             'navigation_label' => 'Dashboard',
@@ -332,16 +354,41 @@ return [
         'settings' => [
             'navigation_label' => 'Settings',
             'title' => 'Settings',
+            'tabs' => [
+                'settings' => 'Settings',
+                'website' => 'Website',
+                'authentication' => 'Authentication',
+                'email' => 'Email connector',
+            ],
             'sections' => [
+                'admin_login' => 'Admin login',
+                'email_connector' => 'Email connector',
                 'website_status' => 'Website status',
             ],
             'descriptions' => [
+                'admin_login' => 'Choose how administrators sign in and how long one-time email codes remain valid.',
+                'email_connector' => 'Configure transactional email for login codes and future platform notifications.',
                 'website_status' => 'Control whether the public storefront is available. The admin panel remains available while the website is offline.',
             ],
             'fields' => [
+                'admin_login_method' => 'Login method',
+                'login_code_length' => 'Code length',
+                'login_code_ttl_minutes' => 'Code lifetime',
+                'mail_api_key' => 'API key',
+                'mail_driver' => 'Email provider',
+                'mail_from_email' => 'From email',
+                'mail_from_name' => 'From name',
+                'smtp_host' => 'SMTP host',
+                'smtp_password' => 'SMTP password',
+                'smtp_port' => 'SMTP port',
+                'smtp_scheme' => 'SMTP security',
+                'smtp_username' => 'SMTP username',
                 'website_online' => 'Website online',
             ],
             'help' => [
+                'admin_login_method' => 'Passwordless email codes can replace passwords, or run next to passwords during rollout.',
+                'login_code_length' => 'Use 6 to 10 digits. Six is user-friendly; longer is stricter.',
+                'login_code_ttl_minutes' => 'Use a short lifetime for codes. The default is 10 minutes.',
                 'website_online' => 'When disabled, public website API requests return an offline response.',
             ],
             'notifications' => [
@@ -349,6 +396,54 @@ return [
             ],
             'actions' => [
                 'save' => 'Save settings',
+            ],
+            'options' => [
+                'login_methods' => [
+                    'password' => 'Password',
+                    'email_code' => 'Email code only',
+                    'password_or_email_code' => 'Password or email code',
+                ],
+                'mail_drivers' => [
+                    'log' => 'Log only',
+                    'smtp' => 'SMTP',
+                    'mailersend_api' => 'MailerSend API',
+                    'sendgrid_api' => 'SendGrid API',
+                ],
+                'smtp_schemes' => [
+                    'default' => 'Default',
+                    'smtp' => 'STARTTLS / port 587',
+                    'smtps' => 'SSL / port 465',
+                ],
+            ],
+            'validation' => [
+                'mail_api_key_required' => 'An API key is required for this email provider.',
+            ],
+        ],
+
+        'profile' => [
+            'navigation_label' => 'Profile',
+            'title' => 'Profile',
+            'sections' => [
+                'profile' => 'Profile',
+                'password' => 'Password',
+            ],
+            'descriptions' => [
+                'profile' => 'Update your admin account details and preferred language.',
+                'password' => 'Leave these fields empty to keep your current password.',
+            ],
+            'fields' => [
+                'current_password' => 'Current password',
+                'new_password' => 'New password',
+                'confirm_password' => 'Confirm password',
+            ],
+            'validation' => [
+                'current_password' => 'The current password is incorrect.',
+            ],
+            'notifications' => [
+                'saved' => 'Profile updated',
+            ],
+            'actions' => [
+                'save' => 'Save profile',
             ],
         ],
 
