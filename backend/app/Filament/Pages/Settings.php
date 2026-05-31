@@ -70,6 +70,7 @@ class Settings extends Page
             'smtp_scheme' => $mailConnector['smtp_scheme'],
             'smtp_username' => $mailConnector['smtp_username'],
             'smtp_password' => $mailConnector['smtp_password'],
+            'sendmail_path' => $mailConnector['sendmail_path'],
             'mail_api_key' => $mailConnector['api_key'],
         ]);
     }
@@ -171,6 +172,12 @@ class Settings extends Page
                                             ->password()
                                             ->revealable()
                                             ->maxLength(255),
+                                        TextInput::make('sendmail_path')
+                                            ->label(__('admin.pages.settings.fields.sendmail_path'))
+                                            ->visible(fn (Get $get): bool => $get('mail_driver') === PlatformSettings::MAIL_DRIVER_SENDMAIL)
+                                            ->required(fn (Get $get): bool => $get('mail_driver') === PlatformSettings::MAIL_DRIVER_SENDMAIL)
+                                            ->maxLength(255)
+                                            ->helperText(__('admin.pages.settings.help.sendmail_path')),
                                         TextInput::make('mail_api_key')
                                             ->label(__('admin.pages.settings.fields.mail_api_key'))
                                             ->visible(fn (Get $get): bool => in_array($get('mail_driver'), [
@@ -211,6 +218,7 @@ class Settings extends Page
             'smtp_scheme' => $data['smtp_scheme'] ?? null,
             'smtp_username' => $data['smtp_username'] ?? null,
             'smtp_password' => $data['smtp_password'] ?? null,
+            'sendmail_path' => $data['sendmail_path'] ?? null,
             'api_key' => $data['mail_api_key'] ?? null,
         ]);
 

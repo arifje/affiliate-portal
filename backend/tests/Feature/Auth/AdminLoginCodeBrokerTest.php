@@ -128,4 +128,25 @@ class AdminLoginCodeBrokerTest extends TestCase
             && $request['from']['email'] === 'noreply@example.com'
             && $request['personalizations'][0]['to'][0]['email'] === 'admin@example.com');
     }
+
+    public function test_sendmail_connector_can_send_through_laravel_mailer(): void
+    {
+        Mail::fake();
+
+        PlatformSettings::setMailConnector([
+            'driver' => PlatformSettings::MAIL_DRIVER_SENDMAIL,
+            'from_name' => 'Affiliate Portal',
+            'from_email' => 'noreply@example.com',
+            'sendmail_path' => '/usr/sbin/sendmail -bs -i',
+        ]);
+
+        app(TransactionalMailer::class)->send(
+            toEmail: 'admin@example.com',
+            toName: 'Admin',
+            subject: 'Login code',
+            text: 'Your code is 123456',
+        );
+
+        Mail::assertNothingQueued();
+    }
 }

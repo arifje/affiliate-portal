@@ -390,12 +390,14 @@ return [
                 'smtp_port' => 'SMTP port',
                 'smtp_scheme' => 'SMTP security',
                 'smtp_username' => 'SMTP username',
+                'sendmail_path' => 'Sendmail path',
                 'website_online' => 'Website online',
             ],
             'help' => [
                 'admin_login_method' => 'Passwordless email codes can replace passwords, or run next to passwords during rollout.',
                 'login_code_length' => 'Use 6 to 10 digits. Six is user-friendly; longer is stricter.',
                 'login_code_ttl_minutes' => 'Use a short lifetime for codes. The default is 10 minutes.',
+                'sendmail_path' => 'Path used by Laravel sendmail transport. Default: /usr/sbin/sendmail -bs -i.',
                 'website_online' => 'When disabled, public website API requests return an offline response.',
             ],
             'notifications' => [
@@ -413,6 +415,7 @@ return [
                 'mail_drivers' => [
                     'log' => 'Log only',
                     'smtp' => 'SMTP',
+                    'sendmail' => 'PHP sendmail',
                     'mailersend_api' => 'MailerSend API',
                     'sendgrid_api' => 'SendGrid API',
                 ],

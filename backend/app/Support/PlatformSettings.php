@@ -28,6 +28,8 @@ class PlatformSettings
 
     public const MAIL_DRIVER_SMTP = 'smtp';
 
+    public const MAIL_DRIVER_SENDMAIL = 'sendmail';
+
     public const MAIL_DRIVER_MAILERSEND_API = 'mailersend_api';
 
     public const MAIL_DRIVER_SENDGRID_API = 'sendgrid_api';
@@ -54,6 +56,7 @@ class PlatformSettings
         return [
             self::MAIL_DRIVER_LOG => __('admin.pages.settings.options.mail_drivers.log'),
             self::MAIL_DRIVER_SMTP => __('admin.pages.settings.options.mail_drivers.smtp'),
+            self::MAIL_DRIVER_SENDMAIL => __('admin.pages.settings.options.mail_drivers.sendmail'),
             self::MAIL_DRIVER_MAILERSEND_API => __('admin.pages.settings.options.mail_drivers.mailersend_api'),
             self::MAIL_DRIVER_SENDGRID_API => __('admin.pages.settings.options.mail_drivers.sendgrid_api'),
         ];
@@ -128,6 +131,7 @@ class PlatformSettings
             'smtp_password' => array_key_exists('smtp_password', $settings)
                 ? self::decryptSecret($settings['smtp_password'])
                 : config('mail.mailers.smtp.password'),
+            'sendmail_path' => $settings['sendmail_path'] ?? config('mail.mailers.sendmail.path'),
             'api_key' => self::decryptSecret($settings['api_key'] ?? null),
         ];
     }
@@ -148,6 +152,7 @@ class PlatformSettings
             'smtp_scheme' => $settings['smtp_scheme'] ?? null,
             'smtp_username' => $settings['smtp_username'] ?? null,
             'smtp_password' => self::encryptSecret($settings['smtp_password'] ?? null),
+            'sendmail_path' => $settings['sendmail_path'] ?? null,
             'api_key' => self::encryptSecret($settings['api_key'] ?? null),
         ]);
     }

@@ -390,12 +390,14 @@ return [
                 'smtp_port' => 'SMTP-poort',
                 'smtp_scheme' => 'SMTP-beveiliging',
                 'smtp_username' => 'SMTP-gebruikersnaam',
+                'sendmail_path' => 'Sendmail-pad',
                 'website_online' => 'Website online',
             ],
             'help' => [
                 'admin_login_method' => 'Wachtwoordloze e-mailcodes kunnen wachtwoorden vervangen, of tijdelijk naast wachtwoorden werken.',
                 'login_code_length' => 'Gebruik 6 tot 10 cijfers. Zes is gebruiksvriendelijk; langer is strenger.',
                 'login_code_ttl_minutes' => 'Gebruik een korte geldigheid voor codes. Standaard is 10 minuten.',
+                'sendmail_path' => 'Pad dat Laravel gebruikt voor sendmail. Standaard: /usr/sbin/sendmail -bs -i.',
                 'website_online' => 'Wanneer dit is uitgeschakeld, geven publieke website-API-verzoeken een offline reactie terug.',
             ],
             'notifications' => [
@@ -413,6 +415,7 @@ return [
                 'mail_drivers' => [
                     'log' => 'Alleen loggen',
                     'smtp' => 'SMTP',
+                    'sendmail' => 'PHP sendmail',
                     'mailersend_api' => 'MailerSend API',
                     'sendgrid_api' => 'SendGrid API',
                 ],

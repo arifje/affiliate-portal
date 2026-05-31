@@ -124,9 +124,11 @@ class TransactionalMailer
      */
     private function configureLaravelMailer(array $settings): string
     {
-        $mailer = ($settings['driver'] ?? PlatformSettings::MAIL_DRIVER_LOG) === PlatformSettings::MAIL_DRIVER_SMTP
-            ? 'admin_smtp'
-            : 'admin_log';
+        $mailer = match ($settings['driver'] ?? PlatformSettings::MAIL_DRIVER_LOG) {
+            PlatformSettings::MAIL_DRIVER_SMTP => 'admin_smtp',
+            PlatformSettings::MAIL_DRIVER_SENDMAIL => 'admin_sendmail',
+            default => 'admin_log',
+        };
 
         config([
             'mail.from.address' => $settings['from_email'],
@@ -145,6 +147,13 @@ class TransactionalMailer
                     'password' => $settings['smtp_password'] ?? null,
                     'timeout' => null,
                     'local_domain' => parse_url((string) config('app.url', 'http://localhost'), PHP_URL_HOST),
+                ],
+            ]);
+        } elseif ($mailer === 'admin_sendmail') {
+            config([
+                'mail.mailers.admin_sendmail' => [
+                    'transport' => 'sendmail',
+                    'path' => $settings['sendmail_path'] ?? config('mail.mailers.sendmail.path'),
                 ],
             ]);
         } else {

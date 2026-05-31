@@ -67,4 +67,30 @@ class SettingsPageTest extends TestCase
             (string) AppSetting::query()->where('key', PlatformSettings::MAIL_CONNECTOR)->value('value'),
         );
     }
+
+    public function test_sendmail_connector_settings_can_be_saved(): void
+    {
+        $user = User::factory()->create([
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Settings::class)
+            ->set('data.website_is_online', true)
+            ->set('data.admin_login_method', PlatformSettings::LOGIN_METHOD_PASSWORD)
+            ->set('data.login_code_ttl_minutes', 10)
+            ->set('data.login_code_length', 6)
+            ->set('data.mail_driver', PlatformSettings::MAIL_DRIVER_SENDMAIL)
+            ->set('data.mail_from_name', 'Affiliate Portal')
+            ->set('data.mail_from_email', 'noreply@example.com')
+            ->set('data.sendmail_path', '/usr/sbin/sendmail -bs -i')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $mailConnector = PlatformSettings::mailConnector();
+
+        $this->assertSame(PlatformSettings::MAIL_DRIVER_SENDMAIL, $mailConnector['driver']);
+        $this->assertSame('/usr/sbin/sendmail -bs -i', $mailConnector['sendmail_path']);
+    }
 }
