@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProductViewController;
 use App\Http\Controllers\Api\SitePreviewController;
 use App\Http\Controllers\Api\SitePreviewProductController;
 use App\Http\Controllers\Api\SitePreviewProductIndexController;
+use App\Http\Controllers\Api\SitePreviewSearchSuggestionController;
 use App\Http\Controllers\Api\SiteVisitController;
 use App\Http\Middleware\EnsureWebsiteIsOnline;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(EnsureWebsiteIsOnline::class)->group(function (): void {
     Route::get('/sites/preview/{site:slug}', SitePreviewController::class)
         ->name('api.sites.preview');
+
+    Route::get('/sites/preview/{site:slug}/search-suggestions', SitePreviewSearchSuggestionController::class)
+        ->name('api.sites.preview.search-suggestions');
 
     Route::get('/sites/preview/{site:slug}/products', SitePreviewProductIndexController::class)
         ->name('api.sites.preview.products.index');

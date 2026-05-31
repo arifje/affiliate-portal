@@ -49,7 +49,6 @@ type SitePreviewResponse = {
 
 const route = useRoute()
 const config = useRuntimeConfig()
-const searchQuery = ref('')
 
 const slug = computed(() => String(route.params.slug))
 const apiBase = computed(() => import.meta.server ? config.apiBase : config.public.apiBase)
@@ -179,19 +178,6 @@ function mediaUrl(path: string | null | undefined): string | null {
   return `${publicBackendBase}/storage/${cleanPath}`
 }
 
-function submitSearch(): void {
-  const query = searchQuery.value.trim()
-
-  if (!query || !site.value) {
-    return
-  }
-
-  navigateTo({
-    path: `/preview/${site.value.slug}/search`,
-    query: { q: query },
-  })
-}
-
 onMounted(() => {
   watch(site, (currentSite) => {
     stopSiteVisitHeartbeat?.()
@@ -244,20 +230,12 @@ useHead(() => ({
           <h1>{{ heroTitle }}</h1>
           <p>{{ heroIntro }}</p>
 
-          <form class="search-panel" @submit.prevent="submitSearch">
-            <label for="storefront-search">Search</label>
-            <div class="search-box">
-              <span aria-hidden="true">/</span>
-              <input
-                id="storefront-search"
-                v-model="searchQuery"
-                type="search"
-                :placeholder="searchPlaceholder"
-                autocomplete="off"
-              >
-              <button type="submit">Zoeken</button>
-            </div>
-          </form>
+          <SiteSearchAutocomplete
+            input-id="storefront-search"
+            :site-slug="site.slug"
+            :placeholder="searchPlaceholder"
+            :contrast="Boolean(heroImageUrl)"
+          />
         </div>
       </section>
 
@@ -544,65 +522,8 @@ h1 {
   color: #ffdda3;
 }
 
-.hero-has-image .hero-copy > p:not(.eyebrow),
-.hero-has-image .search-panel label {
+.hero-has-image .hero-copy > p:not(.eyebrow) {
   color: rgba(255, 255, 255, 0.84);
-}
-
-.search-panel {
-  width: min(720px, 100%);
-}
-
-.search-panel label {
-  display: block;
-  margin-bottom: 9px;
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.search-box {
-  min-height: 64px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
-  align-items: center;
-  padding: 0 10px 0 18px;
-  border: 1px solid #cfd9d5;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 20px 50px rgba(23, 33, 31, 0.08);
-}
-
-.search-box span {
-  color: var(--site-primary);
-  font-size: 1.4rem;
-  font-weight: 900;
-}
-
-.search-box input {
-  width: 100%;
-  border: 0;
-  outline: 0;
-  color: var(--site-text);
-  font: inherit;
-  font-size: 1.05rem;
-}
-
-.search-box button {
-  min-height: 44px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--site-primary);
-  color: #ffffff;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 900;
-}
-
-.search-box button:hover {
-  background: var(--site-primary-dark);
 }
 
 .category-band,
@@ -909,19 +830,5 @@ h1 {
     width: 76px;
   }
 
-  .search-box {
-    grid-template-columns: auto 1fr;
-    min-height: 56px;
-    padding-bottom: 12px;
-  }
-
-  .search-box span,
-  .search-box input {
-    padding-top: 12px;
-  }
-
-  .search-box button {
-    grid-column: 1 / -1;
-  }
 }
 </style>

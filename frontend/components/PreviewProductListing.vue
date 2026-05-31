@@ -72,7 +72,6 @@ const props = defineProps<{
 
 const route = useRoute()
 const config = useRuntimeConfig()
-const searchQuery = ref(String(route.query.q || ''))
 const sort = ref(String(route.query.sort || 'latest'))
 const apiBase = computed(() => import.meta.server ? config.apiBase : config.public.apiBase)
 
@@ -190,19 +189,6 @@ function formatPrice(amount: string | number | null, currency: string): string {
   }).format(Number(amount))
 }
 
-function submitSearch(): void {
-  const query = searchQuery.value.trim()
-
-  if (!query || !site.value) {
-    return
-  }
-
-  navigateTo({
-    path: `/preview/${site.value.slug}/search`,
-    query: { q: query },
-  })
-}
-
 function productPath(product: PreviewProduct): string {
   return `/preview/${site.value?.slug}/products/${product.slug}`
 }
@@ -301,20 +287,13 @@ useHead(() => ({
           <p>{{ subtitle }}</p>
         </div>
 
-        <form class="search-panel" @submit.prevent="submitSearch">
-          <label for="listing-search">Search</label>
-          <div class="search-box">
-            <span aria-hidden="true">/</span>
-            <input
-              id="listing-search"
-              v-model="searchQuery"
-              type="search"
-              :placeholder="site.settings.search_placeholder || 'Zoek op product, merk of categorie'"
-              autocomplete="off"
-            >
-            <button type="submit">Zoeken</button>
-          </div>
-        </form>
+        <SiteSearchAutocomplete
+          input-id="listing-search"
+          :site-slug="site.slug"
+          :placeholder="site.settings.search_placeholder || 'Zoek op product, merk of categorie'"
+          :initial-query="String(route.query.q || '')"
+          :contrast="Boolean(categoryHeroImageUrl)"
+        />
       </section>
 
       <section class="content-shell">
@@ -487,10 +466,6 @@ useHead(() => ({
   color: rgba(255, 255, 255, 0.88);
 }
 
-.listing-hero.has-hero-image .search-panel label {
-  color: #ffffff;
-}
-
 .eyebrow {
   margin: 0 0 12px;
   color: var(--site-eyebrow);
@@ -521,53 +496,6 @@ h1 {
   color: #43534f;
   font-size: 1.08rem;
   line-height: 1.65;
-}
-
-.search-panel label {
-  display: block;
-  margin-bottom: 9px;
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.search-box {
-  min-height: 58px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
-  align-items: center;
-  padding: 0 10px 0 16px;
-  border: 1px solid #cfd9d5;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 20px 50px rgba(23, 33, 31, 0.08);
-}
-
-.search-box span {
-  color: var(--site-primary);
-  font-size: 1.35rem;
-  font-weight: 900;
-}
-
-.search-box input {
-  width: 100%;
-  border: 0;
-  outline: 0;
-  color: var(--site-text);
-  font: inherit;
-}
-
-.search-box button {
-  min-height: 40px;
-  padding: 0 15px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--site-primary);
-  color: #ffffff;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 900;
 }
 
 .content-shell {
@@ -744,22 +672,4 @@ h1 {
   }
 }
 
-@media (max-width: 640px) {
-  .search-box {
-    grid-template-columns: auto 1fr;
-    padding: 0 14px 14px;
-  }
-
-  .search-box span {
-    padding-top: 14px;
-  }
-
-  .search-box input {
-    padding-top: 14px;
-  }
-
-  .search-box button {
-    grid-column: 1 / -1;
-  }
-}
 </style>
