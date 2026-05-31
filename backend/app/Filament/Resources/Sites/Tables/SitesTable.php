@@ -7,7 +7,6 @@ use App\Models\Site;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -77,13 +76,13 @@ class SitesTable
                     ->label(__('admin.fields.is_active')),
             ])
             ->defaultSort('name')
+            ->recordUrl(fn (Site $record): string => SiteResource::getUrl('edit', ['record' => $record]))
             ->recordActions([
                 Action::make('preview')
                     ->label(__('admin.actions.preview'))
                     ->icon(Heroicon::OutlinedEye)
                     ->url(fn (Site $record): string => SiteResource::getPreviewUrl($record))
                     ->openUrlInNewTab(),
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
                     ->modalDescription(__('admin.messages.deleting_site')),

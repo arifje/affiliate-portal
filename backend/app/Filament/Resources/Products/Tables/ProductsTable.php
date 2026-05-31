@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Filament\Resources\Products\ProductResource;
 use App\Models\Product;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -132,8 +132,8 @@ class ProductsTable
                     ->nullable(),
             ])
             ->defaultSort('updated_at', 'desc')
+            ->recordUrl(fn (Product $record): string => ProductResource::getUrl('edit', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ]);

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -56,8 +56,8 @@ class UsersTable
                     ->label(__('admin.resources.users.fields.is_active')),
             ])
             ->defaultSort('created_at', 'desc')
+            ->recordUrl(fn (User $record): string => UserResource::getUrl('edit', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
                     ->visible(fn (User $record): bool => $record->id !== auth()->id()),
