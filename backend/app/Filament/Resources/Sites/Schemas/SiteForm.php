@@ -23,57 +23,65 @@ class SiteForm
     {
         return $schema
             ->components([
-                Section::make('Site identity')
+                Section::make(__('admin.sections.site_identity'))
                     ->schema([
                         TextInput::make('name')
+                            ->label(__('admin.fields.name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('slug')
+                            ->label(__('admin.fields.slug'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         TextInput::make('primary_domain')
+                            ->label(__('admin.fields.primary_domain'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->placeholder('maskers.nl')
                             ->maxLength(255),
                         TagsInput::make('domain_aliases')
+                            ->label(__('admin.fields.domain_aliases'))
                             ->placeholder('www.maskers.nl')
                             ->columnSpanFull(),
                         Toggle::make('is_active')
+                            ->label(__('admin.fields.is_active'))
                             ->required()
                             ->default(true),
                     ])
                     ->columns(2),
-                Section::make('Locale')
+                Section::make(__('admin.sections.locale'))
                     ->schema([
                         TextInput::make('locale')
+                            ->label(__('admin.fields.locale'))
                             ->required()
                             ->default('nl_NL')
                             ->maxLength(12),
                         TextInput::make('currency')
+                            ->label(__('admin.fields.currency'))
                             ->required()
                             ->default('EUR')
                             ->maxLength(3),
                         TextInput::make('timezone')
+                            ->label(__('admin.fields.timezone'))
                             ->required()
                             ->default('Europe/Amsterdam')
                             ->maxLength(255),
                     ])
                     ->columns(3),
-                Section::make('Presentation')
-                    ->description('Theme and layout controls for the shared storefront.')
+                Section::make(__('admin.sections.presentation'))
+                    ->description(__('admin.pages.sites.presentation_description'))
                     ->schema([
                         Actions::make([
                             Action::make('resetPresentation')
-                                ->label('Reset neutral')
+                                ->label(__('admin.pages.sites.actions.reset_neutral'))
                                 ->color('gray')
                                 ->action(fn (Set $set): mixed => self::applyPresentationPreset(
                                     $set,
                                     self::neutralPresentationPreset(),
                                 )),
                             Action::make('randomizePresentation')
-                                ->label('Random style')
+                                ->label(__('admin.pages.sites.actions.random_style'))
                                 ->color('primary')
                                 ->action(fn (Set $set): mixed => self::applyPresentationPreset(
                                     $set,
@@ -82,80 +90,70 @@ class SiteForm
                         ])
                             ->columnSpanFull(),
                         ColorPicker::make('theme.primary_color')
-                            ->label('Primary color')
+                            ->label(__('admin.pages.sites.theme.primary_color'))
                             ->hex()
                             ->default('#0f766e'),
                         ColorPicker::make('theme.primary_dark')
-                            ->label('Primary dark')
+                            ->label(__('admin.pages.sites.theme.primary_dark'))
                             ->hex()
                             ->default('#134e4a'),
                         ColorPicker::make('theme.accent_color')
-                            ->label('Accent color')
+                            ->label(__('admin.pages.sites.theme.accent_color'))
                             ->hex()
                             ->default('#d97706'),
                         ColorPicker::make('theme.eyebrow_color')
-                            ->label('Section label color')
-                            ->helperText('Used for small uppercase labels such as the hero badge.')
+                            ->label(__('admin.pages.sites.theme.eyebrow_color'))
+                            ->helperText(__('admin.helpers.section_label_color'))
                             ->hex()
                             ->default('#d97706'),
                         ColorPicker::make('theme.background_color')
-                            ->label('Background color')
+                            ->label(__('admin.pages.sites.theme.background_color'))
                             ->hex()
                             ->default('#f6f8f4'),
                         ColorPicker::make('theme.muted_color')
-                            ->label('Muted color')
+                            ->label(__('admin.pages.sites.theme.muted_color'))
                             ->hex()
                             ->default('#e7eee9'),
                         ColorPicker::make('theme.surface_color')
-                            ->label('Surface color')
+                            ->label(__('admin.pages.sites.theme.surface_color'))
                             ->hex()
                             ->default('#ffffff'),
                         ColorPicker::make('theme.text_color')
-                            ->label('Text color')
+                            ->label(__('admin.pages.sites.theme.text_color'))
                             ->hex()
                             ->default('#17211f'),
                         ColorPicker::make('theme.soft_color')
-                            ->label('Soft background')
+                            ->label(__('admin.pages.sites.theme.soft_color'))
                             ->hex()
                             ->default('#edf7f4'),
                         Select::make('theme.font_family')
-                            ->label('Font')
-                            ->options([
-                                'Inter, ui-sans-serif, system-ui, sans-serif' => 'Inter / modern sans',
-                                'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' => 'System sans',
-                                'Arial, Helvetica, sans-serif' => 'Arial / neutral sans',
-                                '"Trebuchet MS", Arial, sans-serif' => 'Trebuchet / friendly sans',
-                                'Georgia, "Times New Roman", serif' => 'Georgia / editorial serif',
-                            ])
+                            ->label(__('admin.pages.sites.theme.font_family'))
+                            ->options(__('admin.options.font_families'))
                             ->default('Inter, ui-sans-serif, system-ui, sans-serif'),
                         Select::make('layout.home_variant')
-                            ->label('Homepage variant')
-                            ->options([
-                                'clean' => 'Clean',
-                                'compact' => 'Compact',
-                                'bold' => 'Bold',
-                            ])
+                            ->label(__('admin.pages.sites.theme.home_variant'))
+                            ->options(__('admin.options.homepage_variants'))
                             ->default('clean'),
                     ])
                     ->columns(4)
                     ->columnSpanFull(),
-                Section::make('Settings')
-                    ->description('Text overrides for the shared storefront.')
+                Section::make(__('admin.sections.settings'))
+                    ->description(__('admin.pages.sites.settings_description'))
                     ->schema([
                         TextInput::make('settings.hero_badge')
-                            ->label('Hero badge')
+                            ->label(__('admin.pages.sites.content.hero_badge'))
                             ->default('Onafhankelijke affiliate vergelijking')
                             ->maxLength(255),
                         TextInput::make('settings.hero_title')
-                            ->label('Hero title')
+                            ->label(__('admin.pages.sites.content.hero_title'))
                             ->maxLength(255),
                         Textarea::make('settings.hero_intro')
-                            ->label('Hero intro')
+                            ->label(__('admin.pages.sites.content.hero_intro'))
                             ->rows(3)
                             ->columnSpanFull(),
                         FileUpload::make('settings.hero_image')
-                            ->label('Hero image')
-                            ->helperText('Shown on the homepage hero instead of the old product/category/feed stats block.')
+                            ->label(__('admin.pages.sites.content.hero_image'))
+                            ->helperText(__('admin.helpers.site_hero_image'))
                             ->image()
                             ->imageEditor()
                             ->disk('public')
@@ -168,17 +166,17 @@ class SiteForm
                             ->maxSize(4096)
                             ->columnSpanFull(),
                         TextInput::make('settings.search_placeholder')
-                            ->label('Search placeholder')
+                            ->label(__('admin.pages.sites.content.search_placeholder'))
                             ->default('Zoek op product, merk of categorie')
                             ->maxLength(255),
                         TextInput::make('settings.featured_title')
-                            ->label('Featured section title')
+                            ->label(__('admin.pages.sites.content.featured_title'))
                             ->maxLength(255),
                         TextInput::make('settings.category_title')
-                            ->label('Category section title')
+                            ->label(__('admin.pages.sites.content.category_title'))
                             ->maxLength(255),
                         TextInput::make('settings.footer_tagline')
-                            ->label('Footer tagline')
+                            ->label(__('admin.pages.sites.content.footer_tagline'))
                             ->maxLength(255)
                             ->columnSpanFull(),
                     ])

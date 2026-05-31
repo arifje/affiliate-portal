@@ -22,32 +22,32 @@ class SystemInspector
 
         return [
             [
-                'label' => 'Load average',
+                'label' => __('admin.system.labels.load_average'),
                 'value' => $this->loadAverage(),
-                'description' => '1, 5 and 15 minute averages.',
+                'description' => __('admin.system.descriptions.load_average'),
             ],
             [
-                'label' => 'CPU usage',
+                'label' => __('admin.system.labels.cpu_usage'),
                 'value' => $this->cpuUsage(),
-                'description' => 'Short live estimate from the operating system.',
+                'description' => __('admin.system.descriptions.cpu_usage'),
             ],
             [
-                'label' => 'CPU cores',
+                'label' => __('admin.system.labels.cpu_cores'),
                 'value' => $this->cpuCores(),
-                'description' => 'Logical cores visible to PHP.',
+                'description' => __('admin.system.descriptions.cpu_cores'),
             ],
             [
-                'label' => 'Memory usage',
+                'label' => __('admin.system.labels.memory_usage'),
                 'value' => $memory['value'],
                 'description' => $memory['description'],
             ],
             [
-                'label' => 'Swap usage',
+                'label' => __('admin.system.labels.swap_usage'),
                 'value' => $swap['value'],
                 'description' => $swap['description'],
             ],
             [
-                'label' => 'Free disk space',
+                'label' => __('admin.system.labels.free_disk_space'),
                 'value' => $disk['value'],
                 'description' => $disk['description'],
             ],
@@ -64,22 +64,22 @@ class SystemInspector
         $frontend = $this->frontendInfo();
 
         return [
-            ['label' => 'PHP version', 'value' => PHP_VERSION],
-            ['label' => 'PHP SAPI', 'value' => PHP_SAPI],
-            ['label' => 'OS version', 'value' => php_uname('s').' '.php_uname('r')],
-            ['label' => 'Laravel version', 'value' => app()->version()],
-            ['label' => 'Filament version', 'value' => $this->packageVersion('filament/filament')],
-            ['label' => 'Application environment', 'value' => app()->environment()],
-            ['label' => 'Debug mode', 'value' => config('app.debug') ? 'Enabled' : 'Disabled'],
-            ['label' => 'Application URL', 'value' => (string) config('app.url')],
-            ['label' => 'Database driver & version', 'value' => trim($database['driver'].' '.$database['version'])],
-            ['label' => 'Redis client & status', 'value' => trim($redis['client'].' '.$redis['status'])],
-            ['label' => 'Image driver & version', 'value' => $this->imageDriverVersion()],
-            ['label' => 'Cache store', 'value' => (string) config('cache.default')],
-            ['label' => 'Queue connection', 'value' => (string) config('queue.default')],
-            ['label' => 'Filesystem disk', 'value' => (string) config('filesystems.default')],
-            ['label' => 'Nuxt constraint', 'value' => $frontend['nuxt']],
-            ['label' => 'Vue constraint', 'value' => $frontend['vue']],
+            ['label' => __('admin.system.labels.php_version'), 'value' => PHP_VERSION],
+            ['label' => __('admin.system.labels.php_sapi'), 'value' => PHP_SAPI],
+            ['label' => __('admin.system.labels.os_version'), 'value' => php_uname('s').' '.php_uname('r')],
+            ['label' => __('admin.system.labels.laravel_version'), 'value' => app()->version()],
+            ['label' => __('admin.system.labels.filament_version'), 'value' => $this->packageVersion('filament/filament')],
+            ['label' => __('admin.system.labels.application_environment'), 'value' => app()->environment()],
+            ['label' => __('admin.system.labels.debug_mode'), 'value' => config('app.debug') ? __('admin.system.values.enabled') : __('admin.system.values.disabled')],
+            ['label' => __('admin.system.labels.application_url'), 'value' => (string) config('app.url')],
+            ['label' => __('admin.system.labels.database_driver_version'), 'value' => trim($database['driver'].' '.$database['version'])],
+            ['label' => __('admin.system.labels.redis_client_status'), 'value' => trim($redis['client'].' '.$redis['status'])],
+            ['label' => __('admin.system.labels.image_driver_version'), 'value' => $this->imageDriverVersion()],
+            ['label' => __('admin.system.labels.cache_store'), 'value' => (string) config('cache.default')],
+            ['label' => __('admin.system.labels.queue_connection'), 'value' => (string) config('queue.default')],
+            ['label' => __('admin.system.labels.filesystem_disk'), 'value' => (string) config('filesystems.default')],
+            ['label' => __('admin.system.labels.nuxt_constraint'), 'value' => $frontend['nuxt']],
+            ['label' => __('admin.system.labels.vue_constraint'), 'value' => $frontend['vue']],
         ];
     }
 
@@ -96,61 +96,61 @@ class SystemInspector
                 'label' => 'PHP 8.3+',
                 'value' => PHP_VERSION,
                 'status' => version_compare(PHP_VERSION, '8.3.0', '>=') ? 'pass' : 'fail',
-                'description' => 'Project target runtime.',
+                'description' => __('admin.system.descriptions.project_target_runtime'),
             ],
             [
                 'label' => 'Laravel 12',
                 'value' => app()->version(),
                 'status' => version_compare(app()->version(), '12.0.0', '>=') ? 'pass' : 'fail',
-                'description' => 'Backend framework version.',
+                'description' => __('admin.system.descriptions.backend_framework_version'),
             ],
             [
-                'label' => 'Database connection',
+                'label' => __('admin.system.labels.database_connection'),
                 'value' => $database['version'] ?: $database['error'],
                 'status' => $database['connected'] ? 'pass' : 'fail',
                 'description' => $database['driver'],
             ],
             [
-                'label' => 'MariaDB/MySQL database',
+                'label' => __('admin.system.labels.mariadb_mysql_database'),
                 'value' => $database['driver'],
                 'status' => in_array($database['driver'], ['mariadb', 'mysql'], true) ? 'pass' : 'warning',
-                'description' => 'SQLite is fine for tests, but production should use MariaDB/MySQL.',
+                'description' => __('admin.system.descriptions.production_database'),
             ],
             [
-                'label' => 'InnoDB support',
-                'value' => $database['innodb'] ?? 'Not checked',
+                'label' => __('admin.system.labels.innodb_support'),
+                'value' => $database['innodb'] ?? __('admin.system.values.not_checked'),
                 'status' => $database['innodb'] === 'Available' ? 'pass' : ($database['driver'] === 'sqlite' ? 'warning' : 'fail'),
-                'description' => 'Required for relational integrity on MariaDB/MySQL.',
+                'description' => __('admin.system.descriptions.innodb_support'),
             ],
             [
-                'label' => 'Redis connection',
+                'label' => __('admin.system.labels.redis_connection'),
                 'value' => $redis['status'],
                 'status' => $redis['connected'] ? 'pass' : 'fail',
-                'description' => 'Used for queues/cache when configured.',
+                'description' => __('admin.system.descriptions.redis_connection'),
             ],
             [
-                'label' => 'Application key',
-                'value' => filled(config('app.key')) ? 'Configured' : 'Missing',
+                'label' => __('admin.system.labels.application_key'),
+                'value' => filled(config('app.key')) ? __('admin.messages.configured') : __('admin.system.values.missing'),
                 'status' => filled(config('app.key')) ? 'pass' : 'fail',
-                'description' => 'Required for encryption, sessions and signed data.',
+                'description' => __('admin.system.descriptions.application_key'),
             ],
             [
-                'label' => 'Storage writable',
-                'value' => is_writable(storage_path()) ? 'Writable' : 'Not writable',
+                'label' => __('admin.system.labels.storage_writable'),
+                'value' => is_writable(storage_path()) ? __('admin.system.values.writable') : __('admin.system.values.not_writable'),
                 'status' => is_writable(storage_path()) ? 'pass' : 'fail',
                 'description' => storage_path(),
             ],
             [
-                'label' => 'Public storage link',
-                'value' => File::exists(public_path('storage')) ? 'Exists' : 'Missing',
+                'label' => __('admin.system.labels.public_storage_link'),
+                'value' => File::exists(public_path('storage')) ? __('admin.system.values.exists') : __('admin.system.values.missing'),
                 'status' => File::exists(public_path('storage')) ? 'pass' : 'warning',
-                'description' => 'Needed for public uploads such as site hero images.',
+                'description' => __('admin.system.descriptions.public_storage_link'),
             ],
             [
-                'label' => 'Sensitive folders outside public root',
-                'value' => $this->sensitiveFoldersAreOutsidePublicRoot() ? 'Protected' : 'Review needed',
+                'label' => __('admin.system.labels.sensitive_folders'),
+                'value' => $this->sensitiveFoldersAreOutsidePublicRoot() ? __('admin.system.values.protected') : __('admin.system.values.review_needed'),
                 'status' => $this->sensitiveFoldersAreOutsidePublicRoot() ? 'pass' : 'fail',
-                'description' => 'Storage, vendor and environment files should not be served directly.',
+                'description' => __('admin.system.descriptions.sensitive_folders'),
             ],
             ...$this->extensionRequirements(),
         ];
@@ -180,9 +180,9 @@ class SystemInspector
         ])
             ->map(fn (string $extension): array => [
                 'label' => $extension,
-                'value' => extension_loaded($extension) ? (phpversion($extension) ?: 'Loaded') : 'Missing',
+                'value' => extension_loaded($extension) ? (phpversion($extension) ?: __('admin.system.values.loaded')) : __('admin.system.values.missing'),
                 'status' => extension_loaded($extension) ? 'pass' : ($extension === 'redis' ? 'warning' : 'fail'),
-                'description' => $extension === 'redis' ? 'Required when REDIS_CLIENT=phpredis.' : null,
+                'description' => $extension === 'redis' ? __('admin.system.descriptions.redis_extension') : null,
             ])
             ->values()
             ->all();
@@ -194,12 +194,12 @@ class SystemInspector
     public function storageInfo(): array
     {
         return [
-            ['label' => 'Base path', 'value' => base_path()],
-            ['label' => 'Public path', 'value' => public_path()],
-            ['label' => 'Storage path', 'value' => storage_path()],
-            ['label' => 'Public disk root', 'value' => (string) config('filesystems.disks.public.root')],
-            ['label' => 'Public disk URL', 'value' => (string) config('filesystems.disks.public.url')],
-            ['label' => 'Logs path', 'value' => storage_path('logs')],
+            ['label' => __('admin.system.labels.base_path'), 'value' => base_path()],
+            ['label' => __('admin.system.labels.public_path'), 'value' => public_path()],
+            ['label' => __('admin.system.labels.storage_path'), 'value' => storage_path()],
+            ['label' => __('admin.system.labels.public_disk_root'), 'value' => (string) config('filesystems.disks.public.root')],
+            ['label' => __('admin.system.labels.public_disk_url'), 'value' => (string) config('filesystems.disks.public.url')],
+            ['label' => __('admin.system.labels.logs_path'), 'value' => storage_path('logs')],
         ];
     }
 
@@ -212,17 +212,17 @@ class SystemInspector
         $redis = $this->redisInfo();
 
         return [
-            ['label' => 'Database connection', 'value' => (string) config('database.default')],
-            ['label' => 'Database host', 'value' => (string) config('database.connections.'.config('database.default').'.host', 'N/A')],
-            ['label' => 'Database name', 'value' => (string) config('database.connections.'.config('database.default').'.database', 'N/A')],
-            ['label' => 'Database server', 'value' => $database['version'] ?: $database['error']],
-            ['label' => 'Redis client', 'value' => $redis['client']],
-            ['label' => 'Redis host', 'value' => (string) config('database.redis.default.host', 'N/A')],
-            ['label' => 'Redis port', 'value' => (string) config('database.redis.default.port', 'N/A')],
-            ['label' => 'Redis status', 'value' => $redis['status']],
-            ['label' => 'Session driver', 'value' => (string) config('session.driver')],
-            ['label' => 'Cache store', 'value' => (string) config('cache.default')],
-            ['label' => 'Queue connection', 'value' => (string) config('queue.default')],
+            ['label' => __('admin.system.labels.database_connection'), 'value' => (string) config('database.default')],
+            ['label' => __('admin.system.labels.database_host'), 'value' => (string) config('database.connections.'.config('database.default').'.host', 'N/A')],
+            ['label' => __('admin.system.labels.database_name'), 'value' => (string) config('database.connections.'.config('database.default').'.database', 'N/A')],
+            ['label' => __('admin.system.labels.database_server'), 'value' => $database['version'] ?: $database['error']],
+            ['label' => __('admin.system.labels.redis_client'), 'value' => $redis['client']],
+            ['label' => __('admin.system.labels.redis_host'), 'value' => (string) config('database.redis.default.host', 'N/A')],
+            ['label' => __('admin.system.labels.redis_port'), 'value' => (string) config('database.redis.default.port', 'N/A')],
+            ['label' => __('admin.system.labels.redis_status'), 'value' => $redis['status']],
+            ['label' => __('admin.system.labels.session_driver'), 'value' => (string) config('session.driver')],
+            ['label' => __('admin.system.labels.cache_store'), 'value' => (string) config('cache.default')],
+            ['label' => __('admin.system.labels.queue_connection'), 'value' => (string) config('queue.default')],
         ];
     }
 
@@ -280,13 +280,13 @@ class SystemInspector
             return [
                 'connected' => true,
                 'client' => $client,
-                'status' => is_string($response) ? $response : 'Connected',
+                'status' => is_string($response) ? $response : __('admin.system.values.connected'),
             ];
         } catch (Throwable $exception) {
             return [
                 'connected' => false,
                 'client' => $client,
-                'status' => 'Unavailable: '.$exception->getMessage(),
+                'status' => __('admin.system.values.unavailable_with_message', ['message' => $exception->getMessage()]),
             ];
         }
     }
@@ -294,21 +294,21 @@ class SystemInspector
     private function innodbSupport(string $driver): ?string
     {
         if (! in_array($driver, ['mariadb', 'mysql'], true)) {
-            return $driver === 'sqlite' ? 'Not applicable for SQLite' : null;
+            return $driver === 'sqlite' ? __('admin.system.values.not_applicable_sqlite') : null;
         }
 
         try {
             $row = DB::selectOne("show variables like 'have_innodb'");
             $value = strtoupper((string) ($row->Value ?? $row->value ?? ''));
 
-            return in_array($value, ['YES', 'ON'], true) ? 'Available' : 'Unavailable';
+            return in_array($value, ['YES', 'ON'], true) ? 'Available' : __('admin.system.values.unavailable');
         } catch (Throwable) {
             try {
                 DB::selectOne("select engine from information_schema.engines where engine = 'InnoDB'");
 
                 return 'Available';
             } catch (Throwable) {
-                return 'Unavailable';
+                return __('admin.system.values.unavailable');
             }
         }
     }
@@ -316,13 +316,13 @@ class SystemInspector
     private function loadAverage(): string
     {
         if (! function_exists('sys_getloadavg')) {
-            return 'Unavailable';
+            return __('admin.system.values.unavailable');
         }
 
         $load = sys_getloadavg();
 
         if ($load === false) {
-            return 'Unavailable';
+            return __('admin.system.values.unavailable');
         }
 
         return collect($load)
@@ -336,7 +336,7 @@ class SystemInspector
         $firstSample = $this->procCpuSample();
 
         if ($firstSample === null) {
-            return 'Unavailable';
+            return __('admin.system.values.unavailable');
         }
 
         usleep(100000);
@@ -344,14 +344,14 @@ class SystemInspector
         $secondSample = $this->procCpuSample();
 
         if ($secondSample === null) {
-            return 'Unavailable';
+            return __('admin.system.values.unavailable');
         }
 
         $totalDelta = $secondSample['total'] - $firstSample['total'];
         $idleDelta = $secondSample['idle'] - $firstSample['idle'];
 
         if ($totalDelta <= 0) {
-            return 'Unavailable';
+            return __('admin.system.values.unavailable');
         }
 
         $usage = max(0, min(100, (1 - ($idleDelta / $totalDelta)) * 100));
@@ -379,7 +379,7 @@ class SystemInspector
             }
         }
 
-        return 'Unavailable';
+        return __('admin.system.values.unavailable');
     }
 
     /**
@@ -391,8 +391,8 @@ class SystemInspector
 
         if (! isset($meminfo['MemTotal'], $meminfo['MemAvailable'])) {
             return [
-                'value' => 'Unavailable',
-                'description' => 'Memory totals are not exposed by this operating system.',
+                'value' => __('admin.system.values.unavailable'),
+                'description' => __('admin.system.descriptions.memory_unavailable'),
             ];
         }
 
@@ -402,7 +402,7 @@ class SystemInspector
 
         return [
             'value' => $this->formatBytes($used).' / '.$this->formatBytes($total).' ('.$this->formatPercent($used, $total).')',
-            'description' => $this->formatBytes($available).' available.',
+            'description' => __('admin.system.descriptions.bytes_available', ['bytes' => $this->formatBytes($available)]),
         ];
     }
 
@@ -415,8 +415,8 @@ class SystemInspector
 
         if (! isset($meminfo['SwapTotal'], $meminfo['SwapFree'])) {
             return [
-                'value' => 'Unavailable',
-                'description' => 'Swap totals are not exposed by this operating system.',
+                'value' => __('admin.system.values.unavailable'),
+                'description' => __('admin.system.descriptions.swap_unavailable'),
             ];
         }
 
@@ -425,8 +425,8 @@ class SystemInspector
 
         if ($total <= 0) {
             return [
-                'value' => 'No swap configured',
-                'description' => '0 B total.',
+                'value' => __('admin.system.values.no_swap_configured'),
+                'description' => __('admin.system.descriptions.zero_total'),
             ];
         }
 
@@ -434,7 +434,7 @@ class SystemInspector
 
         return [
             'value' => $this->formatBytes($used).' / '.$this->formatBytes($total).' ('.$this->formatPercent($used, $total).')',
-            'description' => $this->formatBytes($free).' available.',
+            'description' => __('admin.system.descriptions.bytes_available', ['bytes' => $this->formatBytes($free)]),
         ];
     }
 
@@ -448,7 +448,7 @@ class SystemInspector
 
         if ($total === false || $free === false || $total <= 0) {
             return [
-                'value' => 'Unavailable',
+                'value' => __('admin.system.values.unavailable'),
                 'description' => $path,
             ];
         }
@@ -456,8 +456,12 @@ class SystemInspector
         $used = max(0, $total - $free);
 
         return [
-            'value' => $this->formatBytes($free).' free',
-            'description' => $this->formatBytes($total).' total, '.$this->formatPercent($used, $total).' used at '.$path.'.',
+            'value' => __('admin.system.values.bytes_free', ['bytes' => $this->formatBytes($free)]),
+            'description' => __('admin.system.descriptions.disk_usage', [
+                'total' => $this->formatBytes($total),
+                'percentage' => $this->formatPercent($used, $total),
+                'path' => $path,
+            ]),
         ];
     }
 
@@ -558,15 +562,15 @@ class SystemInspector
             return 'GD '.($info['GD Version'] ?? (phpversion('gd') ?: 'loaded'));
         }
 
-        return 'No GD or Imagick extension loaded';
+        return __('admin.system.values.no_image_extension');
     }
 
     private function packageVersion(string $package): string
     {
         try {
-            return InstalledVersions::getPrettyVersion($package) ?? 'Installed';
+            return InstalledVersions::getPrettyVersion($package) ?? __('admin.system.values.installed');
         } catch (Throwable) {
-            return 'Not installed';
+            return __('admin.system.values.not_installed');
         }
     }
 
@@ -579,8 +583,8 @@ class SystemInspector
 
         if (! File::exists($packageJson)) {
             return [
-                'nuxt' => 'Unknown',
-                'vue' => 'Unknown',
+                'nuxt' => __('admin.system.values.unknown'),
+                'vue' => __('admin.system.values.unknown'),
             ];
         }
 
@@ -588,8 +592,8 @@ class SystemInspector
         $dependencies = is_array($contents) ? ($contents['dependencies'] ?? []) : [];
 
         return [
-            'nuxt' => (string) ($dependencies['nuxt'] ?? 'Unknown'),
-            'vue' => (string) ($dependencies['vue'] ?? 'Unknown'),
+            'nuxt' => (string) ($dependencies['nuxt'] ?? __('admin.system.values.unknown')),
+            'vue' => (string) ($dependencies['vue'] ?? __('admin.system.values.unknown')),
         ];
     }
 
@@ -620,8 +624,8 @@ class SystemInspector
     {
         return collect(['bcmath', 'ctype', 'curl', 'dom', 'fileinfo', 'mbstring', 'openssl', 'pdo', 'tokenizer', 'xml'])
             ->map(fn (string $extension): array => [
-                'label' => "{$extension} extension",
-                'value' => extension_loaded($extension) ? 'Loaded' : 'Missing',
+                'label' => __('admin.system.labels.extension', ['extension' => $extension]),
+                'value' => extension_loaded($extension) ? __('admin.system.values.loaded') : __('admin.system.values.missing'),
                 'status' => extension_loaded($extension) ? 'pass' : 'fail',
                 'description' => null,
             ])

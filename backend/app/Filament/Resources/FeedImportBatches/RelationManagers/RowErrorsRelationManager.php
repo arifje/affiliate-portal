@@ -22,18 +22,24 @@ class RowErrorsRelationManager extends RelationManager
         return $schema
             ->components([
                 TextEntry::make('row_number')
+                    ->label(__('admin.fields.row_number'))
                     ->numeric(),
                 TextEntry::make('external_id')
+                    ->label(__('admin.fields.external_id'))
                     ->placeholder('-'),
                 JsonTextEntry::make('errors')
+                    ->label(__('admin.fields.errors'))
                     ->columnSpanFull(),
                 JsonTextEntry::make('source_payload')
+                    ->label(__('admin.fields.source_payload'))
                     ->placeholder('-')
                     ->columnSpanFull(),
                 JsonTextEntry::make('mapped_payload')
+                    ->label(__('admin.fields.mapping'))
                     ->placeholder('-')
                     ->columnSpanFull(),
                 TextEntry::make('created_at')
+                    ->label(__('admin.fields.created_at'))
                     ->dateTime()
                     ->placeholder('-'),
             ]);
@@ -45,11 +51,14 @@ class RowErrorsRelationManager extends RelationManager
             ->recordTitleAttribute('row_number')
             ->columns([
                 TextColumn::make('row_number')
+                    ->label(__('admin.fields.row_number'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('external_id')
+                    ->label(__('admin.fields.external_id'))
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

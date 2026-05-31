@@ -53,14 +53,14 @@ class Logs extends Page
     public function getLevelOptions(): array
     {
         return [
-            'EMERGENCY' => 'Emergency',
-            'ALERT' => 'Alert',
-            'CRITICAL' => 'Critical',
-            'ERROR' => 'Error',
-            'WARNING' => 'Warning',
-            'NOTICE' => 'Notice',
-            'INFO' => 'Info',
-            'DEBUG' => 'Debug',
+            'EMERGENCY' => __('admin.pages.logs.levels.emergency'),
+            'ALERT' => __('admin.pages.logs.levels.alert'),
+            'CRITICAL' => __('admin.pages.logs.levels.critical'),
+            'ERROR' => __('admin.pages.logs.levels.error'),
+            'WARNING' => __('admin.pages.logs.levels.warning'),
+            'NOTICE' => __('admin.pages.logs.levels.notice'),
+            'INFO' => __('admin.pages.logs.levels.info'),
+            'DEBUG' => __('admin.pages.logs.levels.debug'),
         ];
     }
 
@@ -98,10 +98,10 @@ class Logs extends Page
     public function getDebugInfo(): array
     {
         return [
-            'Environment' => app()->environment(),
-            'Laravel' => app()->version(),
-            'PHP' => PHP_VERSION,
-            'Log channel' => (string) config('logging.default'),
+            __('admin.pages.logs.debug.environment') => app()->environment(),
+            __('admin.pages.logs.debug.laravel') => app()->version(),
+            __('admin.pages.logs.debug.php') => PHP_VERSION,
+            __('admin.pages.logs.debug.log_channel') => (string) config('logging.default'),
         ];
     }
 

@@ -15,36 +15,37 @@ class PartnerForm
     {
         return $schema
             ->components([
-                Section::make('Partner')
+                Section::make(__('admin.sections.partner'))
                     ->schema([
                         TextInput::make('name')
+                            ->label(__('admin.fields.name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('slug')
+                            ->label(__('admin.fields.slug'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         Select::make('provider')
-                            ->options([
-                                'awin' => 'Awin',
-                                'daisycon' => 'Daisycon',
-                                'tradetracker' => 'TradeTracker',
-                                'custom' => 'Custom',
-                            ])
+                            ->label(__('admin.fields.provider'))
+                            ->options(__('admin.options.providers'))
                             ->required(),
                         TextInput::make('website_url')
+                            ->label(__('admin.fields.website_url'))
                             ->url()
                             ->maxLength(255),
                         Toggle::make('is_active')
+                            ->label(__('admin.fields.is_active'))
                             ->required()
                             ->default(true),
                     ])
                     ->columns(2),
-                Section::make('Settings')
+                Section::make(__('admin.sections.settings'))
                     ->schema([
                         KeyValue::make('settings')
-                            ->keyLabel('Setting')
-                            ->valueLabel('Value')
+                            ->label(__('admin.fields.settings'))
+                            ->keyLabel(__('admin.fields.key'))
+                            ->valueLabel(__('admin.fields.default_value'))
                             ->columnSpanFull(),
                     ]),
             ]);

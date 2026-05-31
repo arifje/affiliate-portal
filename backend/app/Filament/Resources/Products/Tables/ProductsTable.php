@@ -20,84 +20,98 @@ class ProductsTable
         return $table
             ->columns([
                 ImageColumn::make('image_url')
-                    ->label('Image')
+                    ->label(__('admin.fields.image'))
                     ->square(),
                 TextColumn::make('title')
+                    ->label(__('admin.fields.title'))
                     ->searchable()
                     ->sortable()
                     ->limit(50),
                 TextColumn::make('site.name')
+                    ->label(__('admin.fields.site'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('partner.name')
+                    ->label(__('admin.fields.partner'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('feed.name')
+                    ->label(__('admin.fields.feed'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('brand')
+                    ->label(__('admin.fields.brand'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('price')
+                    ->label(__('admin.fields.price'))
                     ->money(fn (Product $record): string => $record->currency)
                     ->sortable(),
                 TextColumn::make('availability')
+                    ->label(__('admin.fields.availability'))
                     ->badge()
                     ->placeholder('-')
                     ->searchable(),
                 TextColumn::make('merchant_category')
+                    ->label(__('admin.fields.category'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('product_type')
+                    ->label(__('admin.fields.product_type'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_featured')
-                    ->label('Featured')
+                    ->label(__('admin.fields.is_featured'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('featured_sort_order')
-                    ->label('Featured order')
+                    ->label(__('admin.fields.sort_order'))
                     ->numeric()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
+                    ->label(__('admin.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('published_at')
+                    ->label(__('admin.fields.published_at'))
                     ->dateTime()
                     ->sortable()
-                    ->placeholder('Draft'),
+                    ->placeholder(__('admin.placeholders.draft')),
                 TextColumn::make('imported_at')
+                    ->label(__('admin.fields.imported_at'))
                     ->dateTime()
                     ->sortable()
                     ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
+                    ->label(__('admin.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('site_id')
-                    ->label('Site')
+                    ->label(__('admin.fields.site'))
                     ->relationship('site', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('partner_id')
-                    ->label('Partner')
+                    ->label(__('admin.fields.partner'))
                     ->relationship('partner', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('feed_id')
-                    ->label('Feed')
+                    ->label(__('admin.fields.feed'))
                     ->relationship('feed', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('category_id')
-                    ->label('Category')
+                    ->label(__('admin.fields.category'))
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('brand')
+                    ->label(__('admin.fields.brand'))
                     ->options(fn (): array => Product::query()
                         ->whereNotNull('brand')
                         ->where('brand', '!=', '')
@@ -107,17 +121,14 @@ class ProductsTable
                         ->all())
                     ->searchable(),
                 SelectFilter::make('availability')
-                    ->options([
-                        'in_stock' => 'In stock',
-                        'out_of_stock' => 'Out of stock',
-                        'preorder' => 'Preorder',
-                        'backorder' => 'Backorder',
-                    ]),
-                TernaryFilter::make('is_active'),
+                    ->label(__('admin.fields.availability'))
+                    ->options(__('admin.options.availability')),
+                TernaryFilter::make('is_active')
+                    ->label(__('admin.fields.is_active')),
                 TernaryFilter::make('is_featured')
-                    ->label('Featured'),
+                    ->label(__('admin.fields.is_featured')),
                 TernaryFilter::make('published_at')
-                    ->label('Published')
+                    ->label(__('admin.fields.published'))
                     ->nullable(),
             ])
             ->defaultSort('updated_at', 'desc')

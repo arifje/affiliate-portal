@@ -13,11 +13,17 @@ class SiteStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 4;
 
-    protected ?string $heading = 'Sites';
-
-    protected ?string $description = 'Domain inventory and catalog assignment.';
-
     protected ?string $pollingInterval = '30s';
+
+    protected function getHeading(): ?string
+    {
+        return __('admin.widgets.sites.heading');
+    }
+
+    protected function getDescription(): ?string
+    {
+        return __('admin.widgets.sites.description');
+    }
 
     protected function getStats(): array
     {
@@ -28,18 +34,21 @@ class SiteStatsOverview extends StatsOverviewWidget
         $productsAssigned = Product::query()->whereNotNull('site_id')->count();
 
         return [
-            Stat::make('Total sites', number_format($totalSites))
-                ->description(number_format($activeSites).' active, '.number_format($inactiveSites).' inactive')
+            Stat::make(__('admin.widgets.sites.total'), number_format($totalSites))
+                ->description(__('admin.widgets.common.active_inactive', [
+                    'active' => number_format($activeSites),
+                    'inactive' => number_format($inactiveSites),
+                ]))
                 ->icon(Heroicon::OutlinedGlobeAlt)
                 ->url(SiteResource::getUrl())
                 ->color('primary'),
-            Stat::make('Active sites', number_format($activeSites))
-                ->description($totalSites > 0 ? round(($activeSites / $totalSites) * 100).'% of sites' : 'No sites yet')
+            Stat::make(__('admin.widgets.sites.active'), number_format($activeSites))
+                ->description($totalSites > 0 ? __('admin.widgets.sites.site_percentage', ['percentage' => round(($activeSites / $totalSites) * 100)]) : __('admin.widgets.sites.empty'))
                 ->icon(Heroicon::OutlinedCheckCircle)
                 ->url(SiteResource::getUrl())
                 ->color('success'),
-            Stat::make('Sites with products', number_format($sitesWithProducts))
-                ->description(number_format($productsAssigned).' products assigned')
+            Stat::make(__('admin.widgets.sites.with_products'), number_format($sitesWithProducts))
+                ->description(__('admin.widgets.sites.products_assigned', ['count' => number_format($productsAssigned)]))
                 ->icon(Heroicon::OutlinedRectangleGroup)
                 ->url(SiteResource::getUrl())
                 ->color('info'),

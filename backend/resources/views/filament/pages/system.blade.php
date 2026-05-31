@@ -10,8 +10,8 @@
 <x-filament-panels::page>
     <div class="admin-utility-page">
         <x-filament::section
-            heading="Server info"
-            description="Basic resource snapshot for the backend container or server."
+            :heading="__('admin.pages.system.server_info')"
+            :description="__('admin.pages.system.server_info_description')"
         >
             <div class="server-info-grid">
                 @foreach ($serverInfo as $item)
@@ -28,8 +28,8 @@
         </x-filament::section>
 
         <x-filament::section
-            heading="Application info"
-            description="Runtime, framework and service details for this installation."
+            :heading="__('admin.pages.system.application_info')"
+            :description="__('admin.pages.system.application_info_description')"
         >
             <dl class="grid gap-x-8 gap-y-4 lg:grid-cols-2">
                 @foreach ($applicationInfo as $item)
@@ -42,8 +42,8 @@
         </x-filament::section>
 
         <x-filament::section
-            heading="Requirements"
-            description="Checks for the current architecture target: Laravel 12, PHP 8.3+, MariaDB/MySQL and Redis."
+            :heading="__('admin.pages.system.requirements')"
+            :description="__('admin.pages.system.requirements_description')"
         >
             <div class="grid gap-3 lg:grid-cols-2">
                 @foreach ($requirements as $requirement)
@@ -79,8 +79,8 @@
 
         <div class="grid gap-6 xl:grid-cols-2">
             <x-filament::section
-                heading="Services"
-                description="Configured backend services and their active drivers."
+                :heading="__('admin.pages.system.services')"
+                :description="__('admin.pages.system.services_description')"
             >
                 <dl class="space-y-4">
                     @foreach ($serviceInfo as $item)
@@ -93,8 +93,8 @@
             </x-filament::section>
 
             <x-filament::section
-                heading="Storage"
-                description="Important filesystem paths used by Laravel and public uploads."
+                :heading="__('admin.pages.system.storage')"
+                :description="__('admin.pages.system.storage_description')"
             >
                 <dl class="space-y-4">
                     @foreach ($storageInfo as $item)
@@ -108,8 +108,8 @@
         </div>
 
         <x-filament::section
-            heading="PHP extensions"
-            description="Loaded extension status for Laravel, database access, Redis and feed processing."
+            :heading="__('admin.pages.system.php_extensions')"
+            :description="__('admin.pages.system.php_extensions_description')"
         >
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($phpExtensions as $extension)

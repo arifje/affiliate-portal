@@ -16,31 +16,35 @@ class ProductInfolist
     {
         return $schema
             ->components([
-                Section::make('Product')
+                Section::make(__('admin.sections.product'))
                     ->schema([
                         ImageEntry::make('image_url')
-                            ->label('Image')
+                            ->label(__('admin.fields.image'))
                             ->placeholder('-'),
                         TextEntry::make('title')
+                            ->label(__('admin.fields.title'))
                             ->columnSpanFull(),
                         TextEntry::make('site.name')
-                            ->label('Site'),
+                            ->label(__('admin.fields.site')),
                         TextEntry::make('partner.name')
-                            ->label('Partner'),
+                            ->label(__('admin.fields.partner')),
                         TextEntry::make('feed.name')
-                            ->label('Feed')
+                            ->label(__('admin.fields.feed'))
                             ->placeholder('-'),
                         TextEntry::make('category.name')
-                            ->label('Category')
+                            ->label(__('admin.fields.category'))
                             ->placeholder('-'),
                         TextEntry::make('brand')
+                            ->label(__('admin.fields.brand'))
                             ->placeholder('-'),
-                        TextEntry::make('slug'),
+                        TextEntry::make('slug')
+                            ->label(__('admin.fields.slug')),
                     ])
                     ->columns(2),
-                Section::make('Identifiers')
+                Section::make(__('admin.sections.identifiers'))
                     ->schema([
                         TextEntry::make('provider_product_id')
+                            ->label(__('admin.fields.provider_product_id'))
                             ->placeholder('-'),
                         TextEntry::make('sku')
                             ->label('SKU')
@@ -52,102 +56,130 @@ class ProductInfolist
                             ->label('MPN')
                             ->placeholder('-'),
                         TextEntry::make('item_group_id')
+                            ->label(__('admin.fields.item_group_id'))
                             ->placeholder('-'),
                     ])
                     ->columns(3),
-                Section::make('Content')
+                Section::make(__('admin.sections.content'))
                     ->schema([
                         TextEntry::make('description')
+                            ->label(__('admin.fields.description'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('merchant_category')
+                            ->label(__('admin.fields.category'))
                             ->placeholder('-'),
                         TextEntry::make('product_type')
+                            ->label(__('admin.fields.product_type'))
                             ->placeholder('-'),
                     ])
                     ->columns(2),
-                Section::make('URLs')
+                Section::make(__('admin.sections.urls'))
                     ->schema([
                         TextEntry::make('image_url')
+                            ->label(__('admin.fields.image_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('additional_image_urls')
+                            ->label(__('admin.fields.additional_image_urls'))
                             ->listWithLineBreaks()
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('product_url')
+                            ->label(__('admin.fields.product_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('affiliate_url')
+                            ->label(__('admin.fields.affiliate_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('tracking_url')
+                            ->label(__('admin.fields.tracking_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
-                Section::make('Pricing and availability')
+                Section::make(__('admin.sections.pricing_availability'))
                     ->schema([
                         TextEntry::make('price')
+                            ->label(__('admin.fields.price'))
                             ->money(fn (Product $record): string => $record->currency)
                             ->placeholder('-'),
                         TextEntry::make('old_price')
+                            ->label(__('admin.fields.old_price'))
                             ->money(fn (Product $record): string => $record->currency)
                             ->placeholder('-'),
                         TextEntry::make('shipping_cost')
+                            ->label(__('admin.fields.shipping_cost'))
                             ->money(fn (Product $record): string => $record->currency)
                             ->placeholder('-'),
-                        TextEntry::make('currency'),
+                        TextEntry::make('currency')
+                            ->label(__('admin.fields.currency')),
                         TextEntry::make('availability')
+                            ->label(__('admin.fields.availability'))
                             ->badge()
                             ->placeholder('-'),
                         TextEntry::make('stock_quantity')
+                            ->label(__('admin.fields.stock_quantity'))
                             ->numeric()
                             ->placeholder('-'),
                         TextEntry::make('delivery_time')
+                            ->label(__('admin.fields.delivery_time'))
                             ->placeholder('-'),
-                        TextEntry::make('condition'),
+                        TextEntry::make('condition')
+                            ->label(__('admin.fields.condition')),
                     ])
                     ->columns(4),
-                Section::make('Variants')
+                Section::make(__('admin.sections.variants'))
                     ->schema([
                         TextEntry::make('color')
+                            ->label(__('admin.fields.color'))
                             ->placeholder('-'),
                         TextEntry::make('size')
+                            ->label(__('admin.fields.size'))
                             ->placeholder('-'),
                         TextEntry::make('gender')
+                            ->label(__('admin.fields.gender'))
                             ->placeholder('-'),
                         TextEntry::make('material')
+                            ->label(__('admin.fields.material'))
                             ->placeholder('-'),
                         TextEntry::make('pattern')
+                            ->label(__('admin.fields.pattern'))
                             ->placeholder('-'),
                         TextEntry::make('age_group')
+                            ->label(__('admin.fields.age_group'))
                             ->placeholder('-'),
                     ])
                     ->columns(3),
-                Section::make('Publishing')
+                Section::make(__('admin.sections.publishing'))
                     ->schema([
                         IconEntry::make('is_active')
+                            ->label(__('admin.fields.is_active'))
                             ->boolean(),
                         IconEntry::make('is_featured')
-                            ->label('Featured')
+                            ->label(__('admin.fields.is_featured'))
                             ->boolean(),
                         TextEntry::make('featured_sort_order')
-                            ->label('Featured order')
+                            ->label(__('admin.fields.sort_order'))
                             ->numeric(),
                         TextEntry::make('published_at')
+                            ->label(__('admin.fields.published_at'))
                             ->dateTime()
-                            ->placeholder('Draft'),
+                            ->placeholder(__('admin.placeholders.draft')),
                         TextEntry::make('imported_at')
+                            ->label(__('admin.fields.imported_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ])
                     ->columns(5),
-                Section::make('Metadata')
+                Section::make(__('admin.sections.metadata'))
                     ->schema([
                         JsonTextEntry::make('metadata')
+                            ->label(__('admin.fields.metadata'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         JsonTextEntry::make('raw_payload')
+                            ->label(__('admin.fields.raw_payload'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),

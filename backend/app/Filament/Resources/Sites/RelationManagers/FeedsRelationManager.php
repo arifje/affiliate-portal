@@ -32,64 +32,65 @@ class FeedsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Section::make('Feed')
+                Section::make(__('admin.sections.feed'))
                     ->schema([
                         Select::make('partner_id')
+                            ->label(__('admin.fields.partner'))
                             ->relationship('partner', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('name')
+                            ->label(__('admin.fields.name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('slug')
+                            ->label(__('admin.fields.slug'))
                             ->required()
                             ->maxLength(255),
                         Select::make('provider')
-                            ->options([
-                                'awin' => 'Awin',
-                                'daisycon' => 'Daisycon',
-                                'tradetracker' => 'TradeTracker',
-                                'custom' => 'Custom',
-                            ])
+                            ->label(__('admin.fields.provider'))
+                            ->options(__('admin.options.providers'))
                             ->required(),
                         Toggle::make('is_active')
+                            ->label(__('admin.fields.is_active'))
                             ->required()
                             ->default(true),
                     ])
                     ->columns(2),
-                Section::make('Source')
+                Section::make(__('admin.sections.source'))
                     ->schema([
                         Select::make('source_type')
-                            ->options([
-                                'url' => 'URL',
-                                'api' => 'API',
-                                'file' => 'File',
-                                'manual' => 'Manual',
-                            ])
+                            ->label(__('admin.fields.source_type'))
+                            ->options(__('admin.options.source_types'))
                             ->required()
                             ->default('url'),
                         Textarea::make('source_url')
+                            ->label(__('admin.fields.source_url'))
                             ->rows(3)
                             ->columnSpanFull(),
                         KeyValue::make('credentials')
-                            ->keyLabel('Key')
-                            ->valueLabel('Secret/value')
+                            ->label(__('admin.fields.credentials'))
+                            ->keyLabel(__('admin.fields.key'))
+                            ->valueLabel(__('admin.fields.default_value'))
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                Section::make('Mapping and schedule')
+                Section::make(__('admin.sections.mapping_and_schedule'))
                     ->schema([
                         Select::make('mapping_profile_id')
+                            ->label(__('admin.fields.mapping_profile'))
                             ->relationship('mappingProfile', 'name')
                             ->searchable()
                             ->preload(),
                         TextInput::make('schedule')
-                            ->placeholder('daily, hourly, weekly, or cron label')
+                            ->label(__('admin.fields.schedule'))
+                            ->placeholder(__('admin.placeholders.schedule'))
                             ->maxLength(255),
                         KeyValue::make('mapping')
-                            ->keyLabel('Override')
-                            ->valueLabel('Value')
+                            ->label(__('admin.fields.mapping'))
+                            ->keyLabel(__('admin.fields.key'))
+                            ->valueLabel(__('admin.fields.default_value'))
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
@@ -100,50 +101,62 @@ class FeedsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Section::make('Feed')
+                Section::make(__('admin.sections.feed'))
                     ->schema([
                         TextEntry::make('partner.name')
-                            ->label('Partner'),
-                        TextEntry::make('name'),
-                        TextEntry::make('slug'),
+                            ->label(__('admin.fields.partner')),
+                        TextEntry::make('name')
+                            ->label(__('admin.fields.name')),
+                        TextEntry::make('slug')
+                            ->label(__('admin.fields.slug')),
                         TextEntry::make('provider')
+                            ->label(__('admin.fields.provider'))
                             ->badge(),
                         TextEntry::make('source_type')
+                            ->label(__('admin.fields.source_type'))
                             ->badge(),
                         TextEntry::make('mappingProfile.name')
-                            ->label('Mapping profile')
+                            ->label(__('admin.fields.mapping_profile'))
                             ->placeholder('-'),
                         IconEntry::make('is_active')
+                            ->label(__('admin.fields.is_active'))
                             ->boolean(),
                     ])
                     ->columns(2),
-                Section::make('Source')
+                Section::make(__('admin.sections.source'))
                     ->schema([
                         TextEntry::make('source_url')
+                            ->label(__('admin.fields.source_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('credentials')
-                            ->label('Credentials')
-                            ->formatStateUsing(fn (?array $state): string => filled($state) ? 'Configured' : 'Not configured')
-                            ->placeholder('Not configured'),
+                            ->label(__('admin.fields.credentials'))
+                            ->formatStateUsing(fn (?array $state): string => filled($state) ? __('admin.messages.configured') : __('admin.messages.not_configured'))
+                            ->placeholder(__('admin.messages.not_configured')),
                     ]),
-                Section::make('Mapping and import state')
+                Section::make(__('admin.sections.mapping_and_import_state'))
                     ->schema([
                         JsonTextEntry::make('mapping')
+                            ->label(__('admin.fields.mapping'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('schedule')
+                            ->label(__('admin.fields.schedule'))
                             ->placeholder('-'),
                         TextEntry::make('last_import_status')
+                            ->label(__('admin.fields.last_import_status'))
                             ->badge()
-                            ->placeholder('Never'),
+                            ->placeholder(__('admin.placeholders.never')),
                         TextEntry::make('last_import_started_at')
+                            ->label(__('admin.fields.last_import_started_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('last_import_finished_at')
+                            ->label(__('admin.fields.last_import_finished_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('last_import_message')
+                            ->label(__('admin.fields.last_import_message'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ])
@@ -161,32 +174,38 @@ class FeedsRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.fields.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('partner.name')
+                    ->label(__('admin.fields.partner'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('provider')
+                    ->label(__('admin.fields.provider'))
                     ->badge()
                     ->searchable(),
                 TextColumn::make('mappingProfile.name')
-                    ->label('Mapping profile')
+                    ->label(__('admin.fields.mapping_profile'))
                     ->searchable(),
                 TextColumn::make('products_count')
-                    ->label('Products')
+                    ->label(__('admin.fields.products'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('import_batches_count')
-                    ->label('Imports')
+                    ->label(__('admin.fields.imports'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('last_import_status')
+                    ->label(__('admin.fields.last_import_status'))
                     ->badge()
-                    ->placeholder('Never')
+                    ->placeholder(__('admin.placeholders.never'))
                     ->searchable(),
                 IconColumn::make('is_active')
+                    ->label(__('admin.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('updated_at')
+                    ->label(__('admin.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -201,7 +220,7 @@ class FeedsRelationManager extends RelationManager
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
-                    ->modalDescription('Deleting a feed keeps imported products but removes the feed link from them.'),
+                    ->modalDescription(__('admin.messages.deleting_feed')),
             ])
             ->defaultSort('created_at', 'desc');
     }

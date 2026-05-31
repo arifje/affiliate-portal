@@ -23,75 +23,84 @@ class FeedsTable
             ]))
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.fields.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('site.name')
+                    ->label(__('admin.fields.site'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('partner.name')
+                    ->label(__('admin.fields.partner'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('provider')
+                    ->label(__('admin.fields.provider'))
                     ->badge()
                     ->searchable(),
                 TextColumn::make('source_type')
+                    ->label(__('admin.fields.source_type'))
                     ->badge()
                     ->searchable(),
                 TextColumn::make('mappingProfile.name')
-                    ->label('Mapping profile')
+                    ->label(__('admin.fields.mapping_profile'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('products_count')
-                    ->label('Products')
+                    ->label(__('admin.fields.products'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('import_batches_count')
-                    ->label('Imports')
+                    ->label(__('admin.fields.imports'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('last_import_status')
+                    ->label(__('admin.fields.last_import_status'))
                     ->badge()
-                    ->placeholder('Never')
+                    ->placeholder(__('admin.placeholders.never'))
                     ->searchable(),
                 TextColumn::make('last_import_finished_at')
+                    ->label(__('admin.fields.last_import_finished_at'))
                     ->dateTime()
                     ->sortable()
                     ->placeholder('-'),
                 IconColumn::make('is_active')
+                    ->label(__('admin.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(__('admin.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('site_id')
+                    ->label(__('admin.fields.site'))
                     ->relationship('site', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('partner_id')
+                    ->label(__('admin.fields.partner'))
                     ->relationship('partner', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('provider')
-                    ->options([
-                        'awin' => 'Awin',
-                        'daisycon' => 'Daisycon',
-                        'tradetracker' => 'TradeTracker',
-                        'custom' => 'Custom',
-                    ]),
-                TernaryFilter::make('is_active'),
+                    ->label(__('admin.fields.provider'))
+                    ->options(__('admin.options.providers')),
+                TernaryFilter::make('is_active')
+                    ->label(__('admin.fields.is_active')),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
-                    ->modalDescription('Deleting a feed keeps imported products but removes the feed link from them.'),
+                    ->modalDescription(__('admin.messages.deleting_feed')),
             ]);
     }
 }

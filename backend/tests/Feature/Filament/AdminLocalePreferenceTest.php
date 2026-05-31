@@ -42,4 +42,36 @@ class AdminLocalePreferenceTest extends TestCase
 
         $this->assertSame(config('app.locale'), $user->preferredLocale());
     }
+
+    public function test_resource_table_headings_use_the_user_locale(): void
+    {
+        $user = User::factory()->create([
+            'admin_locale' => 'nl',
+            'is_active' => true,
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->get('/admin/feeds')
+            ->assertOk()
+            ->assertSee('Brontype')
+            ->assertSee('Mappingprofiel')
+            ->assertSee('Imports');
+
+        $this
+            ->actingAs($user)
+            ->get('/admin/products')
+            ->assertOk()
+            ->assertSee('Afbeelding')
+            ->assertSee('Beschikbaarheid')
+            ->assertSee('Uitgelicht');
+
+        $this
+            ->actingAs($user)
+            ->get('/admin/sites')
+            ->assertOk()
+            ->assertSee('Primair domein')
+            ->assertSee('Categorieen')
+            ->assertSee('Producten');
+    }
 }

@@ -17,17 +17,20 @@ class VisitorStatsOverview extends StatsOverviewWidget
 
     protected static ?int $sort = 3;
 
-    protected ?string $heading = 'Visitors';
-
     protected ?string $pollingInterval = '30s';
+
+    protected function getHeading(): ?string
+    {
+        return __('admin.widgets.visitors.heading');
+    }
 
     protected function getDescription(): ?string
     {
         $site = $this->selectedSite();
 
         return $site
-            ? 'Visitor activity for '.$site->name.'.'
-            : 'Visitor activity across all sites.';
+            ? __('admin.widgets.visitors.site_description', ['site' => $site->name])
+            : __('admin.widgets.visitors.description');
     }
 
     protected function getStats(): array
@@ -35,25 +38,25 @@ class VisitorStatsOverview extends StatsOverviewWidget
         $now = $this->siteNow();
 
         return [
-            Stat::make('Visitors online', number_format($this->visitorsOnline()))
-                ->description('Active in the last 5 minutes')
+            Stat::make(__('admin.widgets.visitors.online'), number_format($this->visitorsOnline()))
+                ->description(__('admin.widgets.visitors.online_description'))
                 ->icon(Heroicon::OutlinedSignal)
                 ->color('success'),
-            Stat::make('Today', number_format($this->uniqueVisitorsOn($now)))
-                ->description('Unique visitors today')
+            Stat::make(__('admin.widgets.common.today'), number_format($this->uniqueVisitorsOn($now)))
+                ->description(__('admin.widgets.visitors.today_description'))
                 ->icon(Heroicon::OutlinedUserGroup)
                 ->chart($this->lastSevenDaysChart())
                 ->color('primary'),
-            Stat::make('This week', number_format($this->uniqueVisitorsSince($now->copy()->startOfWeek())))
-                ->description('Unique visitors since Monday')
+            Stat::make(__('admin.widgets.common.this_week'), number_format($this->uniqueVisitorsSince($now->copy()->startOfWeek())))
+                ->description(__('admin.widgets.visitors.week_description'))
                 ->icon(Heroicon::OutlinedCalendarDays)
                 ->color('info'),
-            Stat::make('This month', number_format($this->uniqueVisitorsSince($now->copy()->startOfMonth())))
-                ->description('Unique visitors this month')
+            Stat::make(__('admin.widgets.common.this_month'), number_format($this->uniqueVisitorsSince($now->copy()->startOfMonth())))
+                ->description(__('admin.widgets.visitors.month_description'))
                 ->icon(Heroicon::OutlinedChartBar)
                 ->color('gray'),
-            Stat::make('This year', number_format($this->uniqueVisitorsSince($now->copy()->startOfYear())))
-                ->description('Unique visitors this year')
+            Stat::make(__('admin.widgets.common.this_year'), number_format($this->uniqueVisitorsSince($now->copy()->startOfYear())))
+                ->description(__('admin.widgets.visitors.year_description'))
                 ->icon(Heroicon::OutlinedPresentationChartLine)
                 ->color('gray'),
         ];

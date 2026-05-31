@@ -17,37 +17,40 @@ class ClickStatsOverview extends StatsOverviewWidget
 
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Clicks';
-
     protected ?string $pollingInterval = '30s';
+
+    protected function getHeading(): ?string
+    {
+        return __('admin.widgets.clicks.heading');
+    }
 
     protected function getDescription(): ?string
     {
         $site = $this->selectedSite();
 
         return $site
-            ? 'Outbound click performance for '.$site->name.'.'
-            : 'Outbound click performance across all sites.';
+            ? __('admin.widgets.clicks.site_description', ['site' => $site->name])
+            : __('admin.widgets.clicks.description');
     }
 
     protected function getStats(): array
     {
         return [
-            Stat::make('Total outbound clicks', number_format($this->clicks()->count()))
+            Stat::make(__('admin.widgets.clicks.total'), number_format($this->clicks()->count()))
                 ->description($this->rangeDescription())
                 ->icon(Heroicon::OutlinedCursorArrowRays)
                 ->chart($this->lastSevenDaysChart())
                 ->color('primary'),
-            Stat::make('Today', number_format($this->clicksSince(now()->startOfDay())))
-                ->description('Since midnight')
+            Stat::make(__('admin.widgets.common.today'), number_format($this->clicksSince(now()->startOfDay())))
+                ->description(__('admin.widgets.common.since_midnight'))
                 ->icon(Heroicon::OutlinedBolt)
                 ->color('success'),
-            Stat::make('Last 7 days', number_format($this->clicksSince(now()->subDays(6)->startOfDay())))
-                ->description('Rolling week including today')
+            Stat::make(__('admin.widgets.common.last_7_days'), number_format($this->clicksSince(now()->subDays(6)->startOfDay())))
+                ->description(__('admin.widgets.common.rolling_week'))
                 ->icon(Heroicon::OutlinedChartBar)
                 ->color('info'),
-            Stat::make('Last 30 days', number_format($this->clicksSince(now()->subDays(29)->startOfDay())))
-                ->description('Rolling month including today')
+            Stat::make(__('admin.widgets.common.last_30_days'), number_format($this->clicksSince(now()->subDays(29)->startOfDay())))
+                ->description(__('admin.widgets.common.rolling_month'))
                 ->icon(Heroicon::OutlinedPresentationChartLine)
                 ->color('gray'),
         ];
@@ -56,7 +59,7 @@ class ClickStatsOverview extends StatsOverviewWidget
     private function rangeDescription(): string
     {
         return implode(' | ', [
-            number_format($this->clicksSince(now()->startOfDay())).' today',
+            __('admin.widgets.common.today_count', ['count' => number_format($this->clicksSince(now()->startOfDay()))]),
             number_format($this->clicksSince(now()->subDays(6)->startOfDay())).' 7d',
             number_format($this->clicksSince(now()->subDays(29)->startOfDay())).' 30d',
         ]);

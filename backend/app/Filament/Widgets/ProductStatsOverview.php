@@ -14,11 +14,17 @@ class ProductStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
 
-    protected ?string $heading = 'Products';
-
-    protected ?string $description = 'Catalog size and unique product-page views.';
-
     protected ?string $pollingInterval = '30s';
+
+    protected function getHeading(): ?string
+    {
+        return __('admin.widgets.products.heading');
+    }
+
+    protected function getDescription(): ?string
+    {
+        return __('admin.widgets.products.description');
+    }
 
     protected function getStats(): array
     {
@@ -29,23 +35,26 @@ class ProductStatsOverview extends StatsOverviewWidget
         $totalRawViews = ProductView::query()->sum('view_count');
 
         return [
-            Stat::make('Total products', number_format($totalProducts))
-                ->description(number_format($activeProducts).' active, '.number_format($inactiveProducts).' inactive')
+            Stat::make(__('admin.widgets.products.total'), number_format($totalProducts))
+                ->description(__('admin.widgets.common.active_inactive', [
+                    'active' => number_format($activeProducts),
+                    'inactive' => number_format($inactiveProducts),
+                ]))
                 ->icon(Heroicon::OutlinedShoppingBag)
                 ->url(ProductResource::getUrl())
                 ->color('primary'),
-            Stat::make('Active products', number_format($activeProducts))
-                ->description($totalProducts > 0 ? round(($activeProducts / $totalProducts) * 100).'% of catalog' : 'No products yet')
+            Stat::make(__('admin.widgets.products.active'), number_format($activeProducts))
+                ->description($totalProducts > 0 ? __('admin.widgets.products.catalog_percentage', ['percentage' => round(($activeProducts / $totalProducts) * 100)]) : __('admin.widgets.products.empty'))
                 ->icon(Heroicon::OutlinedCheckCircle)
                 ->url(ProductResource::getUrl())
                 ->color('success'),
-            Stat::make('Unique product views', number_format($totalUniqueViews))
+            Stat::make(__('admin.widgets.products.unique_views'), number_format($totalUniqueViews))
                 ->description($this->viewDescription())
                 ->icon(Heroicon::OutlinedEye)
                 ->chart($this->lastSevenDaysChart())
                 ->color('info'),
-            Stat::make('Raw product hits', number_format($totalRawViews))
-                ->description('Repeat refreshes included')
+            Stat::make(__('admin.widgets.products.raw_hits'), number_format($totalRawViews))
+                ->description(__('admin.widgets.products.raw_hits_description'))
                 ->icon(Heroicon::OutlinedChartBar)
                 ->color('gray'),
         ];
@@ -54,7 +63,7 @@ class ProductStatsOverview extends StatsOverviewWidget
     private function viewDescription(): string
     {
         return implode(' | ', [
-            number_format($this->uniqueViewsSince(now()->startOfDay())).' today',
+            __('admin.widgets.common.today_count', ['count' => number_format($this->uniqueViewsSince(now()->startOfDay()))]),
             number_format($this->uniqueViewsSince(now()->subDays(6)->startOfDay())).' 7d',
             number_format($this->uniqueViewsSince(now()->subDays(29)->startOfDay())).' 30d',
         ]);

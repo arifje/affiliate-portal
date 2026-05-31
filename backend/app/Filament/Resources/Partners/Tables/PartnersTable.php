@@ -23,49 +23,52 @@ class PartnersTable
             ]))
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin.fields.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('provider')
+                    ->label(__('admin.fields.provider'))
                     ->badge()
                     ->searchable(),
                 TextColumn::make('website_url')
+                    ->label(__('admin.fields.website_url'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('feeds_count')
-                    ->label('Feeds')
+                    ->label(__('admin.fields.feeds'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('products_count')
-                    ->label('Products')
+                    ->label(__('admin.fields.products'))
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label(__('admin.fields.is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(__('admin.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('provider')
-                    ->options([
-                        'awin' => 'Awin',
-                        'daisycon' => 'Daisycon',
-                        'tradetracker' => 'TradeTracker',
-                        'custom' => 'Custom',
-                    ]),
-                TernaryFilter::make('is_active'),
+                    ->label(__('admin.fields.provider'))
+                    ->options(__('admin.options.providers')),
+                TernaryFilter::make('is_active')
+                    ->label(__('admin.fields.is_active')),
             ])
             ->defaultSort('name')
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
-                    ->modalDescription('Deleting a partner also removes its feeds and products.'),
+                    ->modalDescription(__('admin.messages.deleting_partner')),
             ]);
     }
 }

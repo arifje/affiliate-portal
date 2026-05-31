@@ -12,11 +12,17 @@ class UserStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 5;
 
-    protected ?string $heading = 'Users';
-
-    protected ?string $description = 'Admin users and account status.';
-
     protected ?string $pollingInterval = '30s';
+
+    protected function getHeading(): ?string
+    {
+        return __('admin.widgets.users.heading');
+    }
+
+    protected function getDescription(): ?string
+    {
+        return __('admin.widgets.users.description');
+    }
 
     protected function getStats(): array
     {
@@ -27,18 +33,21 @@ class UserStatsOverview extends StatsOverviewWidget
         $recentUsers = User::query()->where('created_at', '>=', now()->subDays(29)->startOfDay())->count();
 
         return [
-            Stat::make('Total users', number_format($totalUsers))
-                ->description(number_format($activeUsers).' active, '.number_format($inactiveUsers).' inactive')
+            Stat::make(__('admin.widgets.users.total'), number_format($totalUsers))
+                ->description(__('admin.widgets.common.active_inactive', [
+                    'active' => number_format($activeUsers),
+                    'inactive' => number_format($inactiveUsers),
+                ]))
                 ->icon(Heroicon::OutlinedUsers)
                 ->url(UserResource::getUrl())
                 ->color('primary'),
-            Stat::make('Active users', number_format($activeUsers))
-                ->description($totalUsers > 0 ? round(($activeUsers / $totalUsers) * 100).'% of users' : 'No users yet')
+            Stat::make(__('admin.widgets.users.active'), number_format($activeUsers))
+                ->description($totalUsers > 0 ? __('admin.widgets.users.user_percentage', ['percentage' => round(($activeUsers / $totalUsers) * 100)]) : __('admin.widgets.users.empty'))
                 ->icon(Heroicon::OutlinedShieldCheck)
                 ->url(UserResource::getUrl())
                 ->color('success'),
-            Stat::make('Verified users', number_format($verifiedUsers))
-                ->description(number_format($recentUsers).' created in 30d')
+            Stat::make(__('admin.widgets.users.verified'), number_format($verifiedUsers))
+                ->description(__('admin.widgets.users.created_30d', ['count' => number_format($recentUsers)]))
                 ->icon(Heroicon::OutlinedEnvelope)
                 ->url(UserResource::getUrl())
                 ->color('info'),
