@@ -333,6 +333,45 @@ useHead(() => ({
             </select>
           </div>
 
+          <details class="mobile-filters">
+            <summary>
+              <span>Filters</span>
+              <small>{{ categories.length }} categorieen - {{ brands.length }} merken</small>
+            </summary>
+
+            <div class="mobile-filter-groups">
+              <section>
+                <h2>Categorieen</h2>
+                <div class="filter-chips">
+                  <NuxtLink
+                    v-for="category in categories"
+                    :key="category.id"
+                    :class="{ 'is-active': props.mode === 'category' && category.slug === props.categorySlug }"
+                    :to="`/preview/${site.slug}/categories/${category.slug}`"
+                  >
+                    <span>{{ category.name }}</span>
+                    <strong>{{ category.products_count }}</strong>
+                  </NuxtLink>
+                </div>
+              </section>
+
+              <section v-if="brands.length">
+                <h2>Merken</h2>
+                <div class="filter-chips">
+                  <NuxtLink
+                    v-for="brand in brands"
+                    :key="brand.slug"
+                    :class="{ 'is-active': props.mode === 'brand' && brand.slug === props.brandSlug }"
+                    :to="`/preview/${site.slug}/brands/${brand.slug}`"
+                  >
+                    <span>{{ brand.name }}</span>
+                    <strong>{{ brand.products_count }}</strong>
+                  </NuxtLink>
+                </div>
+              </section>
+            </div>
+          </details>
+
           <div v-if="products.length" class="product-grid">
             <NuxtLink
               v-for="product in products"
@@ -541,6 +580,10 @@ h1 {
   color: var(--site-primary);
 }
 
+.mobile-filters {
+  display: none;
+}
+
 .results-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -669,6 +712,108 @@ h1 {
   .nav-links {
     justify-content: start;
     overflow-x: auto;
+  }
+
+  .content-shell {
+    gap: 0;
+    padding-top: 28px;
+  }
+
+  .filters {
+    display: none;
+  }
+
+  .mobile-filters {
+    display: block;
+    margin-bottom: 18px;
+    border: 1px solid #d9e1dd;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .mobile-filters summary {
+    min-height: 52px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 900;
+  }
+
+  .mobile-filters summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-filters summary::after {
+    content: '+';
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--site-soft);
+    color: var(--site-primary);
+    font-weight: 900;
+  }
+
+  .mobile-filters[open] summary::after {
+    content: '-';
+  }
+
+  .mobile-filters summary span,
+  .mobile-filters summary small {
+    min-width: 0;
+  }
+
+  .mobile-filters summary small {
+    color: #687672;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .mobile-filter-groups {
+    display: grid;
+    gap: 18px;
+    padding: 0 14px 14px;
+  }
+
+  .mobile-filter-groups h2 {
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+  }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-chips a {
+    min-height: 36px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 0 10px;
+    border: 1px solid #d9e1dd;
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--site-text);
+    font-size: 0.88rem;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .filter-chips a.is-active,
+  .filter-chips a:hover {
+    border-color: var(--site-primary);
+    background: var(--site-soft);
+  }
+
+  .filter-chips strong {
+    color: var(--site-primary);
   }
 }
 
