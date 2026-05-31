@@ -170,6 +170,21 @@ class SiteForm
                             ->visibility('public')
                             ->maxSize(10240)
                             ->columnSpanFull(),
+                        FileUpload::make('settings.products_hero_image')
+                            ->label(__('admin.pages.sites.content.products_hero_image'))
+                            ->helperText(__('admin.helpers.products_hero_image'))
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->imageEditor()
+                            ->disk('public')
+                            ->directory(fn (Get $get, ?Site $record = null): string => Site::storageDirectoryFor(
+                                $record?->slug ?: $get('slug'),
+                                $record?->id,
+                                'products-hero',
+                            ))
+                            ->visibility('public')
+                            ->maxSize(10240)
+                            ->columnSpanFull(),
                         TextInput::make('settings.search_placeholder')
                             ->label(__('admin.pages.sites.content.search_placeholder'))
                             ->default('Zoek op product, merk of categorie')

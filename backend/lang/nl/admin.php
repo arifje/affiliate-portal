@@ -137,6 +137,7 @@ return [
         'category_hero_image' => 'Wordt paginabreed bovenaan deze categoriepagina getoond. Gebruik JPG, PNG of WebP tot 10 MB.',
         'featured_product' => 'Toon dit product in de sectie Aanbevolen op de storefront-homepage.',
         'featured_sort_order' => 'Lagere nummers worden eerst getoond.',
+        'products_hero_image' => 'Wordt getoond op productoverzichten, zoekpagina\'s, aanbiedingen en merkpagina\'s. Categorie-hero-afbeeldingen krijgen voorrang.',
         'site_hero_image' => 'Wordt getoond in de homepage-hero in plaats van het oude product/categorie/feed-statistiekenblok. Gebruik JPG, PNG of WebP tot 10 MB.',
         'section_label_color' => 'Gebruikt voor kleine labels in hoofdletters, zoals de hero-badge.',
     ],
@@ -500,6 +501,7 @@ return [
                 'hero_image' => 'Hero-afbeelding',
                 'hero_intro' => 'Hero-intro',
                 'hero_title' => 'Hero-titel',
+                'products_hero_image' => 'Producten-hero-afbeelding',
                 'search_placeholder' => 'Zoek-placeholder',
             ],
             'theme' => [

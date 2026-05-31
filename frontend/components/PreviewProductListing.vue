@@ -145,12 +145,15 @@ const brands = computed(() => data.value?.brands ?? [])
 const meta = computed(() => data.value?.meta)
 const pageTitle = computed(() => props.mode === 'categories' ? 'Categorieen' : meta.value?.title)
 const categoryHeroImageUrl = computed(() => props.mode === 'category' ? mediaUrl(meta.value?.category?.hero_image) : null)
+const productsHeroImageUrl = computed(() => mediaUrl(site.value?.settings?.products_hero_image_url || site.value?.settings?.products_hero_image))
+const homepageHeroImageUrl = computed(() => mediaUrl(site.value?.settings?.hero_image_url || site.value?.settings?.hero_image))
+const listingHeroImageUrl = computed(() => categoryHeroImageUrl.value || productsHeroImageUrl.value || homepageHeroImageUrl.value)
 const listingHeroStyle = computed(() => {
-  if (!categoryHeroImageUrl.value) {
+  if (!listingHeroImageUrl.value) {
     return {}
   }
 
-  const imageUrl = categoryHeroImageUrl.value.replaceAll('"', '\\"')
+  const imageUrl = listingHeroImageUrl.value.replaceAll('"', '\\"')
 
   return {
     backgroundImage: `linear-gradient(90deg, rgba(11, 18, 17, 0.76), rgba(11, 18, 17, 0.48) 52%, rgba(11, 18, 17, 0.2)), url("${imageUrl}")`,
@@ -377,7 +380,7 @@ useHead(() => ({
 
       <section
         class="listing-hero"
-        :class="{ 'has-hero-image': categoryHeroImageUrl }"
+        :class="{ 'has-hero-image': listingHeroImageUrl }"
         :style="listingHeroStyle"
       >
         <div>
@@ -391,7 +394,7 @@ useHead(() => ({
           :site-slug="site.slug"
           :placeholder="site.settings.search_placeholder || 'Zoek op product, merk of categorie'"
           :initial-query="String(route.query.q || '')"
-          :contrast="Boolean(categoryHeroImageUrl)"
+          :contrast="Boolean(listingHeroImageUrl)"
         />
       </section>
 
