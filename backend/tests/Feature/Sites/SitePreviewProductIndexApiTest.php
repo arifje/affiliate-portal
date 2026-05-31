@@ -89,6 +89,23 @@ class SitePreviewProductIndexApiTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'products')
             ->assertJsonPath('products.0.slug', 'velobeat-chest-strap-duo');
+
+        $this->getJson('/api/sites/preview/hartslagmeters_nl/products?categories=sporthorloges,borstbanden')
+            ->assertOk()
+            ->assertJsonCount(2, 'products')
+            ->assertJsonCount(2, 'meta.categories')
+            ->assertJsonPath('meta.title', 'Gefilterde producten');
+
+        $this->getJson('/api/sites/preview/hartslagmeters_nl/products?brands=heartpilot,velobeat')
+            ->assertOk()
+            ->assertJsonCount(2, 'products')
+            ->assertJsonCount(2, 'meta.brands')
+            ->assertJsonPath('meta.title', 'Gefilterde producten');
+
+        $this->getJson('/api/sites/preview/hartslagmeters_nl/products?categories=borstbanden&brands=velobeat')
+            ->assertOk()
+            ->assertJsonCount(1, 'products')
+            ->assertJsonPath('products.0.slug', 'velobeat-chest-strap-duo');
     }
 
     public function test_it_returns_not_found_for_unknown_brand_or_category(): void
@@ -103,6 +120,12 @@ class SitePreviewProductIndexApiTest extends TestCase
             ->assertNotFound();
 
         $this->getJson('/api/sites/preview/'.$site->slug.'/products?brand=unknown')
+            ->assertNotFound();
+
+        $this->getJson('/api/sites/preview/'.$site->slug.'/products?categories=unknown')
+            ->assertNotFound();
+
+        $this->getJson('/api/sites/preview/'.$site->slug.'/products?brands=unknown')
             ->assertNotFound();
     }
 }

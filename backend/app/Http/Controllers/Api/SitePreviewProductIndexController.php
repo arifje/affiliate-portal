@@ -9,6 +9,7 @@ use App\Models\Site;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class SitePreviewProductIndexController extends Controller
@@ -18,28 +19,31 @@ class SitePreviewProductIndexController extends Controller
         $site->loadCount(['categories', 'feeds', 'products']);
 
         $search = trim((string) $request->query('q', ''));
-        $categorySlug = trim((string) $request->query('category', ''));
-        $brandSlug = trim((string) $request->query('brand', ''));
+        $categorySlugs = $this->queryList($request->query('categories'));
+        $legacyCategorySlug = trim((string) $request->query('category', ''));
+        $brandSlugs = $this->queryList($request->query('brands'));
+        $legacyBrandSlug = trim((string) $request->query('brand', ''));
         $dealsOnly = $request->boolean('deals');
         $sort = (string) $request->query('sort', 'latest');
 
-        $category = $categorySlug !== ''
-            ? $site->categories()->where('slug', $categorySlug)->where('is_active', true)->firstOrFail()
-            : null;
-
-        $brand = $brandSlug !== ''
-            ? $this->resolveBrand($site, $brandSlug)
-            : null;
-
-        if ($brandSlug !== '' && $brand === null) {
-            abort(404);
+        if ($legacyCategorySlug !== '') {
+            array_unshift($categorySlugs, $legacyCategorySlug);
         }
+
+        if ($legacyBrandSlug !== '') {
+            array_unshift($brandSlugs, $legacyBrandSlug);
+        }
+
+        $categorySlugs = array_values(array_unique($categorySlugs));
+        $brandSlugs = array_values(array_unique($brandSlugs));
+        $categories = $this->resolveCategories($site, $categorySlugs);
+        $brands = $this->resolveBrands($site, $brandSlugs);
 
         $products = $site->products()
             ->with(['partner:id,name', 'category:id,name,slug'])
             ->where('is_active', true)
-            ->when($category, fn (Builder $query) => $query->where('category_id', $category->id))
-            ->when($brand, fn (Builder $query) => $query->where('brand', $brand))
+            ->when($categories->isNotEmpty(), fn (Builder $query) => $query->whereIn('category_id', $categories->pluck('id')))
+            ->when($brands->isNotEmpty(), fn (Builder $query) => $query->whereIn('brand', $brands->all()))
             ->when($dealsOnly, fn (Builder $query) => $query
                 ->whereNotNull('price')
                 ->whereNotNull('old_price')
@@ -63,42 +67,118 @@ class SitePreviewProductIndexController extends Controller
             'categories' => $this->categoriesPayload($site),
             'brands' => $this->brandsPayload($site),
             'meta' => [
-                'title' => $this->title($site, $search, $category, $brand, $dealsOnly),
+                'title' => $this->title($site, $search, $categories, $brands, $dealsOnly),
                 'search' => $search,
-                'category' => $category ? $this->categoryPayload($category) : null,
-                'brand' => $brand ? [
+                'category' => $categories->count() === 1 ? $this->categoryPayload($categories->first()) : null,
+                'categories' => $categories->map(fn (Category $category): array => $this->categoryPayload($category))->values(),
+                'brand' => $brands->count() === 1 ? [
+                    'name' => $brands->first(),
+                    'slug' => Str::slug($brands->first()),
+                ] : null,
+                'brands' => $brands->map(fn (string $brand): array => [
                     'name' => $brand,
                     'slug' => Str::slug($brand),
-                ] : null,
+                ])->values(),
                 'deals' => $dealsOnly,
                 'sort' => $sort,
             ],
         ]);
     }
 
-    private function resolveBrand(Site $site, string $brandSlug): ?string
+    /**
+     * @return array<int, string>
+     */
+    private function queryList(mixed $value): array
     {
-        return $site->products()
+        if ($value === null) {
+            return [];
+        }
+
+        $values = is_array($value) ? $value : [$value];
+
+        return collect($values)
+            ->flatMap(fn (mixed $item): array => explode(',', (string) $item))
+            ->map(fn (string $item): string => trim($item))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<int, string>  $categorySlugs
+     * @return Collection<int, Category>
+     */
+    private function resolveCategories(Site $site, array $categorySlugs): Collection
+    {
+        if ($categorySlugs === []) {
+            return collect();
+        }
+
+        $categories = $site->categories()
+            ->whereIn('slug', $categorySlugs)
+            ->where('is_active', true)
+            ->get();
+
+        if ($categories->count() !== count($categorySlugs)) {
+            abort(404);
+        }
+
+        return collect($categorySlugs)
+            ->map(fn (string $slug): ?Category => $categories->firstWhere('slug', $slug))
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * @param  array<int, string>  $brandSlugs
+     * @return Collection<int, string>
+     */
+    private function resolveBrands(Site $site, array $brandSlugs): Collection
+    {
+        if ($brandSlugs === []) {
+            return collect();
+        }
+
+        $brands = $site->products()
             ->where('is_active', true)
             ->whereNotNull('brand')
             ->where('brand', '!=', '')
             ->distinct()
-            ->pluck('brand')
-            ->first(fn (string $brand): bool => Str::slug($brand) === $brandSlug);
+            ->pluck('brand');
+
+        $resolvedBrands = collect($brandSlugs)
+            ->map(fn (string $slug): ?string => $brands->first(fn (string $brand): bool => Str::slug($brand) === $slug))
+            ->filter()
+            ->values();
+
+        if ($resolvedBrands->count() !== count($brandSlugs)) {
+            abort(404);
+        }
+
+        return $resolvedBrands;
     }
 
-    private function title(Site $site, string $search, ?Category $category, ?string $brand, bool $dealsOnly): string
+    /**
+     * @param  Collection<int, Category>  $categories
+     * @param  Collection<int, string>  $brands
+     */
+    private function title(Site $site, string $search, Collection $categories, Collection $brands, bool $dealsOnly): string
     {
         if ($search !== '') {
             return 'Zoekresultaten voor "'.$search.'"';
         }
 
-        if ($category) {
-            return $category->name;
+        if ($categories->count() === 1 && $brands->isEmpty() && ! $dealsOnly) {
+            return $categories->first()->name;
         }
 
-        if ($brand) {
-            return $brand;
+        if ($brands->count() === 1 && $categories->isEmpty() && ! $dealsOnly) {
+            return $brands->first();
+        }
+
+        if ($categories->isNotEmpty() || $brands->isNotEmpty()) {
+            return $dealsOnly ? 'Gefilterde aanbiedingen' : 'Gefilterde producten';
         }
 
         if ($dealsOnly) {

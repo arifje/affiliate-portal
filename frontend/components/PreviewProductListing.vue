@@ -57,7 +57,9 @@ type PreviewProductIndexResponse = {
     title: string
     search: string
     category: { id: number; name: string; slug: string; description: string | null; hero_image: string | null } | null
+    categories: Array<{ id: number; name: string; slug: string; description: string | null; hero_image: string | null }>
     brand: { name: string; slug: string } | null
+    brands: Array<{ name: string; slug: string }>
     deals: boolean
     sort: string
   }
@@ -74,20 +76,41 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const sort = ref(String(route.query.sort || 'latest'))
 const apiBase = computed(() => import.meta.server ? config.apiBase : config.public.apiBase)
+const selectedCategorySlugs = computed(() => {
+  const slugs = queryValueList(route.query.categories)
+
+  if (props.mode === 'category' && props.categorySlug && !slugs.includes(props.categorySlug)) {
+    slugs.unshift(props.categorySlug)
+  }
+
+  return slugs
+})
+const selectedBrandSlugs = computed(() => {
+  const slugs = queryValueList(route.query.brands)
+
+  if (props.mode === 'brand' && props.brandSlug && !slugs.includes(props.brandSlug)) {
+    slugs.unshift(props.brandSlug)
+  }
+
+  return slugs
+})
+const hasActiveFacetFilters = computed(() => selectedCategorySlugs.value.length > 0 || selectedBrandSlugs.value.length > 0)
+const activeFacetCount = computed(() => selectedCategorySlugs.value.length + selectedBrandSlugs.value.length)
+const isDealsFilterActive = computed(() => props.mode === 'deals' || route.query.deals === '1')
 
 const requestUrl = computed(() => {
   const params = new URLSearchParams()
 
-  if (props.mode === 'deals') {
+  if (isDealsFilterActive.value) {
     params.set('deals', '1')
   }
 
-  if (props.mode === 'category' && props.categorySlug) {
-    params.set('category', props.categorySlug)
+  if (selectedCategorySlugs.value.length) {
+    params.set('categories', selectedCategorySlugs.value.join(','))
   }
 
-  if (props.mode === 'brand' && props.brandSlug) {
-    params.set('brand', props.brandSlug)
+  if (selectedBrandSlugs.value.length) {
+    params.set('brands', selectedBrandSlugs.value.join(','))
   }
 
   if (props.mode === 'search' && route.query.q) {
@@ -193,6 +216,82 @@ function productPath(product: PreviewProduct): string {
   return `/preview/${site.value?.slug}/products/${product.slug}`
 }
 
+function queryValueList(value: unknown): string[] {
+  const values = Array.isArray(value) ? value : [value]
+
+  return [...new Set(values
+    .flatMap((item) => String(item || '').split(','))
+    .map((item) => item.trim())
+    .filter(Boolean))]
+}
+
+function isCategorySelected(slug: string): boolean {
+  return selectedCategorySlugs.value.includes(slug)
+}
+
+function isBrandSelected(slug: string): boolean {
+  return selectedBrandSlugs.value.includes(slug)
+}
+
+function toggleValue(values: string[], value: string): string[] {
+  return values.includes(value)
+    ? values.filter((item) => item !== value)
+    : [...values, value]
+}
+
+function filterBasePath(): string {
+  if (props.mode === 'search' || route.query.q) {
+    return `/preview/${site.value?.slug}/search`
+  }
+
+  if (props.mode === 'deals') {
+    return `/preview/${site.value?.slug}/deals`
+  }
+
+  return `/preview/${site.value?.slug}/products`
+}
+
+function filterLocation(categorySlugs: string[], brandSlugs: string[]) {
+  const query: Record<string, string> = {}
+
+  if (route.query.q) {
+    query.q = String(route.query.q)
+  }
+
+  if (isDealsFilterActive.value && props.mode !== 'deals') {
+    query.deals = '1'
+  }
+
+  if (sort.value !== 'latest') {
+    query.sort = sort.value
+  }
+
+  if (categorySlugs.length) {
+    query.categories = categorySlugs.join(',')
+  }
+
+  if (brandSlugs.length) {
+    query.brands = brandSlugs.join(',')
+  }
+
+  return {
+    path: filterBasePath(),
+    query,
+  }
+}
+
+function toggleCategoryLocation(slug: string) {
+  return filterLocation(toggleValue(selectedCategorySlugs.value, slug), selectedBrandSlugs.value)
+}
+
+function toggleBrandLocation(slug: string) {
+  return filterLocation(selectedCategorySlugs.value, toggleValue(selectedBrandSlugs.value, slug))
+}
+
+function clearFilterLocation() {
+  return filterLocation([], [])
+}
+
 function mediaUrl(path: string | null | undefined): string | null {
   if (!path) {
     return null
@@ -240,7 +339,7 @@ useHead(() => ({
   meta: [
     {
       name: 'robots',
-      content: props.mode === 'search' ? 'noindex,follow' : 'index,follow',
+      content: props.mode === 'search' || Boolean(route.query.q || route.query.categories || route.query.brands || route.query.deals) ? 'noindex,follow' : 'index,follow',
     },
   ],
 }))
@@ -298,12 +397,21 @@ useHead(() => ({
 
       <section class="content-shell">
         <aside class="filters">
+          <NuxtLink
+            v-if="hasActiveFacetFilters"
+            class="clear-filters"
+            :to="clearFilterLocation()"
+          >
+            Wis filters ({{ activeFacetCount }})
+          </NuxtLink>
+
           <section>
             <h2>Categorieen</h2>
             <NuxtLink
               v-for="category in categories"
               :key="category.id"
-              :to="`/preview/${site.slug}/categories/${category.slug}`"
+              :class="{ 'is-active': isCategorySelected(category.slug) }"
+              :to="toggleCategoryLocation(category.slug)"
             >
               <span>{{ category.name }}</span>
               <strong>{{ category.products_count }}</strong>
@@ -315,7 +423,8 @@ useHead(() => ({
             <NuxtLink
               v-for="brand in brands"
               :key="brand.slug"
-              :to="`/preview/${site.slug}/brands/${brand.slug}`"
+              :class="{ 'is-active': isBrandSelected(brand.slug) }"
+              :to="toggleBrandLocation(brand.slug)"
             >
               <span>{{ brand.name }}</span>
               <strong>{{ brand.products_count }}</strong>
@@ -336,18 +445,27 @@ useHead(() => ({
           <details class="mobile-filters">
             <summary>
               <span>Filters</span>
-              <small>{{ categories.length }} categorieen - {{ brands.length }} merken</small>
+              <small v-if="activeFacetCount">{{ activeFacetCount }} actief</small>
+              <small v-else>{{ categories.length }} categorieen - {{ brands.length }} merken</small>
             </summary>
 
             <div class="mobile-filter-groups">
+              <NuxtLink
+                v-if="hasActiveFacetFilters"
+                class="clear-filters"
+                :to="clearFilterLocation()"
+              >
+                Wis filters
+              </NuxtLink>
+
               <section>
                 <h2>Categorieen</h2>
                 <div class="filter-chips">
                   <NuxtLink
                     v-for="category in categories"
                     :key="category.id"
-                    :class="{ 'is-active': props.mode === 'category' && category.slug === props.categorySlug }"
-                    :to="`/preview/${site.slug}/categories/${category.slug}`"
+                    :class="{ 'is-active': isCategorySelected(category.slug) }"
+                    :to="toggleCategoryLocation(category.slug)"
                   >
                     <span>{{ category.name }}</span>
                     <strong>{{ category.products_count }}</strong>
@@ -361,8 +479,8 @@ useHead(() => ({
                   <NuxtLink
                     v-for="brand in brands"
                     :key="brand.slug"
-                    :class="{ 'is-active': props.mode === 'brand' && brand.slug === props.brandSlug }"
-                    :to="`/preview/${site.slug}/brands/${brand.slug}`"
+                    :class="{ 'is-active': isBrandSelected(brand.slug) }"
+                    :to="toggleBrandLocation(brand.slug)"
                   >
                     <span>{{ brand.name }}</span>
                     <strong>{{ brand.products_count }}</strong>
@@ -572,12 +690,41 @@ h1 {
   font-weight: 800;
 }
 
+.filters a.is-active {
+  margin-inline: -8px;
+  padding-inline: 8px;
+  border-top-color: transparent;
+  border-radius: 8px;
+  background: var(--site-soft);
+  color: var(--site-primary);
+}
+
 .filters a:first-of-type {
   border-top: 0;
 }
 
 .filters strong {
   color: var(--site-primary);
+}
+
+.clear-filters {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid #d9e1dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--site-primary);
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.clear-filters:hover {
+  border-color: var(--site-primary);
+  background: var(--site-soft);
 }
 
 .mobile-filters {
@@ -778,6 +925,10 @@ h1 {
     display: grid;
     gap: 18px;
     padding: 0 14px 14px;
+  }
+
+  .mobile-filter-groups .clear-filters {
+    width: fit-content;
   }
 
   .mobile-filter-groups h2 {
