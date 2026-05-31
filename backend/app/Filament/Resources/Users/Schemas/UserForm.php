@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
@@ -14,26 +16,36 @@ class UserForm
     {
         return $schema
             ->components([
-                Section::make('User')
+                Section::make(__('admin.users.sections.user'))
                     ->schema([
                         TextInput::make('name')
+                            ->label(__('admin.users.fields.name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('email')
-                            ->label('Email address')
+                            ->label(__('admin.users.fields.email'))
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                        DateTimePicker::make('email_verified_at'),
+                        Select::make('admin_locale')
+                            ->label(__('admin.users.fields.admin_locale'))
+                            ->options(User::ADMIN_LOCALES)
+                            ->default('en')
+                            ->required()
+                            ->native(false),
+                        DateTimePicker::make('email_verified_at')
+                            ->label(__('admin.users.fields.email_verified_at')),
                         Toggle::make('is_active')
+                            ->label(__('admin.users.fields.is_active'))
                             ->required()
                             ->default(true),
                     ])
                     ->columns(2),
-                Section::make('Password')
+                Section::make(__('admin.users.sections.password'))
                     ->schema([
                         TextInput::make('password')
+                            ->label(__('admin.users.fields.password'))
                             ->password()
                             ->revealable()
                             ->autocomplete('new-password')
