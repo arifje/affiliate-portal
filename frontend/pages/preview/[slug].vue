@@ -117,6 +117,33 @@ const heroStyle = computed(() => {
 const searchPlaceholder = computed(() => site.value?.settings?.search_placeholder || 'Zoek op product, merk of categorie')
 const featuredTitle = computed(() => site.value?.settings?.featured_title || 'Uitgelichte keuzes')
 const categoryTitle = computed(() => site.value?.settings?.category_title || 'Shop op categorie')
+const carouselArrowButton = {
+  color: 'neutral',
+  variant: 'solid',
+  size: 'md',
+} as const
+const carouselBaseUi = {
+  root: 'storefront-carousel',
+  viewport: 'overflow-hidden',
+  container: 'items-stretch',
+  controls: 'pointer-events-none absolute inset-y-0 left-0 right-0',
+  prev: 'pointer-events-auto absolute left-0 top-1/2 z-[2] hidden -translate-y-1/2 rounded-full bg-white/95 text-gray-950 shadow-lg ring-1 ring-black/10 hover:bg-white disabled:invisible aria-disabled:invisible sm:inline-flex',
+  next: 'pointer-events-auto absolute right-0 top-1/2 z-[2] hidden -translate-y-1/2 rounded-full bg-white/95 text-gray-950 shadow-lg ring-1 ring-black/10 hover:bg-white disabled:invisible aria-disabled:invisible sm:inline-flex',
+}
+const categoryCarouselUi = {
+  ...carouselBaseUi,
+  item: 'min-w-0 basis-[84%] pe-4 sm:basis-[48%] lg:basis-[32%] xl:basis-[25%]',
+}
+const productCarouselUi = {
+  ...carouselBaseUi,
+  item: 'min-w-0 basis-[84%] pe-4 sm:basis-[44%] lg:basis-[30%] xl:basis-[24%]',
+}
+const saleCarouselUi = {
+  ...carouselBaseUi,
+  item: 'min-w-0 basis-[88%] pe-4 md:basis-[50%] xl:basis-[34%]',
+  prev: 'pointer-events-auto absolute left-0 top-1/2 z-[2] hidden -translate-y-1/2 rounded-full bg-white text-gray-950 shadow-lg ring-1 ring-white/30 hover:bg-white disabled:invisible aria-disabled:invisible sm:inline-flex',
+  next: 'pointer-events-auto absolute right-0 top-1/2 z-[2] hidden -translate-y-1/2 rounded-full bg-white text-gray-950 shadow-lg ring-1 ring-white/30 hover:bg-white disabled:invisible aria-disabled:invisible sm:inline-flex',
+}
 
 function formatPrice(amount: string | number | null, currency: string): string {
   if (amount === null || amount === '') {
@@ -239,9 +266,19 @@ useHead(() => ({
           <h2>{{ categoryTitle }}</h2>
         </div>
 
-        <div v-if="categories.length" class="slider-row category-slider">
+        <UCarousel
+          v-if="categories.length"
+          v-slot="{ item: category }"
+          arrows
+          wheel-gestures
+          align="start"
+          :slides-to-scroll="'auto'"
+          :items="categories"
+          :prev="carouselArrowButton"
+          :next="carouselArrowButton"
+          :ui="categoryCarouselUi"
+        >
           <NuxtLink
-            v-for="category in categories"
             :key="category.id"
             class="category-tile"
             :to="categoryPath(category)"
@@ -250,7 +287,7 @@ useHead(() => ({
             <strong>{{ category.products_count }} producten</strong>
             <small>{{ category.description || 'Bekijk de beste keuzes in deze categorie.' }}</small>
           </NuxtLink>
-        </div>
+        </UCarousel>
       </section>
 
       <section id="featured" class="featured-band">
@@ -258,9 +295,19 @@ useHead(() => ({
           <h2>{{ featuredTitle }}</h2>
         </div>
 
-        <div v-if="featuredProducts.length" class="slider-row product-slider">
+        <UCarousel
+          v-if="featuredProducts.length"
+          v-slot="{ item: product }"
+          :arrows="featuredProducts.length > 3"
+          wheel-gestures
+          align="start"
+          :slides-to-scroll="'auto'"
+          :items="featuredProducts"
+          :prev="carouselArrowButton"
+          :next="carouselArrowButton"
+          :ui="productCarouselUi"
+        >
           <NuxtLink
-            v-for="product in featuredProducts"
             :key="product.id"
             class="product-card"
             :to="productPath(product)"
@@ -278,7 +325,7 @@ useHead(() => ({
               </div>
             </div>
           </NuxtLink>
-        </div>
+        </UCarousel>
       </section>
 
       <section v-if="saleProducts.length" class="sale-strip">
@@ -286,9 +333,19 @@ useHead(() => ({
           <h2>Producten met korting</h2>
         </div>
 
-        <div class="slider-row sale-list">
+        <UCarousel
+          v-slot="{ item: product }"
+          class="sale-list"
+          arrows
+          wheel-gestures
+          align="start"
+          :slides-to-scroll="'auto'"
+          :items="saleProducts"
+          :prev="carouselArrowButton"
+          :next="carouselArrowButton"
+          :ui="saleCarouselUi"
+        >
           <NuxtLink
-            v-for="product in saleProducts"
             :key="product.id"
             class="sale-card"
             :to="productPath(product)"
@@ -303,7 +360,7 @@ useHead(() => ({
               <em>{{ formatPrice(product.price, product.currency) }}</em>
             </span>
           </NuxtLink>
-        </div>
+        </UCarousel>
       </section>
 
       <section id="catalog" class="catalog-band">
@@ -311,9 +368,19 @@ useHead(() => ({
           <h2>Latest products</h2>
         </div>
 
-        <div v-if="latestProducts.length" class="slider-row product-slider">
+        <UCarousel
+          v-if="latestProducts.length"
+          v-slot="{ item: product }"
+          arrows
+          wheel-gestures
+          align="start"
+          :slides-to-scroll="'auto'"
+          :items="latestProducts"
+          :prev="carouselArrowButton"
+          :next="carouselArrowButton"
+          :ui="productCarouselUi"
+        >
           <NuxtLink
-            v-for="product in latestProducts"
             :key="product.id"
             class="product-card"
             :to="productPath(product)"
@@ -334,7 +401,7 @@ useHead(() => ({
               </p>
             </div>
           </NuxtLink>
-        </div>
+        </UCarousel>
 
         <div v-else class="empty">
           <h3>Geen producten gevonden</h3>
@@ -562,44 +629,23 @@ h1 {
 .section-heading h2 {
   margin: 0;
   font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 850;
+  line-height: 1.05;
 }
 
-.slider-row {
-  display: flex;
-  gap: 14px;
-  margin-inline: -2px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding: 2px 2px 16px;
-  scroll-padding-inline: 2px;
-  scroll-snap-type: x mandatory;
-  scrollbar-color: rgba(101, 114, 111, 0.35) transparent;
-  scrollbar-width: thin;
-}
-
-.slider-row::-webkit-scrollbar {
-  height: 8px;
-}
-
-.slider-row::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.slider-row::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(101, 114, 111, 0.28);
+:deep(.storefront-carousel) {
+  padding-inline: 2px;
 }
 
 .category-tile {
   display: block;
-  flex: 0 0 clamp(230px, 27vw, 320px);
+  height: 100%;
   min-height: 160px;
   padding: 18px;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: #ffffff;
   color: var(--site-text);
-  scroll-snap-align: start;
   text-align: left;
   text-decoration: none;
   transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
@@ -659,24 +705,19 @@ h1 {
 }
 
 .sale-list {
-  scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
-}
-
-.sale-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.32);
+  margin-inline: -2px;
 }
 
 .sale-card {
   display: grid;
-  flex: 0 0 clamp(270px, 31vw, 380px);
   grid-template-columns: 88px 1fr;
   gap: 14px;
   align-items: center;
+  height: 100%;
   padding: 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.09);
-  scroll-snap-align: start;
   transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
@@ -727,13 +768,12 @@ h1 {
 
 .product-card {
   display: flex;
-  flex: 0 0 clamp(230px, 24vw, 285px);
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: var(--site-surface);
-  scroll-snap-align: start;
   transition: border-color 160ms ease, transform 160ms ease;
 }
 
@@ -859,12 +899,6 @@ h1 {
 @media (max-width: 640px) {
   .nav-links {
     width: 100%;
-  }
-
-  .category-tile,
-  .product-card,
-  .sale-card {
-    flex-basis: min(82vw, 320px);
   }
 
   .sale-card {

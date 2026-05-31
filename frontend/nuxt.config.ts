@@ -2,6 +2,12 @@
 export default defineNuxtConfig({
   ssr: true,
   devtools: { enabled: true },
+  modules: ['@nuxt/ui'],
+  css: ['~/assets/css/main.css'],
+  ui: {
+    colorMode: false,
+    fonts: false,
+  },
   runtimeConfig: {
     apiBase: process.env.NUXT_API_BASE || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8080/api',
     public: {
