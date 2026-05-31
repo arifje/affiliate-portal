@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Sites\Schemas;
 
 use App\Models\Site;
+use DateTimeZone;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
@@ -62,11 +63,14 @@ class SiteForm
                             ->required()
                             ->default('EUR')
                             ->maxLength(3),
-                        TextInput::make('timezone')
+                        Select::make('timezone')
                             ->label(__('admin.fields.timezone'))
                             ->required()
                             ->default('Europe/Amsterdam')
-                            ->maxLength(255),
+                            ->options(self::timezoneOptions())
+                            ->searchable()
+                            ->preload()
+                            ->native(false),
                     ])
                     ->columns(3),
                 Section::make(__('admin.sections.presentation'))
@@ -200,6 +204,16 @@ class SiteForm
         }
 
         return null;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function timezoneOptions(): array
+    {
+        return collect(DateTimeZone::listIdentifiers())
+            ->mapWithKeys(fn (string $timezone): array => [$timezone => $timezone])
+            ->all();
     }
 
     /**
