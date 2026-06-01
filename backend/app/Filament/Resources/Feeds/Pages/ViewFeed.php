@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Feeds\Pages;
 
 use App\Filament\Resources\Feeds\FeedResource;
 use App\Filament\Resources\Feeds\Pages\Concerns\AnalyzesFeedSource;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -19,6 +20,11 @@ class ViewFeed extends ViewRecord
             $this->analyzeSourceAction(),
             $this->runImportAction(),
             EditAction::make(),
+            DeleteAction::make()
+                ->modal(false)
+                ->requiresConfirmation(false)
+                ->extraAttributes(['wire:confirm' => __('admin.messages.deleting_feed')])
+                ->successRedirectUrl(FeedResource::getUrl()),
         ];
     }
 }

@@ -3,11 +3,14 @@
 namespace Database\Seeders\Demo;
 
 use App\Models\Category;
+use App\Models\CanonicalField;
 use App\Models\Feed;
 use App\Models\Partner;
 use App\Models\Product;
 use App\Models\Site;
+use Database\Seeders\FeedMapping\CanonicalFieldSeeder;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class DemoHartslagmetersSeeder extends Seeder
 {
@@ -16,6 +19,8 @@ class DemoHartslagmetersSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(CanonicalFieldSeeder::class);
+
         $site = Site::query()->firstOrCreate(
             ['slug' => 'hartslagmeters_nl'],
             [
@@ -39,35 +44,55 @@ class DemoHartslagmetersSeeder extends Seeder
         );
 
         $partner = Partner::query()->updateOrCreate(
-            ['slug' => 'demo-sportshop'],
+            ['slug' => 'demo-awin-sportshop'],
             [
-                'name' => 'Demo Sportshop',
-                'provider' => 'custom',
+                'name' => 'Demo Awin Sportshop',
+                'provider' => 'awin',
                 'website_url' => 'https://example.com',
                 'settings' => [
                     'demo' => true,
-                    'note' => 'Local demo merchant for storefront and product management testing.',
+                    'note' => 'Local Awin-style demo merchant for feed import and storefront testing.',
                 ],
                 'is_active' => true,
             ]
         );
 
+        $sourceFilePath = $this->writeDemoFeedFile($site);
+        $analysis = $this->demoFeedAnalysis();
+
         $feed = Feed::query()->updateOrCreate(
             [
                 'site_id' => $site->id,
-                'slug' => 'hartslagmeters-demo-feed',
+                'slug' => 'hartslagmeters-demo-awin-csv',
             ],
             [
                 'partner_id' => $partner->id,
-                'name' => 'Hartslagmeters Demo Feed',
-                'provider' => 'custom',
-                'source_type' => 'manual',
+                'name' => 'Hartslagmeters Demo Awin CSV',
+                'provider' => 'awin',
+                'source_type' => 'file',
+                'source_format' => 'csv',
+                'source_encoding' => 'utf-8',
+                'source_file_path' => $sourceFilePath,
+                'source_file_original_name' => ['demo-hartslagmeters-awin.csv'],
                 'source_url' => null,
-                'mapping' => [
-                    'demo' => true,
-                    'source' => 'DemoHartslagmetersSeeder',
-                ],
-                'schedule' => null,
+                'delimiter' => ';',
+                'enclosure' => '"',
+                'decimal_separator' => ',',
+                'thousands_separator' => '.',
+                'row_selector' => 'rows',
+                'first_row_is_header' => true,
+                'available_elements' => $analysis['available_elements'],
+                'sample_fields' => $analysis['sample_fields'],
+                'sample_payload' => $analysis['sample_payload'],
+                'last_analyzed_at' => now(),
+                'unique_identifier_field' => 'external_id',
+                'import_create_new' => true,
+                'import_update_existing' => true,
+                'import_disable_missing_globally' => false,
+                'import_disable_missing_for_site' => false,
+                'import_delete_missing' => false,
+                'import_update_search_indexes' => true,
+                'schedule' => 'manual',
                 'last_import_status' => 'demo_seeded',
                 'last_import_message' => 'Demo products seeded locally.',
                 'last_import_started_at' => now(),
@@ -75,6 +100,8 @@ class DemoHartslagmetersSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        $this->seedProductFieldMappings($feed);
 
         $categories = $this->seedCategories($site);
 
@@ -124,8 +151,10 @@ class DemoHartslagmetersSeeder extends Seeder
                         'connectivity' => $product['connectivity'],
                     ],
                     'raw_payload' => [
-                        'demo_provider' => 'custom',
-                        'source_row' => $product['provider_product_id'],
+                        'aw_product_id' => $product['provider_product_id'],
+                        'merchant_product_id' => $product['sku'],
+                        'product_name' => $product['title'],
+                        'search_price' => number_format((float) $product['price'], 2, ',', ''),
                     ],
                     'imported_at' => now(),
                     'published_at' => now(),
@@ -186,6 +215,186 @@ class DemoHartslagmetersSeeder extends Seeder
                 ),
             ])
             ->all();
+    }
+
+    private function writeDemoFeedFile(Site $site): string
+    {
+        $path = "feeds/site-{$site->id}/demo-hartslagmeters-awin.csv";
+        $handle = fopen('php://temp', 'r+');
+
+        $headers = [
+            'aw_product_id',
+            'merchant_product_id',
+            'product_name',
+            'description',
+            'merchant_product_category_path',
+            'merchant_category',
+            'aw_deep_link',
+            'merchant_deep_link',
+            'merchant_image_url',
+            'search_price',
+            'rrp_price',
+            'currency',
+            'delivery_cost',
+            'in_stock',
+            'stock_quantity',
+            'condition',
+            'brand_name',
+            'product_GTIN',
+            'mpn',
+            'colour',
+            'product_type',
+            'delivery_time',
+        ];
+
+        fputcsv($handle, $headers, ';', '"', '');
+
+        foreach ($this->products() as $product) {
+            fputcsv($handle, [
+                $product['provider_product_id'],
+                $product['sku'],
+                $product['title'],
+                $product['description'],
+                $product['merchant_category'],
+                $product['merchant_category'],
+                'https://www.awin1.com/cread.php?awinmid=demo&ued='.rawurlencode('https://example.com/go/'.$product['slug']),
+                'https://example.com/products/'.$product['slug'],
+                $this->placeholderUrl($product['title'], $product['image_bg'], $product['image_fg']),
+                number_format((float) $product['price'], 2, ',', ''),
+                $product['old_price'] !== null ? number_format((float) $product['old_price'], 2, ',', '') : '',
+                'EUR',
+                number_format((float) $product['shipping_cost'], 2, ',', ''),
+                $product['availability'] === 'in_stock' ? 'yes' : 'no',
+                $product['stock_quantity'],
+                'new',
+                $product['brand'],
+                $product['ean'],
+                $product['mpn'],
+                $product['color'],
+                $product['product_type'],
+                $product['delivery_time'],
+            ], ';', '"', '');
+        }
+
+        rewind($handle);
+        Storage::disk('local')->put($path, stream_get_contents($handle));
+        fclose($handle);
+
+        return $path;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function demoFeedAnalysis(): array
+    {
+        $sample = $this->products()[0];
+        $samplePayload = [
+            'aw_product_id' => $sample['provider_product_id'],
+            'merchant_product_id' => $sample['sku'],
+            'product_name' => $sample['title'],
+            'description' => $sample['description'],
+            'merchant_product_category_path' => $sample['merchant_category'],
+            'merchant_category' => $sample['merchant_category'],
+            'aw_deep_link' => 'https://www.awin1.com/cread.php?awinmid=demo',
+            'merchant_deep_link' => 'https://example.com/products/'.$sample['slug'],
+            'merchant_image_url' => $this->placeholderUrl($sample['title'], $sample['image_bg'], $sample['image_fg']),
+            'search_price' => number_format((float) $sample['price'], 2, ',', ''),
+            'rrp_price' => number_format((float) $sample['old_price'], 2, ',', ''),
+            'currency' => 'EUR',
+            'delivery_cost' => number_format((float) $sample['shipping_cost'], 2, ',', ''),
+            'in_stock' => 'yes',
+            'stock_quantity' => $sample['stock_quantity'],
+            'condition' => 'new',
+            'brand_name' => $sample['brand'],
+            'product_GTIN' => $sample['ean'],
+            'mpn' => $sample['mpn'],
+            'colour' => $sample['color'],
+            'product_type' => $sample['product_type'],
+            'delivery_time' => $sample['delivery_time'],
+        ];
+
+        return [
+            'available_elements' => [
+                ['path' => 'rows', 'label' => 'rows', 'count' => count($this->products())],
+            ],
+            'sample_fields' => collect($samplePayload)
+                ->map(fn (mixed $sample, string $path): array => [
+                    'path' => $path,
+                    'label' => $path,
+                    'sample' => $sample,
+                ])
+                ->values()
+                ->all(),
+            'sample_payload' => $samplePayload,
+        ];
+    }
+
+    private function seedProductFieldMappings(Feed $feed): void
+    {
+        $mappings = [
+            'external_id' => ['source_field' => 'aw_product_id'],
+            'sku' => ['source_field' => 'merchant_product_id'],
+            'title' => ['source_field' => 'product_name'],
+            'description' => ['source_field' => 'description'],
+            'category_path' => ['source_field' => 'merchant_product_category_path'],
+            'merchant_category' => ['source_field' => 'merchant_category'],
+            'merchant_url' => ['source_field' => 'merchant_deep_link'],
+            'affiliate_url' => ['source_field' => 'aw_deep_link'],
+            'image_url' => ['source_field' => 'merchant_image_url'],
+            'price' => ['source_field' => 'search_price', 'transform_type' => 'money'],
+            'old_price' => ['source_field' => 'rrp_price', 'transform_type' => 'money'],
+            'currency' => ['source_field' => 'currency'],
+            'shipping_cost' => ['source_field' => 'delivery_cost', 'transform_type' => 'money'],
+            'availability' => ['source_field' => 'in_stock', 'transform_type' => 'availability'],
+            'stock_quantity' => ['source_field' => 'stock_quantity', 'transform_type' => 'integer'],
+            'condition' => ['source_field' => 'condition'],
+            'brand' => ['source_field' => 'brand_name'],
+            'gtin' => ['source_field' => 'product_GTIN'],
+            'mpn' => ['source_field' => 'mpn'],
+            'color' => ['source_field' => 'colour'],
+            'product_type' => ['source_field' => 'product_type'],
+            'delivery_time' => ['source_field' => 'delivery_time'],
+        ];
+        $sampleFields = collect($feed->sample_fields ?? [])->keyBy('path');
+
+        foreach ($mappings as $canonicalKey => $mapping) {
+            $field = CanonicalField::query()->where('key', $canonicalKey)->first();
+
+            if (! $field) {
+                continue;
+            }
+
+            $sourceField = $mapping['source_field'];
+
+            $feed->productFieldMappings()->updateOrCreate(
+                ['canonical_field_id' => $field->id],
+                [
+                    'mapping_action' => 'map',
+                    'source_field' => $sourceField,
+                    'source_path' => $sourceField,
+                    'source_sample' => $sampleFields->get($sourceField)['sample'] ?? null,
+                    'fallback_fields' => $mapping['fallback_fields'] ?? [],
+                    'default_value' => $mapping['default_value'] ?? null,
+                    'transform_type' => $mapping['transform_type'] ?? $this->defaultTransformForField($field),
+                    'transform_config' => $mapping['transform_config'] ?? null,
+                    'is_required' => $field->is_required,
+                    'sort_order' => $field->sort_order,
+                ]
+            );
+        }
+    }
+
+    private function defaultTransformForField(CanonicalField $field): string
+    {
+        return match ($field->data_type) {
+            'array' => 'array',
+            'boolean' => 'boolean',
+            'decimal' => 'decimal',
+            'integer' => 'integer',
+            'url' => 'url',
+            default => 'copy',
+        };
     }
 
     /**

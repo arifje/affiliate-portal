@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Feeds\Tables;
 
+use App\Filament\Resources\Feeds\FeedResource;
 use App\Models\Feed;
 use App\Services\Feeds\FeedImporter;
 use Filament\Actions\Action;
@@ -146,7 +147,10 @@ class FeedsTable
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
-                    ->modalDescription(__('admin.messages.deleting_feed')),
+                    ->modal(false)
+                    ->requiresConfirmation(false)
+                    ->extraAttributes(['wire:confirm' => __('admin.messages.deleting_feed')])
+                    ->successRedirectUrl(FeedResource::getUrl()),
             ]);
     }
 }

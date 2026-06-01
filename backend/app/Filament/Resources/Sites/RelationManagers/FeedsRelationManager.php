@@ -232,7 +232,9 @@ class FeedsRelationManager extends RelationManager
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
-                    ->modalDescription(__('admin.messages.deleting_feed')),
+                    ->modal(false)
+                    ->requiresConfirmation(false)
+                    ->extraAttributes(['wire:confirm' => __('admin.messages.deleting_feed')]),
             ])
             ->defaultSort('created_at', 'desc');
     }

@@ -20,7 +20,11 @@ class EditFeed extends EditRecord
             $this->analyzeSourceAction(),
             $this->runImportAction(),
             ViewAction::make(),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->modal(false)
+                ->requiresConfirmation(false)
+                ->extraAttributes(['wire:confirm' => __('admin.messages.deleting_feed')])
+                ->successRedirectUrl(FeedResource::getUrl()),
         ];
     }
 }
