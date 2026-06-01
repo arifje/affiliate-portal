@@ -3,6 +3,8 @@
 namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\Feeds\FeedResource;
+use App\Filament\Resources\Feeds\Pages\CreateFeed;
+use App\Filament\Resources\Feeds\Pages\EditFeed;
 use App\Filament\Resources\Feeds\Pages\ListFeeds;
 use App\Filament\Resources\Feeds\Pages\ViewFeed;
 use App\Models\Feed;
@@ -16,6 +18,33 @@ use Tests\TestCase;
 class FeedResourceTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_feed_create_page_uses_wizard_steps(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+
+        Livewire::actingAs($user)
+            ->test(CreateFeed::class)
+            ->assertSee(__('admin.wizard.feed_identity.title'))
+            ->assertSee(__('admin.wizard.source.title'))
+            ->assertSee(__('admin.wizard.analyze.title'))
+            ->assertSee(__('admin.wizard.mapping.title'))
+            ->assertSee(__('admin.wizard.import_strategy.title'));
+    }
+
+    public function test_feed_edit_page_uses_wizard_steps(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $feed = $this->createFeed();
+
+        Livewire::actingAs($user)
+            ->test(EditFeed::class, ['record' => $feed->getRouteKey()])
+            ->assertSee(__('admin.wizard.feed_identity.title'))
+            ->assertSee(__('admin.wizard.source.title'))
+            ->assertSee(__('admin.wizard.analyze.title'))
+            ->assertSee(__('admin.wizard.mapping.title'))
+            ->assertSee(__('admin.wizard.import_strategy.title'));
+    }
 
     public function test_feed_can_be_deleted_from_the_table_without_livewire_modal_errors(): void
     {

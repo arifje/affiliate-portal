@@ -204,6 +204,35 @@ return [
         'run_feed_import' => 'This feed will be imported now using the product field mappings and import strategy.',
     ],
 
+    'wizard' => [
+        'analyze' => [
+            'description' => 'Analyze the file, URL or API response and choose the repeating product element.',
+            'status_analyzed' => 'Analyzed source: :elements candidate elements and :fields sample fields stored.',
+            'status_label' => 'Analysis status',
+            'status_pending' => 'Save the feed first, then use Analyze source from the feed page to detect elements and sample fields.',
+            'title' => 'Analyze',
+        ],
+        'feed_identity' => [
+            'description' => 'Choose the site, platform, partner and basic feed identity.',
+            'title' => 'Feed',
+        ],
+        'import_strategy' => [
+            'description' => 'Decide what should happen when the feed runs again.',
+            'title' => 'Import strategy',
+        ],
+        'mapping' => [
+            'description' => 'Choose the unique identifier, schedule and prepare field mapping.',
+            'status_label' => 'Mapping status',
+            'status_saved' => ':count product field mappings exist. Use the Product field mappings table on the feed page to create or edit mappings.',
+            'status_unsaved' => 'Save and analyze the feed first. Then create draft mappings from the Product field mappings table on the feed page.',
+            'title' => 'Mapping',
+        ],
+        'source' => [
+            'description' => 'Configure a URL/API source or upload a CSV, XML, JSON or JSONL file.',
+            'title' => 'Source',
+        ],
+    ],
+
     'options' => [
         'availability' => [
             'in_stock' => 'In stock',

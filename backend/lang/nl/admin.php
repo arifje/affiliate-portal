@@ -204,6 +204,35 @@ return [
         'run_feed_import' => 'Deze feed wordt nu geimporteerd met de productveldmappings en importstrategie.',
     ],
 
+    'wizard' => [
+        'analyze' => [
+            'description' => 'Analyseer het bestand, de URL of API-response en kies het herhalende productelement.',
+            'status_analyzed' => 'Bron geanalyseerd: :elements mogelijke elementen en :fields voorbeeldvelden opgeslagen.',
+            'status_label' => 'Analysestatus',
+            'status_pending' => 'Sla de feed eerst op en gebruik daarna Bron analyseren op de feedpagina om elementen en voorbeeldvelden te detecteren.',
+            'title' => 'Analyse',
+        ],
+        'feed_identity' => [
+            'description' => 'Kies de site, het platform, de partner en de basisgegevens van de feed.',
+            'title' => 'Feed',
+        ],
+        'import_strategy' => [
+            'description' => 'Bepaal wat er moet gebeuren wanneer de feed opnieuw draait.',
+            'title' => 'Importstrategie',
+        ],
+        'mapping' => [
+            'description' => 'Kies de unieke identifier, planning en bereid de veldmapping voor.',
+            'status_label' => 'Mappingstatus',
+            'status_saved' => ':count productveldmappings bestaan. Gebruik de tabel Productveldmappings op de feedpagina om mappings aan te maken of te bewerken.',
+            'status_unsaved' => 'Sla de feed eerst op en analyseer de bron. Maak daarna conceptmappings vanuit de tabel Productveldmappings op de feedpagina.',
+            'title' => 'Mapping',
+        ],
+        'source' => [
+            'description' => 'Configureer een URL/API-bron of upload een CSV-, XML-, JSON- of JSONL-bestand.',
+            'title' => 'Bron',
+        ],
+    ],
+
     'options' => [
         'availability' => [
             'in_stock' => 'Op voorraad',
