@@ -32,6 +32,8 @@ services:
     volumes:
       - ./frontend:/var/www/frontend
       - frontend_node_modules:/var/www/frontend/node_modules
+      - frontend_nuxt:/var/www/frontend/.nuxt
+      - frontend_output:/var/www/frontend/.output
     depends_on:
       - nginx
 
@@ -56,5 +58,7 @@ services:
 
 volumes:
   frontend_node_modules:
+  frontend_nuxt:
+  frontend_output:
   mariadb_data:
   redis_data:

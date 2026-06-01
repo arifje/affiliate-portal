@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   ssr: true,
   devtools: { enabled: true },
+  experimental: {
+    appManifest: false,
+  },
   modules: ['@nuxt/ui'],
   css: ['~/assets/css/main.css'],
   ui: {
