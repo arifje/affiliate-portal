@@ -6,6 +6,7 @@ use App\Models\Feed;
 use App\Models\FeedMappingProfile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
@@ -31,8 +32,18 @@ class FeedStructureAnalyzer
         }
 
         $payload = $this->fetchPayload($feed);
+        $profile->forceFill([
+            'source_format' => $feed->source_format ?: $profile->source_format,
+            'source_encoding' => $feed->source_encoding ?: $profile->source_encoding,
+            'delimiter' => $feed->delimiter,
+            'enclosure' => $feed->enclosure,
+            'decimal_separator' => $feed->decimal_separator ?: '.',
+            'thousands_separator' => $feed->thousands_separator,
+            'row_selector' => $feed->row_selector ?: $profile->row_selector,
+            'first_row_is_header' => $feed->first_row_is_header ?? true,
+        ]);
 
-        return match ($profile->source_format) {
+        return match ($feed->source_format ?: $profile->source_format) {
             'json', 'jsonl' => $this->analyzeJson($payload, $profile),
             'xml' => $this->analyzeXml($payload, $profile),
             default => $this->analyzeCsv($payload, $profile),
@@ -47,17 +58,15 @@ class FeedStructureAnalyzer
             throw new RuntimeException('The feed source URL or file path is empty.');
         }
 
-        if ($feed->source_type === 'file' && is_file($source)) {
-            $payload = file_get_contents($source);
+        if ($feed->source_type === 'file' && File::isFile($source)) {
+            $payload = File::get($source);
 
-            if ($payload === false) {
-                throw new RuntimeException('The feed file could not be read.');
-            }
-
-            return $payload;
+            return (string) $payload;
         }
 
-        $response = Http::timeout(20)->get($source);
+        $response = Http::timeout(20)
+            ->withHeaders($feed->request_headers ?? [])
+            ->get($source, $feed->request_query_params ?? []);
 
         if (! $response->successful()) {
             throw new RuntimeException("The feed returned HTTP {$response->status()}.");

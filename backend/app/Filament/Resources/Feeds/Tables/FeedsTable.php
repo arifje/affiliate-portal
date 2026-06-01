@@ -46,10 +46,10 @@ class FeedsTable
                     ->label(__('admin.fields.source_type'))
                     ->badge()
                     ->searchable(),
-                TextColumn::make('mappingProfile.name')
-                    ->label(__('admin.fields.mapping_profile'))
-                    ->searchable()
-                    ->toggleable(),
+                TextColumn::make('source_format')
+                    ->label(__('admin.fields.source_format'))
+                    ->badge()
+                    ->searchable(),
                 TextColumn::make('unique_identifier_field')
                     ->label(__('admin.fields.unique_identifier_field'))
                     ->placeholder('provider_product_id')

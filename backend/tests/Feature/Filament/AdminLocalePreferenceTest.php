@@ -55,7 +55,7 @@ class AdminLocalePreferenceTest extends TestCase
             ->get('/admin/feeds')
             ->assertOk()
             ->assertSee('Brontype')
-            ->assertSee('Mappingprofiel')
+            ->assertSee('Bronformaat')
             ->assertSee('Imports');
 
         $this

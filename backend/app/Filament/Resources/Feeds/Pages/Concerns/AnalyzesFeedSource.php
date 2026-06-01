@@ -37,15 +37,8 @@ trait AnalyzesFeedSource
     {
         /** @var Feed $feed */
         $feed = $this->getRecord();
-
-        if (! $feed->mappingProfile) {
-            Notification::make()
-                ->danger()
-                ->title(__('admin.messages.mapping_profile_required'))
-                ->send();
-
-            return;
-        }
+        $feed->ensureMappingProfile();
+        $feed->refresh();
 
         try {
             $analysis = app(FeedStructureAnalyzer::class)->analyze($feed);
@@ -66,6 +59,10 @@ trait AnalyzesFeedSource
             'sample_payload' => $analysis['sample_payload'],
             'last_analyzed_at' => now(),
         ])->save();
+
+        $feed->forceFill([
+            'row_selector' => $analysis['row_selector'],
+        ])->saveQuietly();
 
         Notification::make()
             ->success()

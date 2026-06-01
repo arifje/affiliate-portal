@@ -4,11 +4,11 @@ namespace App\Filament\Resources\Feeds\Schemas;
 
 use App\Models\CanonicalField;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\KeyValue;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -31,7 +31,8 @@ class FeedForm
                             ->relationship('partner', 'name')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->helperText(__('admin.helpers.partner_provider')),
                         TextInput::make('name')
                             ->label(__('admin.fields.name'))
                             ->required()
@@ -40,10 +41,6 @@ class FeedForm
                             ->label(__('admin.fields.slug'))
                             ->required()
                             ->maxLength(255),
-                        Select::make('provider')
-                            ->label(__('admin.fields.provider'))
-                            ->options(__('admin.options.providers'))
-                            ->required(),
                         Toggle::make('is_active')
                             ->label(__('admin.fields.is_active'))
                             ->required()
@@ -57,25 +54,62 @@ class FeedForm
                             ->options(__('admin.options.source_types'))
                             ->required()
                             ->default('url'),
+                        Select::make('source_format')
+                            ->label(__('admin.fields.source_format'))
+                            ->options(__('admin.options.source_formats'))
+                            ->required()
+                            ->default('csv'),
+                        TextInput::make('source_encoding')
+                            ->label(__('admin.fields.source_encoding'))
+                            ->required()
+                            ->default('utf-8')
+                            ->maxLength(255),
                         Textarea::make('source_url')
                             ->label(__('admin.fields.source_url'))
                             ->rows(3)
                             ->columnSpanFull(),
+                        TextInput::make('delimiter')
+                            ->label(__('admin.fields.delimiter'))
+                            ->maxLength(8),
+                        TextInput::make('enclosure')
+                            ->label(__('admin.fields.enclosure'))
+                            ->maxLength(8),
+                        TextInput::make('decimal_separator')
+                            ->label(__('admin.fields.decimal_separator'))
+                            ->required()
+                            ->default('.')
+                            ->maxLength(4),
+                        TextInput::make('thousands_separator')
+                            ->label(__('admin.fields.thousands_separator'))
+                            ->maxLength(4),
+                        Toggle::make('first_row_is_header')
+                            ->label(__('admin.fields.first_row_is_header'))
+                            ->default(true),
+                        TextInput::make('row_selector')
+                            ->label(__('admin.fields.primary_element'))
+                            ->helperText(__('admin.helpers.primary_element'))
+                            ->maxLength(255),
                         KeyValue::make('credentials')
                             ->label(__('admin.fields.credentials'))
                             ->keyLabel(__('admin.fields.key'))
                             ->valueLabel(__('admin.fields.default_value'))
                             ->columnSpanFull(),
+                        KeyValue::make('request_headers')
+                            ->label(__('admin.fields.request_headers'))
+                            ->keyLabel(__('admin.fields.header'))
+                            ->valueLabel(__('admin.fields.value'))
+                            ->helperText(__('admin.helpers.request_headers'))
+                            ->columnSpanFull(),
+                        KeyValue::make('request_query_params')
+                            ->label(__('admin.fields.request_query_params'))
+                            ->keyLabel(__('admin.fields.query_param'))
+                            ->valueLabel(__('admin.fields.value'))
+                            ->helperText(__('admin.helpers.request_query_params'))
+                            ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columns(3),
                 Section::make(__('admin.sections.mapping_and_schedule'))
                     ->schema([
-                        Select::make('mapping_profile_id')
-                            ->label(__('admin.fields.mapping_profile'))
-                            ->relationship('mappingProfile', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->helperText(__('admin.helpers.mapping_profile')),
                         Select::make('unique_identifier_field')
                             ->label(__('admin.fields.unique_identifier_field'))
                             ->options(fn (): array => CanonicalField::query()

@@ -29,9 +29,6 @@ class FeedInfolist
                         TextEntry::make('source_type')
                             ->label(__('admin.fields.source_type'))
                             ->badge(),
-                        TextEntry::make('mappingProfile.name')
-                            ->label(__('admin.fields.mapping_profile'))
-                            ->placeholder('-'),
                         TextEntry::make('unique_identifier_field')
                             ->label(__('admin.fields.unique_identifier_field'))
                             ->placeholder('provider_product_id'),
@@ -46,8 +43,24 @@ class FeedInfolist
                             ->label(__('admin.fields.source_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
+                        TextEntry::make('source_format')
+                            ->label(__('admin.fields.source_format'))
+                            ->badge(),
+                        TextEntry::make('source_encoding')
+                            ->label(__('admin.fields.source_encoding')),
+                        TextEntry::make('row_selector')
+                            ->label(__('admin.fields.primary_element'))
+                            ->placeholder('-'),
                         TextEntry::make('credentials')
                             ->label(__('admin.fields.credentials'))
+                            ->formatStateUsing(fn (?array $state): string => filled($state) ? __('admin.messages.configured') : __('admin.messages.not_configured'))
+                            ->placeholder(__('admin.messages.not_configured')),
+                        TextEntry::make('request_headers')
+                            ->label(__('admin.fields.request_headers'))
+                            ->formatStateUsing(fn (?array $state): string => filled($state) ? __('admin.messages.configured') : __('admin.messages.not_configured'))
+                            ->placeholder(__('admin.messages.not_configured')),
+                        TextEntry::make('request_query_params')
+                            ->label(__('admin.fields.request_query_params'))
                             ->formatStateUsing(fn (?array $state): string => filled($state) ? __('admin.messages.configured') : __('admin.messages.not_configured'))
                             ->placeholder(__('admin.messages.not_configured')),
                     ]),
