@@ -263,7 +263,9 @@ class ProductFieldMappingsRelationManager extends RelationManager
     private function templateMappingFor(CanonicalField $field, Feed $feed): ?array
     {
         $templates = collect(config('feed-mapping.provider_templates', []))
-            ->where('provider', $feed->provider);
+            ->where('provider', $feed->provider)
+            ->sortByDesc(fn (array $template): bool => ($template['source_format'] ?? null) === $feed->source_format)
+            ->values();
 
         foreach ($templates as $template) {
             $mapping = $template['mappings'][$field->key] ?? null;

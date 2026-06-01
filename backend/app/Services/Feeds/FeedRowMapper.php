@@ -297,6 +297,7 @@ class FeedRowMapper
             'availability' => $this->normalizeAvailability($value),
             'boolean' => $this->normalizeBoolean($value),
             'decimal', 'money' => $this->normalizeDecimal($value, $context),
+            'first_value' => $this->normalizeFirstValue($value),
             'integer' => $this->normalizeInteger($value),
             'lowercase' => Str::lower((string) $value),
             'uppercase' => Str::upper((string) $value),
@@ -321,6 +322,37 @@ class FeedRowMapper
             array_map('trim', explode($delimiter, (string) $value)),
             fn (string $item): bool => $item !== ''
         ));
+    }
+
+    private function normalizeFirstValue(mixed $value): ?string
+    {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (! $this->hasValue($item)) {
+                    continue;
+                }
+
+                if (is_array($item)) {
+                    $nestedValue = $this->normalizeFirstValue($item);
+
+                    if ($this->hasValue($nestedValue)) {
+                        return $nestedValue;
+                    }
+
+                    continue;
+                }
+
+                return trim((string) $item);
+            }
+
+            return null;
+        }
+
+        if (! $this->hasValue($value)) {
+            return null;
+        }
+
+        return trim((string) $value);
     }
 
     private function normalizeAvailability(mixed $value): string

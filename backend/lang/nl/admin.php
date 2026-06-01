@@ -300,6 +300,7 @@ return [
             'integer' => 'Integer',
             'boolean' => 'Boolean',
             'availability' => 'Beschikbaarheid',
+            'first_value' => 'Eerste waarde',
             'array' => 'Array',
             'url' => 'URL',
         ],

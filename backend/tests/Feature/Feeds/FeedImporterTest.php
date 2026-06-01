@@ -94,6 +94,156 @@ class FeedImporterTest extends TestCase
         ]);
     }
 
+    public function test_it_imports_nested_tradetracker_json_feed(): void
+    {
+        Storage::fake('local');
+        $this->seed(CanonicalFieldSeeder::class);
+
+        $site = Site::query()->create([
+            'name' => 'Keukenapparaten',
+            'slug' => 'keukenapparaten_nl',
+            'primary_domain' => 'keukenapparaten.test',
+            'currency' => 'EUR',
+            'is_active' => true,
+        ]);
+        $partner = Partner::query()->create([
+            'name' => 'TradeTracker Advertiser',
+            'slug' => 'tradetracker-advertiser',
+            'provider' => 'tradetracker',
+            'is_active' => true,
+        ]);
+        $path = 'feeds/site-'.$site->id.'/tradetracker.json';
+
+        Storage::disk('local')->put($path, json_encode([
+            'products' => [
+                [
+                    'ID' => '1183372',
+                    'campaignID' => 904,
+                    'name' => 'Whirlpool CRISP plaat AVM290 magnetron',
+                    'price' => [
+                        'currency' => 'EUR',
+                        'amount' => 27.989999999999998,
+                    ],
+                    'URL' => 'https://www.alternate.nl/tt/?tt=904_1594453_373017_&r=https%3A%2F%2Fwww.alternate.nl%2Fproduct%2F1183372',
+                    'images' => [
+                        'https://p.skitz.eu/750/725387.jpg',
+                    ],
+                    'description' => 'CRISP plaat voor Whirlpool/Bauknecht.',
+                    'categories' => [
+                        'Magnetron' => 'Magnetron',
+                    ],
+                    'properties' => [
+                        'availability' => ['niet op voorraad'],
+                        'deliveryCosts' => ['6.95'],
+                        'MPN' => ['AVM290'],
+                        'brand' => ['Whirlpool'],
+                        'condition' => ['Nieuw'],
+                        'GTIN' => ['8015250040258'],
+                        'weight' => ['616 gram'],
+                        'deliveryTime' => ['Niet op voorraad, geen informatie beschikbaar'],
+                        'Adviesprijs' => ['27.99'],
+                        'availability_date' => [''],
+                    ],
+                    'variations' => [],
+                ],
+                [
+                    'ID' => '1232842',
+                    'campaignID' => 904,
+                    'name' => 'Inventum blender',
+                    'price' => [
+                        'currency' => 'EUR',
+                        'amount' => 39.95,
+                    ],
+                    'URL' => 'https://www.alternate.nl/tt/?tt=904_1594453_373017_&r=https%3A%2F%2Fwww.alternate.nl%2Fproduct%2F1232842',
+                    'images' => [
+                        'https://p.skitz.eu/750/1232842.jpg',
+                    ],
+                    'description' => 'Blender voor dagelijks gebruik.',
+                    'categories' => [
+                        'Blender' => 'Blender',
+                    ],
+                    'properties' => [
+                        'availability' => ['op voorraad'],
+                        'deliveryCosts' => ['0'],
+                        'MPN' => ['BL-123'],
+                        'brand' => ['Inventum'],
+                        'condition' => ['Nieuw'],
+                        'GTIN' => ['8712876100000'],
+                        'weight' => ['1.4 kg'],
+                        'deliveryTime' => ['Morgen in huis'],
+                        'Adviesprijs' => ['49.95'],
+                        'availability_date' => [''],
+                    ],
+                    'variations' => [],
+                ],
+            ],
+        ], JSON_THROW_ON_ERROR));
+
+        $feed = Feed::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'name' => 'TradeTracker JSON',
+            'slug' => 'tradetracker-json',
+            'provider' => 'tradetracker',
+            'source_type' => 'file',
+            'source_format' => 'json',
+            'source_file_path' => $path,
+            'row_selector' => 'products',
+            'decimal_separator' => '.',
+            'unique_identifier_field' => 'external_id',
+            'import_create_new' => true,
+            'import_update_existing' => true,
+            'is_active' => true,
+        ]);
+
+        $this->mapField($feed, 'external_id', 'ID');
+        $this->mapField($feed, 'network_campaign_id', 'campaignID');
+        $this->mapField($feed, 'title', 'name');
+        $this->mapField($feed, 'description', 'description');
+        $this->mapField($feed, 'merchant_category', 'categories', 'first_value');
+        $this->mapField($feed, 'product_type', 'categories', 'first_value');
+        $this->mapField($feed, 'affiliate_url', 'URL');
+        $this->mapField($feed, 'tracking_url', 'URL');
+        $this->mapField($feed, 'image_url', 'images.0');
+        $this->mapField($feed, 'additional_image_urls', 'images', 'array');
+        $this->mapField($feed, 'price', 'price.amount', 'money');
+        $this->mapField($feed, 'old_price', 'properties.Adviesprijs.0', 'money');
+        $this->mapField($feed, 'currency', 'price.currency');
+        $this->mapField($feed, 'shipping_cost', 'properties.deliveryCosts.0', 'money');
+        $this->mapField($feed, 'availability', 'properties.availability.0', 'availability');
+        $this->mapField($feed, 'delivery_time', 'properties.deliveryTime.0');
+        $this->mapField($feed, 'condition', 'properties.condition.0');
+        $this->mapField($feed, 'brand', 'properties.brand.0');
+        $this->mapField($feed, 'gtin', 'properties.GTIN.0');
+        $this->mapField($feed, 'mpn', 'properties.MPN.0');
+        $this->mapField($feed, 'weight', 'properties.weight.0');
+
+        $batch = app(FeedImporter::class)->import($feed);
+
+        $this->assertSame('completed', $batch->status);
+        $this->assertSame(2, $batch->created_rows);
+        $this->assertSame(2, Product::query()->count());
+
+        $product = Product::query()
+            ->where('provider_product_id', '1183372')
+            ->firstOrFail();
+
+        $this->assertSame('Whirlpool CRISP plaat AVM290 magnetron', $product->title);
+        $this->assertSame('Whirlpool', $product->brand);
+        $this->assertSame('8015250040258', $product->ean);
+        $this->assertSame('AVM290', $product->mpn);
+        $this->assertSame('27.99', $product->price);
+        $this->assertSame('27.99', $product->old_price);
+        $this->assertSame('6.95', $product->shipping_cost);
+        $this->assertSame('out_of_stock', $product->availability);
+        $this->assertSame('Magnetron', $product->merchant_category);
+        $this->assertSame('Magnetron', $product->product_type);
+        $this->assertSame('https://p.skitz.eu/750/725387.jpg', $product->image_url);
+        $this->assertSame(['https://p.skitz.eu/750/725387.jpg'], $product->additional_image_urls);
+        $this->assertSame(904, $product->metadata['network']['campaign_id']);
+        $this->assertSame('616 gram', $product->metadata['specifications']['weight']);
+    }
+
     private function mapField(Feed $feed, string $canonicalKey, string $sourceField, string $transform = 'copy'): void
     {
         $field = CanonicalField::query()->where('key', $canonicalKey)->firstOrFail();
