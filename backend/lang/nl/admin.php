@@ -128,6 +128,7 @@ return [
         'slug' => 'Slug',
         'sort_order' => 'Sorteervolgorde',
         'source_encoding' => 'Broncodering',
+        'source_file' => 'Feedbestand',
         'source_field' => 'Bronveld',
         'source_format' => 'Bronformaat',
         'source_path' => 'Bronpad',
@@ -176,6 +177,7 @@ return [
         'primary_element' => 'Het herhalende feed-element dat een productrij vertegenwoordigt, zoals items.item, products.product of rows voor CSV.',
         'request_headers' => 'Optionele HTTP-headers voor afgeschermde feeds, zoals Authorization of X-API-Key.',
         'request_query_params' => 'Optionele queryparameters die aan de feed-URL worden toegevoegd, zoals api_key of token.',
+        'source_file' => 'Upload CSV-, XML-, JSON- of JSONL-bestanden. Bestanden worden prive opgeslagen en gebruikt door Bron analyseren/import.',
         'site_hero_image' => 'Wordt getoond in de homepage-hero in plaats van het oude product/categorie/feed-statistiekenblok. Gebruik JPG, PNG of WebP tot 10 MB.',
         'section_label_color' => 'Gebruikt voor kleine labels in hoofdletters, zoals de hero-badge.',
         'unique_identifier_field' => 'Canoniek veld waarmee bestaande producten bij herimport worden gematcht. Meestal provider_product_id, external_id, ean of product_url.',
@@ -217,6 +219,11 @@ return [
             'string' => 'String',
             'text' => 'Tekst',
             'url' => 'URL',
+        ],
+        'csv_delimiters' => [
+            ',' => 'Komma (,)',
+            ';' => 'Puntkomma (;)',
+            '|' => 'Pipe (|)',
         ],
         'field_groups' => [
             'identity' => 'Identiteit',

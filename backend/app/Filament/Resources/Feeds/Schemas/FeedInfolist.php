@@ -43,6 +43,10 @@ class FeedInfolist
                             ->label(__('admin.fields.source_url'))
                             ->placeholder('-')
                             ->columnSpanFull(),
+                        TextEntry::make('source_file_path')
+                            ->label(__('admin.fields.source_file'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
                         TextEntry::make('source_format')
                             ->label(__('admin.fields.source_format'))
                             ->badge(),

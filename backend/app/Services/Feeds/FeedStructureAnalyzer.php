@@ -5,8 +5,9 @@ namespace App\Services\Feeds;
 use App\Models\Feed;
 use App\Models\FeedMappingProfile;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
@@ -52,16 +53,28 @@ class FeedStructureAnalyzer
 
     private function fetchPayload(Feed $feed): string
     {
+        if ($feed->source_type === 'file') {
+            $source = trim((string) ($feed->source_file_path ?: $feed->source_url));
+
+            if ($source === '') {
+                throw new RuntimeException('Upload a feed file before analyzing this feed.');
+            }
+
+            if (Storage::disk('local')->exists($source)) {
+                return Storage::disk('local')->get($source);
+            }
+
+            if (File::isFile($source)) {
+                return (string) File::get($source);
+            }
+
+            throw new RuntimeException('The uploaded feed file could not be found.');
+        }
+
         $source = trim((string) $feed->source_url);
 
         if ($source === '') {
-            throw new RuntimeException('The feed source URL or file path is empty.');
-        }
-
-        if ($feed->source_type === 'file' && File::isFile($source)) {
-            $payload = File::get($source);
-
-            return (string) $payload;
+            throw new RuntimeException('The feed source URL is empty.');
         }
 
         $response = Http::timeout(20)

@@ -128,6 +128,7 @@ return [
         'slug' => 'Slug',
         'sort_order' => 'Sort order',
         'source_encoding' => 'Source encoding',
+        'source_file' => 'Feed file',
         'source_field' => 'Source field',
         'source_format' => 'Source format',
         'source_path' => 'Source path',
@@ -176,6 +177,7 @@ return [
         'primary_element' => 'The repeating feed element that represents one product row, such as items.item, products.product, or rows for CSV.',
         'request_headers' => 'Optional HTTP headers for protected feeds, for example Authorization or X-API-Key.',
         'request_query_params' => 'Optional query parameters appended to the feed URL, for example api_key or token.',
+        'source_file' => 'Upload CSV, XML, JSON or JSONL files. Files are stored privately and used by Analyze source/import.',
         'site_hero_image' => 'Shown on the homepage hero instead of the old product/category/feed stats block. Use JPG, PNG or WebP up to 10 MB.',
         'section_label_color' => 'Used for small uppercase labels such as the hero badge.',
         'unique_identifier_field' => 'Canonical field used to match existing products on re-import. Usually provider_product_id, external_id, ean, or product_url.',
@@ -217,6 +219,11 @@ return [
             'string' => 'String',
             'text' => 'Text',
             'url' => 'URL',
+        ],
+        'csv_delimiters' => [
+            ',' => 'Comma (,)',
+            ';' => 'Semicolon (;)',
+            '|' => 'Pipe (|)',
         ],
         'field_groups' => [
             'identity' => 'Identity',

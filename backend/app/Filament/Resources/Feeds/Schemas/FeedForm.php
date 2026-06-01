@@ -4,12 +4,14 @@ namespace App\Filament\Resources\Feeds\Schemas;
 
 use App\Models\CanonicalField;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class FeedForm
@@ -52,11 +54,13 @@ class FeedForm
                         Select::make('source_type')
                             ->label(__('admin.fields.source_type'))
                             ->options(__('admin.options.source_types'))
+                            ->live()
                             ->required()
                             ->default('url'),
                         Select::make('source_format')
                             ->label(__('admin.fields.source_format'))
                             ->options(__('admin.options.source_formats'))
+                            ->live()
                             ->required()
                             ->default('csv'),
                         TextInput::make('source_encoding')
@@ -66,13 +70,39 @@ class FeedForm
                             ->maxLength(255),
                         Textarea::make('source_url')
                             ->label(__('admin.fields.source_url'))
+                            ->visible(fn (Get $get): bool => $get('source_type') !== 'file')
+                            ->required(fn (Get $get): bool => $get('source_type') !== 'file')
                             ->rows(3)
                             ->columnSpanFull(),
-                        TextInput::make('delimiter')
+                        FileUpload::make('source_file_path')
+                            ->label(__('admin.fields.source_file'))
+                            ->visible(fn (Get $get): bool => $get('source_type') === 'file')
+                            ->required(fn (Get $get): bool => $get('source_type') === 'file')
+                            ->helperText(__('admin.helpers.source_file'))
+                            ->acceptedFileTypes([
+                                'text/csv',
+                                'text/plain',
+                                'application/csv',
+                                'application/json',
+                                'application/xml',
+                                'text/xml',
+                                'application/vnd.ms-excel',
+                            ])
+                            ->disk('local')
+                            ->directory(fn (Get $get): string => 'feeds/site-'.($get('site_id') ?: 'unassigned'))
+                            ->visibility('private')
+                            ->storeFileNamesIn('source_file_original_name')
+                            ->maxSize(131072)
+                            ->columnSpanFull(),
+                        Select::make('delimiter')
                             ->label(__('admin.fields.delimiter'))
-                            ->maxLength(8),
+                            ->options(__('admin.options.csv_delimiters'))
+                            ->default(',')
+                            ->visible(fn (Get $get): bool => $get('source_format') === 'csv')
+                            ->native(false),
                         TextInput::make('enclosure')
                             ->label(__('admin.fields.enclosure'))
+                            ->visible(fn (Get $get): bool => $get('source_format') === 'csv')
                             ->maxLength(8),
                         TextInput::make('decimal_separator')
                             ->label(__('admin.fields.decimal_separator'))
@@ -84,6 +114,7 @@ class FeedForm
                             ->maxLength(4),
                         Toggle::make('first_row_is_header')
                             ->label(__('admin.fields.first_row_is_header'))
+                            ->visible(fn (Get $get): bool => $get('source_format') === 'csv')
                             ->default(true),
                         TextInput::make('row_selector')
                             ->label(__('admin.fields.primary_element'))

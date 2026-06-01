@@ -20,6 +20,7 @@ class Feed extends Model
             'credentials' => 'encrypted:array',
             'request_headers' => 'encrypted:array',
             'request_query_params' => 'encrypted:array',
+            'source_file_original_name' => 'array',
             'mapping' => 'array',
             'last_import_started_at' => 'datetime',
             'last_import_finished_at' => 'datetime',
