@@ -30,6 +30,8 @@ class Profile extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?int $navigationSort = 95;
 
     protected static ?string $slug = 'profile';
