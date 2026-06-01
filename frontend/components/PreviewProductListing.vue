@@ -404,8 +404,11 @@ useHead(() => ({
             v-if="hasActiveFacetFilters"
             class="clear-filters"
             :to="clearFilterLocation()"
+            aria-label="Wis alle actieve filters"
           >
-            Wis filters ({{ activeFacetCount }})
+            <span class="clear-icon" aria-hidden="true">x</span>
+            <span>Wis filters</span>
+            <span class="clear-count">{{ activeFacetCount }}</span>
           </NuxtLink>
 
           <section>
@@ -415,9 +418,15 @@ useHead(() => ({
               :key="category.id"
               :class="{ 'is-active': isCategorySelected(category.slug) }"
               :to="toggleCategoryLocation(category.slug)"
+              :aria-label="isCategorySelected(category.slug) ? `Verwijder filter ${category.name}` : `Filter op ${category.name}`"
             >
               <span>{{ category.name }}</span>
-              <strong>{{ category.products_count }}</strong>
+              <span
+                v-if="isCategorySelected(category.slug)"
+                class="filter-remove"
+                aria-hidden="true"
+              >-</span>
+              <span v-else class="filter-count">{{ category.products_count }}</span>
             </NuxtLink>
           </section>
 
@@ -428,9 +437,15 @@ useHead(() => ({
               :key="brand.slug"
               :class="{ 'is-active': isBrandSelected(brand.slug) }"
               :to="toggleBrandLocation(brand.slug)"
+              :aria-label="isBrandSelected(brand.slug) ? `Verwijder filter ${brand.name}` : `Filter op ${brand.name}`"
             >
               <span>{{ brand.name }}</span>
-              <strong>{{ brand.products_count }}</strong>
+              <span
+                v-if="isBrandSelected(brand.slug)"
+                class="filter-remove"
+                aria-hidden="true"
+              >-</span>
+              <span v-else class="filter-count">{{ brand.products_count }}</span>
             </NuxtLink>
           </section>
         </aside>
@@ -457,8 +472,11 @@ useHead(() => ({
                 v-if="hasActiveFacetFilters"
                 class="clear-filters"
                 :to="clearFilterLocation()"
+                aria-label="Wis alle actieve filters"
               >
-                Wis filters
+                <span class="clear-icon" aria-hidden="true">x</span>
+                <span>Wis filters</span>
+                <span class="clear-count">{{ activeFacetCount }}</span>
               </NuxtLink>
 
               <section>
@@ -469,9 +487,15 @@ useHead(() => ({
                     :key="category.id"
                     :class="{ 'is-active': isCategorySelected(category.slug) }"
                     :to="toggleCategoryLocation(category.slug)"
+                    :aria-label="isCategorySelected(category.slug) ? `Verwijder filter ${category.name}` : `Filter op ${category.name}`"
                   >
                     <span>{{ category.name }}</span>
-                    <strong>{{ category.products_count }}</strong>
+                    <span
+                      v-if="isCategorySelected(category.slug)"
+                      class="filter-remove"
+                      aria-hidden="true"
+                    >-</span>
+                    <span v-else class="filter-count">{{ category.products_count }}</span>
                   </NuxtLink>
                 </div>
               </section>
@@ -484,9 +508,15 @@ useHead(() => ({
                     :key="brand.slug"
                     :class="{ 'is-active': isBrandSelected(brand.slug) }"
                     :to="toggleBrandLocation(brand.slug)"
+                    :aria-label="isBrandSelected(brand.slug) ? `Verwijder filter ${brand.name}` : `Filter op ${brand.name}`"
                   >
                     <span>{{ brand.name }}</span>
-                    <strong>{{ brand.products_count }}</strong>
+                    <span
+                      v-if="isBrandSelected(brand.slug)"
+                      class="filter-remove"
+                      aria-hidden="true"
+                    >-</span>
+                    <span v-else class="filter-count">{{ brand.products_count }}</span>
                   </NuxtLink>
                 </div>
               </section>
@@ -681,16 +711,18 @@ h1 {
 .filters h2 {
   margin-bottom: 12px;
   font-size: 1rem;
+  font-weight: 900;
 }
 
 .filters a {
   display: flex;
   gap: 12px;
+  align-items: center;
   justify-content: space-between;
   padding: 9px 0;
   border-top: 1px solid #edf1ef;
   font-size: 0.92rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .filters a.is-active {
@@ -706,28 +738,62 @@ h1 {
   border-top: 0;
 }
 
-.filters strong {
+.filter-count,
+.filter-remove {
+  flex: 0 0 auto;
   color: var(--site-primary);
+  font-weight: 700;
+}
+
+.filter-remove {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ffffff;
+  line-height: 1;
 }
 
 .clear-filters {
   min-height: 36px;
   display: inline-flex;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 0 12px;
   border: 1px solid #d9e1dd;
   border-radius: 8px;
   background: #ffffff;
-  color: var(--site-primary);
+  color: var(--site-text);
   font-size: 0.88rem;
-  font-weight: 900;
+  font-weight: 700;
   text-decoration: none;
 }
 
 .clear-filters:hover {
   border-color: var(--site-primary);
   background: var(--site-soft);
+}
+
+.clear-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--site-primary);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.clear-count {
+  margin-left: auto;
+  color: var(--site-primary);
+  font-weight: 700;
 }
 
 .mobile-filters {
@@ -956,7 +1022,7 @@ h1 {
     background: #ffffff;
     color: var(--site-text);
     font-size: 0.88rem;
-    font-weight: 850;
+    font-weight: 500;
     text-decoration: none;
   }
 
@@ -964,10 +1030,6 @@ h1 {
   .filter-chips a:hover {
     border-color: var(--site-primary);
     background: var(--site-soft);
-  }
-
-  .filter-chips strong {
-    color: var(--site-primary);
   }
 }
 
