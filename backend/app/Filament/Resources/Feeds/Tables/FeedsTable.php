@@ -46,6 +46,10 @@ class FeedsTable
                     ->label(__('admin.fields.mapping_profile'))
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('unique_identifier_field')
+                    ->label(__('admin.fields.unique_identifier_field'))
+                    ->placeholder('provider_product_id')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('products_count')
                     ->label(__('admin.fields.products'))
                     ->numeric()
@@ -67,6 +71,14 @@ class FeedsTable
                 IconColumn::make('is_active')
                     ->label(__('admin.fields.is_active'))
                     ->boolean(),
+                IconColumn::make('import_create_new')
+                    ->label(__('admin.fields.import_create_new'))
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('import_update_existing')
+                    ->label(__('admin.fields.import_update_existing'))
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label(__('admin.fields.created_at'))
                     ->dateTime()

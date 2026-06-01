@@ -33,6 +33,9 @@ class FeedInfolist
                         TextEntry::make('mappingProfile.name')
                             ->label(__('admin.fields.mapping_profile'))
                             ->placeholder('-'),
+                        TextEntry::make('unique_identifier_field')
+                            ->label(__('admin.fields.unique_identifier_field'))
+                            ->placeholder('provider_product_id'),
                         IconEntry::make('is_active')
                             ->label(__('admin.fields.is_active'))
                             ->boolean(),
@@ -72,6 +75,32 @@ class FeedInfolist
                             ->placeholder('-'),
                         TextEntry::make('last_import_message')
                             ->label(__('admin.fields.last_import_message'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
+                Section::make(__('admin.sections.import_strategy'))
+                    ->schema([
+                        IconEntry::make('import_create_new')
+                            ->label(__('admin.fields.import_create_new'))
+                            ->boolean(),
+                        IconEntry::make('import_update_existing')
+                            ->label(__('admin.fields.import_update_existing'))
+                            ->boolean(),
+                        IconEntry::make('import_disable_missing_globally')
+                            ->label(__('admin.fields.import_disable_missing_globally'))
+                            ->boolean(),
+                        IconEntry::make('import_disable_missing_for_site')
+                            ->label(__('admin.fields.import_disable_missing_for_site'))
+                            ->boolean(),
+                        IconEntry::make('import_delete_missing')
+                            ->label(__('admin.fields.import_delete_missing'))
+                            ->boolean(),
+                        IconEntry::make('import_update_search_indexes')
+                            ->label(__('admin.fields.import_update_search_indexes'))
+                            ->boolean(),
+                        TextEntry::make('import_strategy_notes')
+                            ->label(__('admin.fields.import_strategy_notes'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ])

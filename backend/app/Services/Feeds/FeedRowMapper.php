@@ -22,6 +22,10 @@ class FeedRowMapper
         $canonical = [];
 
         foreach ($profile->fieldMappings->sortBy('sort_order') as $mapping) {
+            if ($mapping->mapping_action === 'skip') {
+                continue;
+            }
+
             $field = $mapping->canonicalField;
 
             if (! $field || ! $field->is_active) {
@@ -55,6 +59,10 @@ class FeedRowMapper
         $metadata = [];
 
         foreach ($profile->fieldMappings->sortBy('sort_order') as $mapping) {
+            if ($mapping->mapping_action === 'skip') {
+                continue;
+            }
+
             $field = $mapping->canonicalField;
 
             if (! $field || ! $field->is_active) {
@@ -96,7 +104,8 @@ class FeedRowMapper
         $profile->loadMissing(['fieldMappings.canonicalField']);
 
         return $profile->fieldMappings
-            ->filter(fn (FeedFieldMapping $mapping): bool => $mapping->is_required || (bool) $mapping->canonicalField?->is_required)
+            ->filter(fn (FeedFieldMapping $mapping): bool => $mapping->mapping_action !== 'skip'
+                && ($mapping->is_required || (bool) $mapping->canonicalField?->is_required))
             ->map(fn (FeedFieldMapping $mapping): ?string => $mapping->canonicalField?->key)
             ->filter(fn (?string $key): bool => $key !== null && ! $this->hasValue($canonicalRow[$key] ?? null))
             ->values()
@@ -154,6 +163,10 @@ class FeedRowMapper
     private function transform(mixed $value, FeedFieldMapping $mapping, FeedMappingProfile $profile): mixed
     {
         if (! $this->hasValue($value)) {
+            return $mapping->default_value;
+        }
+
+        if ($mapping->mapping_action === 'default') {
             return $mapping->default_value;
         }
 

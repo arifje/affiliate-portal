@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Feeds\Schemas;
 
+use App\Models\CanonicalField;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -72,7 +74,21 @@ class FeedForm
                             ->label(__('admin.fields.mapping_profile'))
                             ->relationship('mappingProfile', 'name')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->helperText(__('admin.helpers.mapping_profile')),
+                        Select::make('unique_identifier_field')
+                            ->label(__('admin.fields.unique_identifier_field'))
+                            ->options(fn (): array => CanonicalField::query()
+                                ->active()
+                                ->orderBy('field_group')
+                                ->orderBy('sort_order')
+                                ->orderBy('label')
+                                ->pluck('label', 'key')
+                                ->all())
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('provider_product_id')
+                            ->helperText(__('admin.helpers.unique_identifier_field')),
                         TextInput::make('schedule')
                             ->label(__('admin.fields.schedule'))
                             ->placeholder(__('admin.placeholders.schedule'))
@@ -81,6 +97,36 @@ class FeedForm
                             ->label(__('admin.fields.mapping'))
                             ->keyLabel(__('admin.fields.key'))
                             ->valueLabel(__('admin.fields.default_value'))
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
+                Section::make(__('admin.sections.import_strategy'))
+                    ->description(__('admin.helpers.import_strategy'))
+                    ->schema([
+                        Checkbox::make('import_create_new')
+                            ->label(__('admin.fields.import_create_new'))
+                            ->helperText(__('admin.helpers.import_create_new'))
+                            ->default(true),
+                        Checkbox::make('import_update_existing')
+                            ->label(__('admin.fields.import_update_existing'))
+                            ->helperText(__('admin.helpers.import_update_existing'))
+                            ->default(true),
+                        Checkbox::make('import_disable_missing_globally')
+                            ->label(__('admin.fields.import_disable_missing_globally'))
+                            ->helperText(__('admin.helpers.import_disable_missing_globally')),
+                        Checkbox::make('import_disable_missing_for_site')
+                            ->label(__('admin.fields.import_disable_missing_for_site'))
+                            ->helperText(__('admin.helpers.import_disable_missing_for_site')),
+                        Checkbox::make('import_delete_missing')
+                            ->label(__('admin.fields.import_delete_missing'))
+                            ->helperText(__('admin.helpers.import_delete_missing')),
+                        Checkbox::make('import_update_search_indexes')
+                            ->label(__('admin.fields.import_update_search_indexes'))
+                            ->helperText(__('admin.helpers.import_update_search_indexes'))
+                            ->default(true),
+                        Textarea::make('import_strategy_notes')
+                            ->label(__('admin.fields.import_strategy_notes'))
+                            ->rows(3)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),

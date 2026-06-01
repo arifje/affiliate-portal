@@ -33,6 +33,16 @@ class FeedMappingProfilesTable
                     ->label(__('admin.fields.source_format'))
                     ->badge()
                     ->searchable(),
+                TextColumn::make('row_selector')
+                    ->label(__('admin.fields.primary_element'))
+                    ->placeholder('-')
+                    ->toggleable(),
+                TextColumn::make('last_analyzed_at')
+                    ->label(__('admin.fields.last_analyzed_at'))
+                    ->dateTime()
+                    ->placeholder('-')
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('site.name')
                     ->label(__('admin.fields.site'))
                     ->searchable()

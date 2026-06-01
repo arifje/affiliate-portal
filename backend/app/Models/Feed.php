@@ -20,6 +20,12 @@ class Feed extends Model
             'mapping' => 'array',
             'last_import_started_at' => 'datetime',
             'last_import_finished_at' => 'datetime',
+            'import_create_new' => 'boolean',
+            'import_update_existing' => 'boolean',
+            'import_disable_missing_globally' => 'boolean',
+            'import_disable_missing_for_site' => 'boolean',
+            'import_delete_missing' => 'boolean',
+            'import_update_search_indexes' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

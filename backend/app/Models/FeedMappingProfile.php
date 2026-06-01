@@ -20,6 +20,10 @@ class FeedMappingProfile extends Model
             'first_row_is_header' => 'boolean',
             'is_template' => 'boolean',
             'is_active' => 'boolean',
+            'available_elements' => 'array',
+            'sample_fields' => 'array',
+            'sample_payload' => 'array',
+            'last_analyzed_at' => 'datetime',
             'settings' => 'array',
         ];
     }

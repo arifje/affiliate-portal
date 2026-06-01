@@ -25,9 +25,17 @@ class FeedFieldMappingsTable
                 TextColumn::make('canonicalField.key')
                     ->label(__('admin.fields.canonical_field'))
                     ->searchable(),
+                TextColumn::make('mapping_action')
+                    ->label(__('admin.fields.mapping_action'))
+                    ->badge()
+                    ->searchable(),
                 TextColumn::make('source_field')
                     ->label(__('admin.fields.source_field'))
                     ->searchable(),
+                TextColumn::make('source_sample')
+                    ->label(__('admin.fields.source_sample'))
+                    ->limit(40)
+                    ->toggleable(),
                 TextColumn::make('source_path')
                     ->label(__('admin.fields.source_path'))
                     ->limit(40)
@@ -63,6 +71,9 @@ class FeedFieldMappingsTable
                 SelectFilter::make('transform_type')
                     ->label(__('admin.fields.transform_type'))
                     ->options(__('admin.options.transform_types')),
+                SelectFilter::make('mapping_action')
+                    ->label(__('admin.fields.mapping_action'))
+                    ->options(__('admin.options.mapping_actions')),
                 TernaryFilter::make('is_required')
                     ->label(__('admin.fields.is_required')),
             ])

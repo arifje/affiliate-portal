@@ -17,9 +17,16 @@ class FeedFieldMappingInfolist
                     ->numeric(),
                 TextEntry::make('canonicalField.id')
                     ->label(__('admin.fields.canonical_field')),
+                TextEntry::make('mapping_action')
+                    ->label(__('admin.fields.mapping_action'))
+                    ->badge(),
                 TextEntry::make('source_field')
                     ->label(__('admin.fields.source_field'))
                     ->placeholder('-'),
+                TextEntry::make('source_sample')
+                    ->label(__('admin.fields.source_sample'))
+                    ->placeholder('-')
+                    ->columnSpanFull(),
                 TextEntry::make('source_path')
                     ->label(__('admin.fields.source_path'))
                     ->placeholder('-')
@@ -36,6 +43,10 @@ class FeedFieldMappingInfolist
                     ->label(__('admin.fields.transform_type')),
                 TextEntry::make('transform_config')
                     ->label(__('admin.fields.transform_config'))
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('notes')
+                    ->label(__('admin.fields.notes'))
                     ->placeholder('-')
                     ->columnSpanFull(),
                 IconEntry::make('is_required')

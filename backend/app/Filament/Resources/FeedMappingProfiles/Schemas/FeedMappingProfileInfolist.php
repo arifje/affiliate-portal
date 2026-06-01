@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\FeedMappingProfiles\Schemas;
 
+use App\Filament\Support\JsonTextEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -46,7 +47,23 @@ class FeedMappingProfileInfolist
                 TextEntry::make('timezone')
                     ->label(__('admin.fields.timezone')),
                 TextEntry::make('row_selector')
-                    ->label(__('admin.fields.row_selector'))
+                    ->label(__('admin.fields.primary_element'))
+                    ->placeholder('-'),
+                JsonTextEntry::make('available_elements')
+                    ->label(__('admin.fields.available_elements'))
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                JsonTextEntry::make('sample_fields')
+                    ->label(__('admin.fields.sample_fields'))
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                JsonTextEntry::make('sample_payload')
+                    ->label(__('admin.fields.sample_payload'))
+                    ->placeholder('-')
+                    ->columnSpanFull(),
+                TextEntry::make('last_analyzed_at')
+                    ->label(__('admin.fields.last_analyzed_at'))
+                    ->dateTime()
                     ->placeholder('-'),
                 IconEntry::make('first_row_is_header')
                     ->label(__('admin.fields.first_row_is_header'))
