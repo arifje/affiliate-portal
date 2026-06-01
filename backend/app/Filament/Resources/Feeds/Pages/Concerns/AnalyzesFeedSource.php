@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Feeds\Pages\Concerns;
 
+use App\Filament\Resources\FeedMappingProfiles\FeedMappingProfileResource;
 use App\Models\Feed;
 use App\Services\Feeds\FeedStructureAnalyzer;
 use Filament\Actions\Action;
@@ -19,6 +20,17 @@ trait AnalyzesFeedSource
             ->requiresConfirmation()
             ->modalDescription(__('admin.messages.analyze_feed_source'))
             ->action(fn () => $this->analyzeFeedSource());
+    }
+
+    protected function mappingSetupAction(): Action
+    {
+        return Action::make('mappingSetup')
+            ->label(__('admin.actions.mapping_setup'))
+            ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
+            ->url(fn (): ?string => $this->getRecord()->mapping_profile_id
+                ? FeedMappingProfileResource::getUrl('edit', ['record' => $this->getRecord()->mapping_profile_id])
+                : null)
+            ->visible(fn (): bool => filled($this->getRecord()->mapping_profile_id));
     }
 
     protected function analyzeFeedSource(): void

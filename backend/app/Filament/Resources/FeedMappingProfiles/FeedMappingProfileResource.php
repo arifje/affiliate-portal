@@ -26,6 +26,8 @@ class FeedMappingProfileResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string $translationKey = 'feed_mapping_profiles';
 
     protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';

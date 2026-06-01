@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Feeds\Schemas;
 
-use App\Filament\Support\JsonTextEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -54,10 +53,6 @@ class FeedInfolist
                     ]),
                 Section::make(__('admin.sections.mapping_and_import_state'))
                     ->schema([
-                        JsonTextEntry::make('mapping')
-                            ->label(__('admin.fields.mapping'))
-                            ->placeholder('-')
-                            ->columnSpanFull(),
                         TextEntry::make('schedule')
                             ->label(__('admin.fields.schedule'))
                             ->placeholder('-'),

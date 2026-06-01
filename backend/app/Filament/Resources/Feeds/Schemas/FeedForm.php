@@ -4,11 +4,11 @@ namespace App\Filament\Resources\Feeds\Schemas;
 
 use App\Models\CanonicalField;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\KeyValue;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -93,11 +93,6 @@ class FeedForm
                             ->label(__('admin.fields.schedule'))
                             ->placeholder(__('admin.placeholders.schedule'))
                             ->maxLength(255),
-                        KeyValue::make('mapping')
-                            ->label(__('admin.fields.mapping'))
-                            ->keyLabel(__('admin.fields.key'))
-                            ->valueLabel(__('admin.fields.default_value'))
-                            ->columnSpanFull(),
                     ])
                     ->columns(2),
                 Section::make(__('admin.sections.import_strategy'))

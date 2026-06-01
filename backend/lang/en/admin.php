@@ -11,6 +11,7 @@ return [
     'actions' => [
         'analyze_feed_source' => 'Analyze source',
         'create_draft_mappings' => 'Create draft mappings',
+        'mapping_setup' => 'Mapping setup',
         'preview' => 'Preview',
         'reset_filters' => 'Reset filters',
     ],

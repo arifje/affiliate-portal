@@ -11,6 +11,7 @@ return [
     'actions' => [
         'analyze_feed_source' => 'Bron analyseren',
         'create_draft_mappings' => 'Conceptmappings maken',
+        'mapping_setup' => 'Mapping instellen',
         'preview' => 'Voorbeeld',
         'reset_filters' => 'Filters resetten',
     ],

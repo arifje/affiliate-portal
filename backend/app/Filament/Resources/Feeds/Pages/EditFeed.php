@@ -18,6 +18,7 @@ class EditFeed extends EditRecord
     {
         return [
             $this->analyzeSourceAction(),
+            $this->mappingSetupAction(),
             ViewAction::make(),
             DeleteAction::make(),
         ];

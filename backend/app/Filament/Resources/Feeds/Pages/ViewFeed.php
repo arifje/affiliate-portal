@@ -17,6 +17,7 @@ class ViewFeed extends ViewRecord
     {
         return [
             $this->analyzeSourceAction(),
+            $this->mappingSetupAction(),
             EditAction::make(),
         ];
     }

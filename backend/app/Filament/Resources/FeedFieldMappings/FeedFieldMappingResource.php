@@ -25,6 +25,8 @@ class FeedFieldMappingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowsRightLeft;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string $translationKey = 'feed_field_mappings';
 
     protected static string $navigationGroupTranslationKey = 'admin.navigation.feed_imports';

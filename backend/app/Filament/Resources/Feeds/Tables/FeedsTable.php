@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources\Feeds\Tables;
 
+use App\Filament\Resources\FeedMappingProfiles\FeedMappingProfileResource;
+use App\Models\Feed;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -109,6 +113,13 @@ class FeedsTable
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
+                Action::make('mappingSetup')
+                    ->label(__('admin.actions.mapping_setup'))
+                    ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
+                    ->url(fn (Feed $record): ?string => $record->mapping_profile_id
+                        ? FeedMappingProfileResource::getUrl('edit', ['record' => $record->mapping_profile_id])
+                        : null)
+                    ->visible(fn (Feed $record): bool => filled($record->mapping_profile_id)),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()
