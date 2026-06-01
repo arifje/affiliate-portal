@@ -244,6 +244,123 @@ class FeedImporterTest extends TestCase
         $this->assertSame('616 gram', $product->metadata['specifications']['weight']);
     }
 
+    public function test_it_imports_tradetracker_xml_feed_with_named_properties(): void
+    {
+        Storage::fake('local');
+        $this->seed(CanonicalFieldSeeder::class);
+
+        $site = Site::query()->create([
+            'name' => 'Audio',
+            'slug' => 'audio_nl',
+            'primary_domain' => 'audio.test',
+            'currency' => 'EUR',
+            'is_active' => true,
+        ]);
+        $partner = Partner::query()->create([
+            'name' => 'TradeTracker Audio',
+            'slug' => 'tradetracker-audio',
+            'provider' => 'tradetracker',
+            'is_active' => true,
+        ]);
+        $path = 'feeds/site-'.$site->id.'/tradetracker.xml';
+
+        Storage::disk('local')->put($path, <<<'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<products>
+  <product ID="12b7e85410114ba3b61cc02ee2ed5c19dcb22ac6">
+    <campaignID>20790</campaignID>
+    <name>Audio Dynavox Black Line Cinchkabel Stereo 1,5 meter</name>
+    <price currency="EUR">80.25</price>
+    <URL>https://www.audioshop.nl/website/Includes/TradeTracker/index.php?tt=20790_1687778_373017_&amp;r=https%3A%2F%2Fwww.audioshop.nl%2Fproduct</URL>
+    <images>
+      <image>https://www.audioshop.nl/image-1.jpg</image>
+      <image>https://www.audioshop.nl/image-2.jpg</image>
+    </images>
+    <description><![CDATA[Dynavox Black Line-serie]]></description>
+    <categories/>
+    <properties>
+      <property name="EAN"><value>4250019131523</value></property>
+      <property name="categoryPath"><value>Accessoires</value><value>Outlet</value></property>
+      <property name="MPN"><value>3586</value></property>
+      <property name="fromPrice"><value>107.00</value></property>
+      <property name="deliveryTime"><value>Direct</value></property>
+      <property name="deliveryCosts"><value>0.00</value></property>
+      <property name="weight"><value>0.0200</value></property>
+      <property name="stock"><value>2</value></property>
+      <property name="brand"><value>Audio Dynavox</value></property>
+      <property name="type"><value>kabels/stekkers/converters</value></property>
+    </properties>
+    <variations/>
+  </product>
+</products>
+XML);
+
+        $feed = Feed::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'name' => 'TradeTracker XML',
+            'slug' => 'tradetracker-xml',
+            'provider' => 'tradetracker',
+            'source_type' => 'file',
+            'source_format' => 'xml',
+            'source_file_path' => $path,
+            'row_selector' => 'product',
+            'decimal_separator' => '.',
+            'unique_identifier_field' => 'external_id',
+            'import_create_new' => true,
+            'import_update_existing' => true,
+            'is_active' => true,
+        ]);
+
+        $this->mapField($feed, 'external_id', '@attributes.ID');
+        $this->mapField($feed, 'network_campaign_id', 'campaignID');
+        $this->mapField($feed, 'title', 'name');
+        $this->mapField($feed, 'description', 'description');
+        $this->mapField($feed, 'merchant_category', 'properties.property[name=categoryPath].value', 'first_value');
+        $this->mapField($feed, 'product_type', 'properties.property[name=type].value');
+        $this->mapField($feed, 'affiliate_url', 'URL');
+        $this->mapField($feed, 'tracking_url', 'URL');
+        $this->mapField($feed, 'image_url', 'images.image', 'first_value');
+        $this->mapField($feed, 'additional_image_urls', 'images.image', 'array');
+        $this->mapField($feed, 'price', 'price', 'money');
+        $this->mapField($feed, 'old_price', 'properties.property[name=fromPrice].value', 'money');
+        $this->mapField($feed, 'shipping_cost', 'properties.property[name=deliveryCosts].value', 'money');
+        $this->mapField($feed, 'availability', 'properties.property[name=stock].value', 'stock_availability');
+        $this->mapField($feed, 'stock_quantity', 'properties.property[name=stock].value', 'integer');
+        $this->mapField($feed, 'delivery_time', 'properties.property[name=deliveryTime].value');
+        $this->mapField($feed, 'brand', 'properties.property[name=brand].value');
+        $this->mapField($feed, 'gtin', 'properties.property[name=EAN].value');
+        $this->mapField($feed, 'mpn', 'properties.property[name=MPN].value');
+        $this->mapField($feed, 'weight', 'properties.property[name=weight].value');
+
+        $batch = app(FeedImporter::class)->import($feed);
+
+        $this->assertSame('completed', $batch->status);
+        $this->assertSame(1, $batch->created_rows);
+
+        $product = Product::query()->firstOrFail();
+
+        $this->assertSame('12b7e85410114ba3b61cc02ee2ed5c19dcb22ac6', $product->provider_product_id);
+        $this->assertSame('Audio Dynavox Black Line Cinchkabel Stereo 1,5 meter', $product->title);
+        $this->assertSame('Audio Dynavox', $product->brand);
+        $this->assertSame('4250019131523', $product->ean);
+        $this->assertSame('3586', $product->mpn);
+        $this->assertSame('80.25', $product->price);
+        $this->assertSame('107.00', $product->old_price);
+        $this->assertSame('0.00', $product->shipping_cost);
+        $this->assertSame('in_stock', $product->availability);
+        $this->assertSame(2, $product->stock_quantity);
+        $this->assertSame('Accessoires', $product->merchant_category);
+        $this->assertSame('kabels/stekkers/converters', $product->product_type);
+        $this->assertSame('https://www.audioshop.nl/image-1.jpg', $product->image_url);
+        $this->assertSame([
+            'https://www.audioshop.nl/image-1.jpg',
+            'https://www.audioshop.nl/image-2.jpg',
+        ], $product->additional_image_urls);
+        $this->assertSame('20790', $product->metadata['network']['campaign_id']);
+        $this->assertSame('0.0200', $product->metadata['specifications']['weight']);
+    }
+
     private function mapField(Feed $feed, string $canonicalKey, string $sourceField, string $transform = 'copy'): void
     {
         $field = CanonicalField::query()->where('key', $canonicalKey)->firstOrFail();

@@ -261,6 +261,18 @@ class FeedRowMapper
             return $sourceRow[$key];
         }
 
+        $pathValue = $this->readArrayPath($sourceRow, $key);
+
+        if ($this->hasValue($pathValue)) {
+            return $pathValue;
+        }
+
+        $selectedValue = $this->readSelectorValue($sourceRow, $key);
+
+        if ($this->hasValue($selectedValue)) {
+            return $selectedValue;
+        }
+
         $dotRow = Arr::dot($sourceRow);
 
         if (array_key_exists($key, $dotRow)) {
@@ -271,6 +283,100 @@ class FeedRowMapper
 
         foreach ($dotRow as $sourceKey => $value) {
             if (Str::lower((string) $sourceKey) === $lowerKey) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Read selector paths such as properties.property[name=brand].value.
+     *
+     * @param  array<string, mixed>  $sourceRow
+     */
+    private function readSelectorValue(array $sourceRow, string $key): mixed
+    {
+        if (! str_contains($key, '[')) {
+            return null;
+        }
+
+        $node = $sourceRow;
+
+        foreach (explode('.', $key) as $segment) {
+            if (preg_match('/^([^\[]+)\[([^=\]]+)=([^\]]+)\]$/', $segment, $matches) === 1) {
+                $node = $this->readArrayKey($node, $matches[1]);
+
+                if (! is_array($node)) {
+                    return null;
+                }
+
+                $filterKey = trim($matches[2]);
+                $filterValue = trim($matches[3], " \t\n\r\0\x0B\"'");
+                $items = array_is_list($node) ? $node : [$node];
+                $match = null;
+
+                foreach ($items as $item) {
+                    if (! is_array($item)) {
+                        continue;
+                    }
+
+                    $itemValue = $this->readArrayPath($item, $filterKey)
+                        ?? $this->readArrayPath($item, '@attributes.'.$filterKey);
+
+                    if (Str::lower(trim((string) $itemValue)) === Str::lower($filterValue)) {
+                        $match = $item;
+
+                        break;
+                    }
+                }
+
+                if ($match === null) {
+                    return null;
+                }
+
+                $node = $match;
+
+                continue;
+            }
+
+            $node = $this->readArrayKey($node, $segment);
+
+            if ($node === null) {
+                return null;
+            }
+        }
+
+        return $node;
+    }
+
+    private function readArrayPath(mixed $node, string $path): mixed
+    {
+        foreach (explode('.', $path) as $segment) {
+            $node = $this->readArrayKey($node, $segment);
+
+            if ($node === null) {
+                return null;
+            }
+        }
+
+        return $node;
+    }
+
+    private function readArrayKey(mixed $node, string $key): mixed
+    {
+        if (! is_array($node)) {
+            return null;
+        }
+
+        if (array_key_exists($key, $node)) {
+            return $node[$key];
+        }
+
+        $lowerKey = Str::lower($key);
+
+        foreach ($node as $nodeKey => $value) {
+            if (Str::lower((string) $nodeKey) === $lowerKey) {
                 return $value;
             }
         }
@@ -300,6 +406,7 @@ class FeedRowMapper
             'first_value' => $this->normalizeFirstValue($value),
             'integer' => $this->normalizeInteger($value),
             'lowercase' => Str::lower((string) $value),
+            'stock_availability' => $this->normalizeStockAvailability($value),
             'uppercase' => Str::upper((string) $value),
             'url', 'trim', 'copy' => $value,
             default => $value,
@@ -353,6 +460,15 @@ class FeedRowMapper
         }
 
         return trim((string) $value);
+    }
+
+    private function normalizeStockAvailability(mixed $value): string
+    {
+        if (is_numeric($value)) {
+            return (float) $value > 0 ? 'in_stock' : 'out_of_stock';
+        }
+
+        return $this->normalizeAvailability($value);
     }
 
     private function normalizeAvailability(mixed $value): string

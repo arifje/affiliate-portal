@@ -301,6 +301,7 @@ return [
             'boolean' => 'Boolean',
             'availability' => 'Availability',
             'first_value' => 'First value',
+            'stock_availability' => 'Stock availability',
             'array' => 'Array',
             'url' => 'URL',
         ],

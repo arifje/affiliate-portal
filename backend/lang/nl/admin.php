@@ -301,6 +301,7 @@ return [
             'boolean' => 'Boolean',
             'availability' => 'Beschikbaarheid',
             'first_value' => 'Eerste waarde',
+            'stock_availability' => 'Voorraadbeschikbaarheid',
             'array' => 'Array',
             'url' => 'URL',
         ],
