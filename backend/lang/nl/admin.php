@@ -239,8 +239,10 @@ return [
             'pricing' => 'Prijzen',
             'availability' => 'Beschikbaarheid',
             'variants' => 'Varianten',
+            'specifications' => 'Specificaties',
             'classification' => 'Classificatie',
             'compliance' => 'Compliance',
+            'feed' => 'Feed',
         ],
         'feed_schedules' => [
             'manual' => 'Alleen handmatig',

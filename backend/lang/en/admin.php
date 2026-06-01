@@ -239,8 +239,10 @@ return [
             'pricing' => 'Pricing',
             'availability' => 'Availability',
             'variants' => 'Variants',
+            'specifications' => 'Specifications',
             'classification' => 'Classification',
             'compliance' => 'Compliance',
+            'feed' => 'Feed',
         ],
         'feed_schedules' => [
             'manual' => 'Manual only',
