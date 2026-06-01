@@ -13,6 +13,7 @@ class FeedInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make(__('admin.sections.feed'))
                     ->schema([
@@ -37,7 +38,11 @@ class FeedInfolist
                             ->label(__('admin.fields.is_active'))
                             ->boolean(),
                     ])
-                    ->columns(2),
+                    ->columnSpanFull()
+                    ->columns([
+                        'md' => 2,
+                        'xl' => 4,
+                    ]),
                 Section::make(__('admin.sections.source'))
                     ->schema([
                         TextEntry::make('source_url')
@@ -68,6 +73,11 @@ class FeedInfolist
                             ->label(__('admin.fields.request_query_params'))
                             ->formatStateUsing(fn (?array $state): string => filled($state) ? __('admin.messages.configured') : __('admin.messages.not_configured'))
                             ->placeholder(__('admin.messages.not_configured')),
+                    ])
+                    ->columnSpanFull()
+                    ->columns([
+                        'md' => 2,
+                        'xl' => 3,
                     ]),
                 Section::make(__('admin.sections.feed_discovery'))
                     ->description(__('admin.helpers.feed_discovery'))
@@ -79,16 +89,19 @@ class FeedInfolist
                         TextEntry::make('row_selector')
                             ->label(__('admin.fields.primary_element'))
                             ->placeholder('-'),
-                        JsonTextEntry::make('available_elements')
+                        JsonTextEntry::make('available_elements', maxHeight: '18rem')
                             ->label(__('admin.fields.available_elements'))
                             ->placeholder(__('admin.placeholders.analyze_feed_first'))
-                            ->columnSpanFull(),
-                        JsonTextEntry::make('sample_fields')
+                            ->columnSpan(1),
+                        JsonTextEntry::make('sample_fields', maxHeight: '18rem')
                             ->label(__('admin.fields.sample_fields'))
                             ->placeholder(__('admin.placeholders.analyze_feed_first'))
-                            ->columnSpanFull(),
+                            ->columnSpan(1),
                     ])
-                    ->columns(2),
+                    ->columnSpanFull()
+                    ->columns([
+                        'md' => 2,
+                    ]),
                 Section::make(__('admin.sections.mapping_and_import_state'))
                     ->schema([
                         TextEntry::make('schedule')
@@ -111,7 +124,10 @@ class FeedInfolist
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columnSpanFull()
+                    ->columns([
+                        'md' => 2,
+                    ]),
                 Section::make(__('admin.sections.import_strategy'))
                     ->schema([
                         IconEntry::make('import_create_new')
@@ -137,7 +153,10 @@ class FeedInfolist
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columnSpanFull()
+                    ->columns([
+                        'md' => 2,
+                    ]),
                 Section::make(__('admin.sections.timestamps'))
                     ->schema([
                         TextEntry::make('created_at')
@@ -149,7 +168,10 @@ class FeedInfolist
                             ->dateTime()
                             ->placeholder('-'),
                     ])
-                    ->columns(2),
+                    ->columnSpanFull()
+                    ->columns([
+                        'md' => 2,
+                    ]),
             ]);
     }
 }

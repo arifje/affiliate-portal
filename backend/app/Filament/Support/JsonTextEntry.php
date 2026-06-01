@@ -8,12 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class JsonTextEntry
 {
-    public static function make(string $name): TextEntry
+    public static function make(string $name, ?string $maxHeight = null): TextEntry
     {
+        $style = 'white-space: pre-wrap; word-break: break-word;';
+
+        if ($maxHeight) {
+            $style .= " max-height: {$maxHeight}; overflow: auto;";
+        }
+
         return TextEntry::make($name)
             ->state(fn (?Model $record): ?string => self::format(data_get($record, $name)))
             ->fontFamily(FontFamily::Mono)
-            ->extraAttributes(['style' => 'white-space: pre-wrap; word-break: break-word;'])
+            ->extraAttributes(['style' => $style])
             ->copyable();
     }
 
