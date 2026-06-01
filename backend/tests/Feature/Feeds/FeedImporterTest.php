@@ -94,6 +94,93 @@ class FeedImporterTest extends TestCase
         ]);
     }
 
+    public function test_it_imports_semicolon_tradetracker_csv_export(): void
+    {
+        Storage::fake('local');
+        $this->seed(CanonicalFieldSeeder::class);
+
+        $site = Site::query()->create([
+            'name' => 'Audio',
+            'slug' => 'audio_nl',
+            'primary_domain' => 'audio.test',
+            'currency' => 'EUR',
+            'is_active' => true,
+        ]);
+        $partner = Partner::query()->create([
+            'name' => 'TradeTracker Audio',
+            'slug' => 'tradetracker-audio',
+            'provider' => 'tradetracker',
+            'is_active' => true,
+        ]);
+        $path = 'feeds/site-'.$site->id.'/tradetracker.csv';
+
+        Storage::disk('local')->put($path, implode("\n", [
+            '"product ID";name;currency;price;description;productURL;imageURL;categories;EAN;categoryPath;uniqueID;productID;number;MPN;fromPrice;deliveryTime;deliveryCosts;weight;stock;brand;type;campaignID',
+            '12b7e85410114ba3b61cc02ee2ed5c19dcb22ac6;"Audio Dynavox Black Line Cinchkabel Stereo 1,5 meter";EUR;80.25;"Dynavox Black Line-serie";https://www.audioshop.nl/tt;https://www.audioshop.nl/image.jpg;;4250019131523;Accessoires;876573204;876573204;"BN 207481";3586;107.00;Direct;0.00;0.0200;2;"Audio Dynavox";kabels/stekkers/converters;20790',
+        ]));
+
+        $feed = Feed::query()->create([
+            'site_id' => $site->id,
+            'partner_id' => $partner->id,
+            'name' => 'TradeTracker CSV',
+            'slug' => 'tradetracker-csv',
+            'provider' => 'tradetracker',
+            'source_type' => 'file',
+            'source_format' => 'csv',
+            'source_file_path' => $path,
+            'decimal_separator' => '.',
+            'unique_identifier_field' => 'external_id',
+            'import_create_new' => true,
+            'import_update_existing' => true,
+            'is_active' => true,
+        ]);
+
+        $this->mapField($feed, 'external_id', 'product ID');
+        $this->mapField($feed, 'sku', 'productID');
+        $this->mapField($feed, 'network_campaign_id', 'campaignID');
+        $this->mapField($feed, 'title', 'name');
+        $this->mapField($feed, 'description', 'description');
+        $this->mapField($feed, 'merchant_category', 'categoryPath');
+        $this->mapField($feed, 'product_type', 'type');
+        $this->mapField($feed, 'affiliate_url', 'productURL');
+        $this->mapField($feed, 'tracking_url', 'productURL');
+        $this->mapField($feed, 'image_url', 'imageURL');
+        $this->mapField($feed, 'price', 'price', 'money');
+        $this->mapField($feed, 'old_price', 'fromPrice', 'money');
+        $this->mapField($feed, 'currency', 'currency');
+        $this->mapField($feed, 'shipping_cost', 'deliveryCosts', 'money');
+        $this->mapField($feed, 'availability', 'stock', 'stock_availability');
+        $this->mapField($feed, 'stock_quantity', 'stock', 'integer');
+        $this->mapField($feed, 'delivery_time', 'deliveryTime');
+        $this->mapField($feed, 'brand', 'brand');
+        $this->mapField($feed, 'gtin', 'EAN');
+        $this->mapField($feed, 'mpn', 'MPN');
+        $this->mapField($feed, 'weight', 'weight');
+
+        $batch = app(FeedImporter::class)->import($feed);
+
+        $this->assertSame('completed', $batch->status);
+        $this->assertSame(1, $batch->created_rows);
+
+        $product = Product::query()->firstOrFail();
+
+        $this->assertSame('12b7e85410114ba3b61cc02ee2ed5c19dcb22ac6', $product->provider_product_id);
+        $this->assertSame('Audio Dynavox Black Line Cinchkabel Stereo 1,5 meter', $product->title);
+        $this->assertSame('Audio Dynavox', $product->brand);
+        $this->assertSame('4250019131523', $product->ean);
+        $this->assertSame('3586', $product->mpn);
+        $this->assertSame('80.25', $product->price);
+        $this->assertSame('107.00', $product->old_price);
+        $this->assertSame('0.00', $product->shipping_cost);
+        $this->assertSame('in_stock', $product->availability);
+        $this->assertSame(2, $product->stock_quantity);
+        $this->assertSame('Accessoires', $product->merchant_category);
+        $this->assertSame('kabels/stekkers/converters', $product->product_type);
+        $this->assertSame('https://www.audioshop.nl/image.jpg', $product->image_url);
+        $this->assertSame('20790', $product->metadata['network']['campaign_id']);
+        $this->assertSame('0.0200', $product->metadata['specifications']['weight']);
+    }
+
     public function test_it_imports_nested_tradetracker_json_feed(): void
     {
         Storage::fake('local');

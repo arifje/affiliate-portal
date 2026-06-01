@@ -157,8 +157,8 @@ class FeedStructureAnalyzer
      */
     private function extractCsvRows(string $payload, FeedMappingProfile $profile, ?int $limit = null): array
     {
-        $delimiter = $profile->delimiter ?: ',';
         $enclosure = $profile->enclosure ?: '"';
+        $delimiter = $this->detectCsvDelimiter($payload, $profile->delimiter ?: ',', $enclosure);
         $handle = fopen('php://temp', 'r+');
 
         if (! $handle) {
@@ -208,6 +208,35 @@ class FeedStructureAnalyzer
         }
 
         return $rows;
+    }
+
+    private function detectCsvDelimiter(string $payload, string $configuredDelimiter, string $enclosure): string
+    {
+        $firstLine = strtok(ltrim($payload, "\xEF\xBB\xBF"), "\r\n") ?: '';
+
+        if ($firstLine === '') {
+            return $configuredDelimiter;
+        }
+
+        $configuredColumns = str_getcsv($firstLine, $configuredDelimiter, $enclosure, '');
+
+        if (count($configuredColumns) > 1) {
+            return $configuredDelimiter;
+        }
+
+        $bestDelimiter = $configuredDelimiter;
+        $bestColumnCount = count($configuredColumns);
+
+        foreach ([',', ';', '|'] as $delimiter) {
+            $columnCount = count(str_getcsv($firstLine, $delimiter, $enclosure, ''));
+
+            if ($columnCount > $bestColumnCount) {
+                $bestDelimiter = $delimiter;
+                $bestColumnCount = $columnCount;
+            }
+        }
+
+        return $bestDelimiter;
     }
 
     /**
