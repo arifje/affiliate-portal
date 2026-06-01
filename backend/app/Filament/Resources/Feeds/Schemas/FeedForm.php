@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Feeds\Schemas;
 
 use App\Models\CanonicalField;
+use App\Models\Partner;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
@@ -28,9 +29,19 @@ class FeedForm
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Select::make('provider')
+                            ->label(__('admin.fields.platform'))
+                            ->options(__('admin.options.providers'))
+                            ->live()
+                            ->native(false)
+                            ->required(),
                         Select::make('partner_id')
                             ->label(__('admin.fields.partner'))
-                            ->relationship('partner', 'name')
+                            ->options(fn (Get $get): array => Partner::query()
+                                ->when($get('provider'), fn ($query, string $provider) => $query->where('provider', $provider))
+                                ->orderBy('name')
+                                ->pluck('name', 'id')
+                                ->all())
                             ->searchable()
                             ->preload()
                             ->required()
@@ -70,8 +81,8 @@ class FeedForm
                             ->maxLength(255),
                         Textarea::make('source_url')
                             ->label(__('admin.fields.source_url'))
-                            ->visible(fn (Get $get): bool => $get('source_type') !== 'file')
-                            ->required(fn (Get $get): bool => $get('source_type') !== 'file')
+                            ->visible(fn (Get $get): bool => in_array($get('source_type'), ['url', 'api'], true))
+                            ->required(fn (Get $get): bool => in_array($get('source_type'), ['url', 'api'], true))
                             ->rows(3)
                             ->columnSpanFull(),
                         FileUpload::make('source_file_path')
@@ -152,12 +163,13 @@ class FeedForm
                                 ->all())
                             ->searchable()
                             ->preload()
-                            ->placeholder('provider_product_id')
+                            ->placeholder('external_id')
                             ->helperText(__('admin.helpers.unique_identifier_field')),
-                        TextInput::make('schedule')
+                        Select::make('schedule')
                             ->label(__('admin.fields.schedule'))
+                            ->options(__('admin.options.feed_schedules'))
                             ->placeholder(__('admin.placeholders.schedule'))
-                            ->maxLength(255),
+                            ->native(false),
                     ])
                     ->columns(2),
                 Section::make(__('admin.sections.import_strategy'))

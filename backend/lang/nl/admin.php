@@ -14,6 +14,7 @@ return [
         'mapping_setup' => 'Mapping instellen',
         'preview' => 'Voorbeeld',
         'reset_filters' => 'Filters resetten',
+        'run_import' => 'Import draaien',
     ],
 
     'fields' => [
@@ -23,7 +24,7 @@ return [
         'availability' => 'Beschikbaarheid',
         'available_elements' => 'Beschikbare elementen',
         'brand' => 'Merk',
-        'canonical_field' => 'Canoniek veld',
+        'canonical_field' => 'Productveld',
         'categories' => 'Categorieen',
         'category' => 'Categorie',
         'color' => 'Kleur',
@@ -101,14 +102,16 @@ return [
         'partner' => 'Partner',
         'parent_category' => 'Hoofdcategorie',
         'pattern' => 'Patroon',
+        'platform' => 'Platform',
         'price' => 'Prijs',
         'primary_element' => 'Primair element',
         'primary_domain' => 'Primair domein',
         'processed_rows' => 'Verwerkte rijen',
         'product_type' => 'Producttype',
         'product_url' => 'Product-URL',
+        'product_field' => 'Productveld',
         'products' => 'Producten',
-        'provider' => 'Provider',
+        'provider' => 'Platform',
         'provider_product_id' => 'Provider-product-ID',
         'published' => 'Gepubliceerd',
         'published_at' => 'Gepubliceerd op',
@@ -170,31 +173,35 @@ return [
         'import_strategy' => 'Kies wat er gebeurt wanneer deze feed opnieuw draait.',
         'import_update_existing' => 'Werkt producten bij die matchen op de gekozen unieke identifier.',
         'import_update_search_indexes' => 'Vernieuwt doorzoekbare productvelden na import.',
-        'mapping_action' => 'Map gebruikt de bronwaarde, Standaard gebruikt alleen de standaardwaarde, Overslaan laat dit canonieke veld ongemoeid.',
-        'mapping_profile' => 'De parser en canonieke veldmapping waarmee deze feed wordt genormaliseerd.',
-        'partner_provider' => 'De affiliate-provider wordt overgenomen van deze partner, zodat je die maar een keer op de partner kiest.',
+        'mapping_action' => 'Map gebruikt de bronwaarde, Standaard gebruikt alleen de standaardwaarde, Overslaan laat dit productveld ongemoeid.',
+        'mapping_profile' => 'Legacy parser- en veldmapping voor oudere feeds.',
+        'partner_provider' => 'Kies eerst het platform en daarna de partner/adverteerder binnen dat platform.',
         'products_hero_image' => 'Wordt getoond op productoverzichten, zoekpagina\'s, aanbiedingen en merkpagina\'s. Categorie-hero-afbeeldingen krijgen voorrang.',
         'primary_element' => 'Het herhalende feed-element dat een productrij vertegenwoordigt, zoals items.item, products.product of rows voor CSV.',
         'request_headers' => 'Optionele HTTP-headers voor afgeschermde feeds, zoals Authorization of X-API-Key.',
         'request_query_params' => 'Optionele queryparameters die aan de feed-URL worden toegevoegd, zoals api_key of token.',
         'source_file' => 'Upload CSV-, XML-, JSON- of JSONL-bestanden. Bestanden worden prive opgeslagen en gebruikt door Bron analyseren/import.',
+        'source_path' => 'Gebruik dit voor geneste JSON/XML-paden. CSV-feeds gebruiken meestal dezelfde waarde als Bronveld.',
         'site_hero_image' => 'Wordt getoond in de homepage-hero in plaats van het oude product/categorie/feed-statistiekenblok. Gebruik JPG, PNG of WebP tot 10 MB.',
         'section_label_color' => 'Gebruikt voor kleine labels in hoofdletters, zoals de hero-badge.',
-        'unique_identifier_field' => 'Canoniek veld waarmee bestaande producten bij herimport worden gematcht. Meestal provider_product_id, external_id, ean of product_url.',
+        'unique_identifier_field' => 'Productveld waarmee bestaande producten bij herimport worden gematcht. Meestal external_id, ean, sku of product_url.',
     ],
 
     'messages' => [
-        'analyze_feed_source' => 'De feedbron wordt opgehaald en een kleine sample wordt opgeslagen op het mappingprofiel.',
+        'analyze_feed_source' => 'De feedbron wordt opgehaald en een kleine sample wordt opgeslagen op deze feed.',
         'configured' => 'Ingesteld',
-        'create_draft_mappings' => 'Dit maakt mappingregels voor actieve canonieke velden die nog niet gemapt zijn. Herkende bronvelden worden automatisch ingevuld; de rest wordt op overslaan gezet.',
+        'create_draft_mappings' => 'Dit maakt mappingregels voor actieve productvelden die nog niet gemapt zijn. Herkende bronvelden worden automatisch ingevuld; de rest wordt op overslaan gezet.',
         'deleting_feed' => 'Als je een feed verwijdert, blijven geimporteerde producten bestaan maar wordt de feedkoppeling verwijderd.',
         'deleting_partner' => 'Als je een partner verwijdert, worden ook de feeds en producten verwijderd.',
         'deleting_site' => 'Als je een site verwijdert, worden ook de categorieen, feeds, producten en kliks verwijderd.',
         'draft_mappings_created' => ':count conceptmappings aangemaakt.',
         'feed_analysis_completed' => 'Feed geanalyseerd: :elements kandidaten voor primair element en :fields velden gevonden.',
         'feed_analysis_failed' => 'Feedanalyse mislukt',
+        'feed_import_completed' => 'Import voltooid: :created aangemaakt, :updated bijgewerkt, :skipped overgeslagen, :failed mislukt.',
+        'feed_import_failed' => 'Feedimport mislukt',
         'mapping_profile_required' => 'Selecteer eerst een mappingprofiel voordat je deze feed analyseert.',
         'not_configured' => 'Niet ingesteld',
+        'run_feed_import' => 'Deze feed wordt nu geimporteerd met de productveldmappings en importstrategie.',
     ],
 
     'options' => [
@@ -234,6 +241,12 @@ return [
             'variants' => 'Varianten',
             'classification' => 'Classificatie',
             'compliance' => 'Compliance',
+        ],
+        'feed_schedules' => [
+            'manual' => 'Alleen handmatig',
+            'hourly' => 'Elk uur',
+            'daily' => 'Dagelijks',
+            'weekly' => 'Wekelijks',
         ],
         'font_families' => [
             'Inter, ui-sans-serif, system-ui, sans-serif' => 'Inter / moderne sans',
@@ -300,13 +313,13 @@ return [
         'no_homepage_settings' => 'Geen homepage-instellingen ingesteld.',
         'no_layout_values' => 'Geen layoutwaarden ingesteld.',
         'no_theme_values' => 'Geen themawaarden ingesteld.',
-        'schedule' => 'dagelijks, elk uur, wekelijks of cron-label',
+        'schedule' => 'Alleen handmatig',
         'search_logs' => 'Zoek in melding of stacktrace',
     ],
 
     'sections' => [
         'behavior' => 'Gedrag',
-        'canonical_field' => 'Canoniek veld',
+        'canonical_field' => 'Productveld',
         'content' => 'Content',
         'counters' => 'Tellers',
         'defaults' => 'Standaarden',
@@ -330,6 +343,7 @@ return [
         'presentation' => 'Presentatie',
         'pricing_availability' => 'Prijzen en beschikbaarheid',
         'product' => 'Product',
+        'product_field_mapping' => 'Productveldmapping',
         'profile' => 'Profiel',
         'publishing' => 'Publicatie',
         'result' => 'Resultaat',
@@ -737,9 +751,9 @@ return [
 
     'resources' => [
         'canonical_fields' => [
-            'model_label' => 'Canoniek veld',
-            'plural_label' => 'Canonieke velden',
-            'navigation_label' => 'Canonieke velden',
+            'model_label' => 'Productveld',
+            'plural_label' => 'Productvelden',
+            'navigation_label' => 'Productvelden',
         ],
 
         'categories' => [
@@ -782,6 +796,12 @@ return [
             'model_label' => 'Product',
             'plural_label' => 'Producten',
             'navigation_label' => 'Producten',
+        ],
+
+        'product_field_mappings' => [
+            'model_label' => 'Productveldmapping',
+            'plural_label' => 'Productveldmappings',
+            'navigation_label' => 'Productveldmappings',
         ],
 
         'sites' => [

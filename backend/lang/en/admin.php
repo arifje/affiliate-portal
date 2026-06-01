@@ -14,6 +14,7 @@ return [
         'mapping_setup' => 'Mapping setup',
         'preview' => 'Preview',
         'reset_filters' => 'Reset filters',
+        'run_import' => 'Run import',
     ],
 
     'fields' => [
@@ -23,7 +24,7 @@ return [
         'availability' => 'Availability',
         'available_elements' => 'Available elements',
         'brand' => 'Brand',
-        'canonical_field' => 'Canonical field',
+        'canonical_field' => 'Product field',
         'categories' => 'Categories',
         'category' => 'Category',
         'color' => 'Color',
@@ -101,14 +102,16 @@ return [
         'partner' => 'Partner',
         'parent_category' => 'Parent category',
         'pattern' => 'Pattern',
+        'platform' => 'Platform',
         'price' => 'Price',
         'primary_element' => 'Primary element',
         'primary_domain' => 'Primary domain',
         'processed_rows' => 'Processed rows',
         'product_type' => 'Product type',
         'product_url' => 'Product URL',
+        'product_field' => 'Product field',
         'products' => 'Products',
-        'provider' => 'Provider',
+        'provider' => 'Platform',
         'provider_product_id' => 'Provider product ID',
         'published' => 'Published',
         'published_at' => 'Published at',
@@ -170,31 +173,35 @@ return [
         'import_strategy' => 'Choose what happens when this feed is run again.',
         'import_update_existing' => 'Updates products that match the selected unique identifier.',
         'import_update_search_indexes' => 'Refreshes searchable product fields after import.',
-        'mapping_action' => 'Map uses the source value, Default ignores the source and uses the default value, Skip leaves this canonical field untouched.',
-        'mapping_profile' => 'The parser and canonical field mapping used to normalize this feed.',
-        'partner_provider' => 'The affiliate provider is taken from this partner, so you only choose it once on the partner.',
+        'mapping_action' => 'Map uses the source value, Default ignores the source and uses the default value, Skip leaves this product field untouched.',
+        'mapping_profile' => 'Legacy parser and field mapping for older feeds.',
+        'partner_provider' => 'Choose the platform first, then the partner/advertiser within that platform.',
         'products_hero_image' => 'Shown on product listing, search, deal and brand pages. Category hero images override this when available.',
         'primary_element' => 'The repeating feed element that represents one product row, such as items.item, products.product, or rows for CSV.',
         'request_headers' => 'Optional HTTP headers for protected feeds, for example Authorization or X-API-Key.',
         'request_query_params' => 'Optional query parameters appended to the feed URL, for example api_key or token.',
         'source_file' => 'Upload CSV, XML, JSON or JSONL files. Files are stored privately and used by Analyze source/import.',
+        'source_path' => 'Use this for nested JSON/XML paths. CSV feeds usually use the same value as Source field.',
         'site_hero_image' => 'Shown on the homepage hero instead of the old product/category/feed stats block. Use JPG, PNG or WebP up to 10 MB.',
         'section_label_color' => 'Used for small uppercase labels such as the hero badge.',
-        'unique_identifier_field' => 'Canonical field used to match existing products on re-import. Usually provider_product_id, external_id, ean, or product_url.',
+        'unique_identifier_field' => 'Product field used to match existing products on re-import. Usually external_id, ean, sku, or product_url.',
     ],
 
     'messages' => [
-        'analyze_feed_source' => 'The feed source will be fetched and a small sample will be stored on the mapping profile.',
+        'analyze_feed_source' => 'The feed source will be fetched and a small sample will be stored on this feed.',
         'configured' => 'Configured',
-        'create_draft_mappings' => 'This creates mapping rows for active canonical fields that are not mapped yet. Matching source fields are filled automatically; the rest are marked as skipped.',
+        'create_draft_mappings' => 'This creates mapping rows for active product fields that are not mapped yet. Matching source fields are filled automatically; the rest are marked as skipped.',
         'deleting_feed' => 'Deleting a feed keeps imported products but removes the feed link from them.',
         'deleting_partner' => 'Deleting a partner also removes its feeds and products.',
         'deleting_site' => 'Deleting a site also removes its categories, feeds, products, and clicks.',
         'draft_mappings_created' => ':count draft mappings created.',
         'feed_analysis_completed' => 'Feed analyzed: :elements primary element candidates and :fields fields found.',
         'feed_analysis_failed' => 'Feed analysis failed',
+        'feed_import_completed' => 'Import completed: :created created, :updated updated, :skipped skipped, :failed failed.',
+        'feed_import_failed' => 'Feed import failed',
         'mapping_profile_required' => 'Select a mapping profile before analyzing this feed.',
         'not_configured' => 'Not configured',
+        'run_feed_import' => 'This feed will be imported now using the product field mappings and import strategy.',
     ],
 
     'options' => [
@@ -234,6 +241,12 @@ return [
             'variants' => 'Variants',
             'classification' => 'Classification',
             'compliance' => 'Compliance',
+        ],
+        'feed_schedules' => [
+            'manual' => 'Manual only',
+            'hourly' => 'Hourly',
+            'daily' => 'Daily',
+            'weekly' => 'Weekly',
         ],
         'font_families' => [
             'Inter, ui-sans-serif, system-ui, sans-serif' => 'Inter / modern sans',
@@ -300,13 +313,13 @@ return [
         'no_homepage_settings' => 'No homepage settings set.',
         'no_layout_values' => 'No layout values set.',
         'no_theme_values' => 'No theme values set.',
-        'schedule' => 'daily, hourly, weekly, or cron label',
+        'schedule' => 'Manual only',
         'search_logs' => 'Search message or stack trace',
     ],
 
     'sections' => [
         'behavior' => 'Behavior',
-        'canonical_field' => 'Canonical field',
+        'canonical_field' => 'Product field',
         'content' => 'Content',
         'counters' => 'Counters',
         'defaults' => 'Defaults',
@@ -330,6 +343,7 @@ return [
         'presentation' => 'Presentation',
         'pricing_availability' => 'Pricing and availability',
         'product' => 'Product',
+        'product_field_mapping' => 'Product field mapping',
         'profile' => 'Profile',
         'publishing' => 'Publishing',
         'result' => 'Result',
@@ -737,9 +751,9 @@ return [
 
     'resources' => [
         'canonical_fields' => [
-            'model_label' => 'Canonical field',
-            'plural_label' => 'Canonical fields',
-            'navigation_label' => 'Canonical fields',
+            'model_label' => 'Product field',
+            'plural_label' => 'Product fields',
+            'navigation_label' => 'Product fields',
         ],
 
         'categories' => [
@@ -782,6 +796,12 @@ return [
             'model_label' => 'Product',
             'plural_label' => 'Products',
             'navigation_label' => 'Products',
+        ],
+
+        'product_field_mappings' => [
+            'model_label' => 'Product field mapping',
+            'plural_label' => 'Product field mappings',
+            'navigation_label' => 'Product field mappings',
         ],
 
         'sites' => [

@@ -6,6 +6,7 @@ use App\Filament\Resources\Feeds\Pages\CreateFeed;
 use App\Filament\Resources\Feeds\Pages\EditFeed;
 use App\Filament\Resources\Feeds\Pages\ListFeeds;
 use App\Filament\Resources\Feeds\Pages\ViewFeed;
+use App\Filament\Resources\Feeds\RelationManagers\ProductFieldMappingsRelationManager;
 use App\Filament\Resources\Feeds\Schemas\FeedForm;
 use App\Filament\Resources\Feeds\Schemas\FeedInfolist;
 use App\Filament\Resources\Feeds\Tables\FeedsTable;
@@ -51,7 +52,7 @@ class FeedResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductFieldMappingsRelationManager::class,
         ];
     }
 

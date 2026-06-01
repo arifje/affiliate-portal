@@ -24,34 +24,32 @@ class FeedStructureAnalyzer
      */
     public function analyze(Feed $feed): array
     {
-        $feed->loadMissing('mappingProfile');
-
-        $profile = $feed->mappingProfile;
-
-        if (! $profile) {
-            throw new RuntimeException('A mapping profile is required before a feed can be analyzed.');
-        }
-
+        $profile = $this->profileFromFeed($feed);
         $payload = $this->fetchPayload($feed);
-        $profile->forceFill([
-            'source_format' => $feed->source_format ?: $profile->source_format,
-            'source_encoding' => $feed->source_encoding ?: $profile->source_encoding,
-            'delimiter' => $feed->delimiter,
-            'enclosure' => $feed->enclosure,
-            'decimal_separator' => $feed->decimal_separator ?: '.',
-            'thousands_separator' => $feed->thousands_separator,
-            'row_selector' => $feed->row_selector ?: $profile->row_selector,
-            'first_row_is_header' => $feed->first_row_is_header ?? true,
-        ]);
 
-        return match ($feed->source_format ?: $profile->source_format) {
+        return match ($profile->source_format) {
             'json', 'jsonl' => $this->analyzeJson($payload, $profile),
             'xml' => $this->analyzeXml($payload, $profile),
             default => $this->analyzeCsv($payload, $profile),
         };
     }
 
-    private function fetchPayload(Feed $feed): string
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function extractRows(Feed $feed, ?int $limit = null): array
+    {
+        $profile = $this->profileFromFeed($feed);
+        $payload = $this->fetchPayload($feed);
+
+        return match ($profile->source_format) {
+            'json', 'jsonl' => $this->extractJsonRows($payload, $profile, $limit),
+            'xml' => $this->extractXmlRows($payload, $profile, $limit),
+            default => $this->extractCsvRows($payload, $profile, $limit),
+        };
+    }
+
+    public function fetchPayload(Feed $feed): string
     {
         if ($feed->source_type === 'file') {
             $source = trim((string) ($feed->source_file_path ?: $feed->source_url));
@@ -88,26 +86,30 @@ class FeedStructureAnalyzer
         return $response->body();
     }
 
+    private function profileFromFeed(Feed $feed): FeedMappingProfile
+    {
+        $profile = $feed->mappingProfile ?: new FeedMappingProfile();
+
+        $profile->forceFill([
+            'source_format' => $feed->source_format ?: $profile->source_format ?: 'csv',
+            'source_encoding' => $feed->source_encoding ?: $profile->source_encoding ?: 'utf-8',
+            'delimiter' => $feed->delimiter ?: $profile->delimiter ?: ',',
+            'enclosure' => $feed->enclosure ?: $profile->enclosure ?: '"',
+            'decimal_separator' => $feed->decimal_separator ?: $profile->decimal_separator ?: '.',
+            'thousands_separator' => $feed->thousands_separator ?: $profile->thousands_separator,
+            'row_selector' => $feed->row_selector ?: $profile->row_selector,
+            'first_row_is_header' => $feed->first_row_is_header ?? $profile->first_row_is_header ?? true,
+        ]);
+
+        return $profile;
+    }
+
     /**
      * @return array<string, mixed>
      */
     private function analyzeJson(string $payload, FeedMappingProfile $profile): array
     {
-        if ($profile->source_format === 'jsonl') {
-            $rows = collect(preg_split('/\R/', trim($payload)) ?: [])
-                ->filter()
-                ->take(20)
-                ->map(fn (string $line): mixed => json_decode($line, true, flags: JSON_THROW_ON_ERROR))
-                ->values()
-                ->all();
-
-            return $this->buildAnalysisFromRows('rows', $rows, [['path' => 'rows', 'label' => 'rows', 'count' => count($rows)]], $profile);
-        }
-
-        $decoded = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
-        $candidates = $this->findRowCandidates($decoded);
-        $selectedPath = $this->selectRowPath($profile, $candidates);
-        $rows = $this->rowsAtPath($decoded, $selectedPath);
+        [$rows, $candidates, $selectedPath] = $this->jsonRowsAndCandidates($payload, $profile, 20);
 
         return $this->buildAnalysisFromRows($selectedPath, $rows, $candidates, $profile);
     }
@@ -116,6 +118,127 @@ class FeedStructureAnalyzer
      * @return array<string, mixed>
      */
     private function analyzeXml(string $payload, FeedMappingProfile $profile): array
+    {
+        [$rows, $candidates, $selectedPath] = $this->xmlRowsAndCandidates($payload, $profile, 20);
+
+        return $this->buildAnalysisFromRows($selectedPath, $rows, $candidates, $profile);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function analyzeCsv(string $payload, FeedMappingProfile $profile): array
+    {
+        $rows = $this->extractCsvRows($payload, $profile, 20);
+
+        return $this->buildAnalysisFromRows('rows', $rows, [
+            ['path' => 'rows', 'label' => 'rows', 'count' => count($rows)],
+        ], $profile);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractJsonRows(string $payload, FeedMappingProfile $profile, ?int $limit = null): array
+    {
+        return $this->jsonRowsAndCandidates($payload, $profile, $limit)[0];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractXmlRows(string $payload, FeedMappingProfile $profile, ?int $limit = null): array
+    {
+        return $this->xmlRowsAndCandidates($payload, $profile, $limit)[0];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractCsvRows(string $payload, FeedMappingProfile $profile, ?int $limit = null): array
+    {
+        $delimiter = $profile->delimiter ?: ',';
+        $enclosure = $profile->enclosure ?: '"';
+        $handle = fopen('php://temp', 'r+');
+
+        if (! $handle) {
+            throw new RuntimeException('The CSV feed could not be read.');
+        }
+
+        fwrite($handle, $payload);
+        rewind($handle);
+
+        $headers = null;
+        $rows = [];
+        $rowIndex = 0;
+
+        while (($row = fgetcsv($handle, null, $delimiter, $enclosure, '')) !== false) {
+            if ($row === [null] || $row === []) {
+                continue;
+            }
+
+            if ($headers === null) {
+                $headers = $profile->first_row_is_header
+                    ? array_map(fn (mixed $header): string => trim((string) $header), $row)
+                    : array_map(fn (int $index): string => "column_{$index}", array_keys($row));
+
+                if ($profile->first_row_is_header) {
+                    continue;
+                }
+            }
+
+            $mapped = [];
+
+            foreach ($headers as $index => $header) {
+                $mapped[$header ?: "column_{$index}"] = $row[$index] ?? null;
+            }
+
+            $rows[] = $mapped;
+            $rowIndex++;
+
+            if ($limit !== null && $rowIndex >= $limit) {
+                break;
+            }
+        }
+
+        fclose($handle);
+
+        if ($rows === []) {
+            throw new RuntimeException('The CSV feed is empty.');
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return array{0: array<int, array<string, mixed>>, 1: array<int, array{path: string, label: string, count: int}>, 2: string}
+     */
+    private function jsonRowsAndCandidates(string $payload, FeedMappingProfile $profile, ?int $limit): array
+    {
+        if ($profile->source_format === 'jsonl') {
+            $rows = collect(preg_split('/\R/', trim($payload)) ?: [])
+                ->filter()
+                ->when($limit !== null, fn ($collection) => $collection->take($limit))
+                ->map(fn (string $line): mixed => json_decode($line, true, flags: JSON_THROW_ON_ERROR))
+                ->filter(fn (mixed $row): bool => is_array($row))
+                ->values()
+                ->all();
+
+            return [$rows, [['path' => 'rows', 'label' => 'rows', 'count' => count($rows)]], 'rows'];
+        }
+
+        $decoded = json_decode($payload, true, flags: JSON_THROW_ON_ERROR);
+        $candidates = $this->findRowCandidates($decoded);
+        $selectedPath = $this->selectRowPath($profile, $candidates);
+        $rows = $this->rowsAtPath($decoded, $selectedPath, $limit);
+
+        return [$rows, $candidates, $selectedPath];
+    }
+
+    /**
+     * @return array{0: array<int, array<string, mixed>>, 1: array<int, array{path: string, label: string, count: int}>, 2: string}
+     */
+    private function xmlRowsAndCandidates(string $payload, FeedMappingProfile $profile, ?int $limit): array
     {
         $previous = libxml_use_internal_errors(true);
 
@@ -133,49 +256,9 @@ class FeedStructureAnalyzer
         $decoded = json_decode(json_encode($xml, JSON_THROW_ON_ERROR), true, flags: JSON_THROW_ON_ERROR);
         $candidates = $this->findRowCandidates($decoded);
         $selectedPath = $this->selectRowPath($profile, $candidates);
-        $rows = $this->rowsAtPath($decoded, $selectedPath);
+        $rows = $this->rowsAtPath($decoded, $selectedPath, $limit);
 
-        return $this->buildAnalysisFromRows($selectedPath, $rows, $candidates, $profile);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function analyzeCsv(string $payload, FeedMappingProfile $profile): array
-    {
-        $lines = collect(preg_split('/\R/', trim($payload)) ?: [])
-            ->filter(fn (string $line): bool => trim($line) !== '')
-            ->take(21)
-            ->values();
-
-        if ($lines->isEmpty()) {
-            throw new RuntimeException('The CSV feed is empty.');
-        }
-
-        $delimiter = $profile->delimiter ?: ',';
-        $enclosure = $profile->enclosure ?: '"';
-        $parsed = $lines
-            ->map(fn (string $line): array => str_getcsv($line, $delimiter, $enclosure))
-            ->values()
-            ->all();
-
-        $headers = $profile->first_row_is_header
-            ? array_map(fn (mixed $header): string => trim((string) $header), array_shift($parsed))
-            : array_map(fn (int $index): string => "column_{$index}", array_keys($parsed[0] ?? []));
-
-        $rows = array_map(function (array $row) use ($headers): array {
-            $mapped = [];
-
-            foreach ($headers as $index => $header) {
-                $mapped[$header ?: "column_{$index}"] = $row[$index] ?? null;
-            }
-
-            return $mapped;
-        }, $parsed);
-
-        return $this->buildAnalysisFromRows('rows', $rows, [
-            ['path' => 'rows', 'label' => 'rows', 'count' => count($rows)],
-        ], $profile);
+        return [$rows, $candidates, $selectedPath];
     }
 
     /**
@@ -248,7 +331,7 @@ class FeedStructureAnalyzer
     /**
      * @return array<int, mixed>
      */
-    private function rowsAtPath(mixed $decoded, string $path): array
+    private function rowsAtPath(mixed $decoded, string $path, ?int $limit = null): array
     {
         $rows = $path === '$' ? $decoded : Arr::get($decoded, $path);
 
@@ -257,7 +340,9 @@ class FeedStructureAnalyzer
         }
 
         if ($this->isListOfRows($rows)) {
-            return array_slice($rows, 0, 20);
+            $rows = $limit === null ? $rows : array_slice($rows, 0, $limit);
+
+            return array_values(array_filter($rows, fn (mixed $row): bool => is_array($row)));
         }
 
         return [$rows];

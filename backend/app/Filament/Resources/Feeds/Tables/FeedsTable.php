@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources\Feeds\Tables;
 
-use App\Filament\Resources\FeedMappingProfiles\FeedMappingProfileResource;
 use App\Models\Feed;
+use App\Services\Feeds\FeedImporter;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -15,6 +16,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Throwable;
 
 class FeedsTable
 {
@@ -39,7 +41,7 @@ class FeedsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('provider')
-                    ->label(__('admin.fields.provider'))
+                    ->label(__('admin.fields.platform'))
                     ->badge()
                     ->searchable(),
                 TextColumn::make('source_type')
@@ -52,7 +54,7 @@ class FeedsTable
                     ->searchable(),
                 TextColumn::make('unique_identifier_field')
                     ->label(__('admin.fields.unique_identifier_field'))
-                    ->placeholder('provider_product_id')
+                    ->placeholder('external_id')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('products_count')
                     ->label(__('admin.fields.products'))
@@ -106,20 +108,41 @@ class FeedsTable
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('provider')
-                    ->label(__('admin.fields.provider'))
+                    ->label(__('admin.fields.platform'))
                     ->options(__('admin.options.providers')),
                 TernaryFilter::make('is_active')
                     ->label(__('admin.fields.is_active')),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
-                Action::make('mappingSetup')
-                    ->label(__('admin.actions.mapping_setup'))
-                    ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
-                    ->url(fn (Feed $record): ?string => $record->mapping_profile_id
-                        ? FeedMappingProfileResource::getUrl('edit', ['record' => $record->mapping_profile_id])
-                        : null)
-                    ->visible(fn (Feed $record): bool => filled($record->mapping_profile_id)),
+                Action::make('runImport')
+                    ->label(__('admin.actions.run_import'))
+                    ->icon(Heroicon::OutlinedPlay)
+                    ->requiresConfirmation()
+                    ->modalDescription(__('admin.messages.run_feed_import'))
+                    ->action(function (Feed $record): void {
+                        try {
+                            $batch = app(FeedImporter::class)->import($record);
+                        } catch (Throwable $exception) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('admin.messages.feed_import_failed'))
+                                ->body($exception->getMessage())
+                                ->send();
+
+                            return;
+                        }
+
+                        Notification::make()
+                            ->success()
+                            ->title(__('admin.messages.feed_import_completed', [
+                                'created' => $batch->created_rows,
+                                'updated' => $batch->updated_rows,
+                                'skipped' => $batch->skipped_rows,
+                                'failed' => $batch->failed_rows,
+                            ]))
+                            ->send();
+                    }),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make()

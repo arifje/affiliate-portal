@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Feeds\Pages\Concerns;
 
-use App\Filament\Resources\FeedMappingProfiles\FeedMappingProfileResource;
 use App\Models\Feed;
+use App\Services\Feeds\FeedImporter;
 use App\Services\Feeds\FeedStructureAnalyzer;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -22,23 +22,20 @@ trait AnalyzesFeedSource
             ->action(fn () => $this->analyzeFeedSource());
     }
 
-    protected function mappingSetupAction(): Action
+    protected function runImportAction(): Action
     {
-        return Action::make('mappingSetup')
-            ->label(__('admin.actions.mapping_setup'))
-            ->icon(Heroicon::OutlinedAdjustmentsHorizontal)
-            ->url(fn (): ?string => $this->getRecord()->mapping_profile_id
-                ? FeedMappingProfileResource::getUrl('edit', ['record' => $this->getRecord()->mapping_profile_id])
-                : null)
-            ->visible(fn (): bool => filled($this->getRecord()->mapping_profile_id));
+        return Action::make('runImport')
+            ->label(__('admin.actions.run_import'))
+            ->icon(Heroicon::OutlinedPlay)
+            ->requiresConfirmation()
+            ->modalDescription(__('admin.messages.run_feed_import'))
+            ->action(fn () => $this->runFeedImport());
     }
 
     protected function analyzeFeedSource(): void
     {
         /** @var Feed $feed */
         $feed = $this->getRecord();
-        $feed->ensureMappingProfile();
-        $feed->refresh();
 
         try {
             $analysis = app(FeedStructureAnalyzer::class)->analyze($feed);
@@ -52,16 +49,12 @@ trait AnalyzesFeedSource
             return;
         }
 
-        $feed->mappingProfile->forceFill([
+        $feed->forceFill([
             'row_selector' => $analysis['row_selector'],
             'available_elements' => $analysis['available_elements'],
             'sample_fields' => $analysis['sample_fields'],
             'sample_payload' => $analysis['sample_payload'],
             'last_analyzed_at' => now(),
-        ])->save();
-
-        $feed->forceFill([
-            'row_selector' => $analysis['row_selector'],
         ])->saveQuietly();
 
         Notification::make()
@@ -69,6 +62,34 @@ trait AnalyzesFeedSource
             ->title(__('admin.messages.feed_analysis_completed', [
                 'fields' => count($analysis['sample_fields']),
                 'elements' => count($analysis['available_elements']),
+            ]))
+            ->send();
+    }
+
+    protected function runFeedImport(): void
+    {
+        /** @var Feed $feed */
+        $feed = $this->getRecord();
+
+        try {
+            $batch = app(FeedImporter::class)->import($feed);
+        } catch (Throwable $exception) {
+            Notification::make()
+                ->danger()
+                ->title(__('admin.messages.feed_import_failed'))
+                ->body($exception->getMessage())
+                ->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->success()
+            ->title(__('admin.messages.feed_import_completed', [
+                'created' => $batch->created_rows,
+                'updated' => $batch->updated_rows,
+                'skipped' => $batch->skipped_rows,
+                'failed' => $batch->failed_rows,
             ]))
             ->send();
     }

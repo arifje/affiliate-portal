@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Feeds\Schemas;
 
+use App\Filament\Support\JsonTextEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -24,14 +25,14 @@ class FeedInfolist
                         TextEntry::make('slug')
                             ->label(__('admin.fields.slug')),
                         TextEntry::make('provider')
-                            ->label(__('admin.fields.provider'))
+                            ->label(__('admin.fields.platform'))
                             ->badge(),
                         TextEntry::make('source_type')
                             ->label(__('admin.fields.source_type'))
                             ->badge(),
                         TextEntry::make('unique_identifier_field')
                             ->label(__('admin.fields.unique_identifier_field'))
-                            ->placeholder('provider_product_id'),
+                            ->placeholder('external_id'),
                         IconEntry::make('is_active')
                             ->label(__('admin.fields.is_active'))
                             ->boolean(),
@@ -68,6 +69,26 @@ class FeedInfolist
                             ->formatStateUsing(fn (?array $state): string => filled($state) ? __('admin.messages.configured') : __('admin.messages.not_configured'))
                             ->placeholder(__('admin.messages.not_configured')),
                     ]),
+                Section::make(__('admin.sections.feed_discovery'))
+                    ->description(__('admin.helpers.feed_discovery'))
+                    ->schema([
+                        TextEntry::make('last_analyzed_at')
+                            ->label(__('admin.fields.last_analyzed_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('row_selector')
+                            ->label(__('admin.fields.primary_element'))
+                            ->placeholder('-'),
+                        JsonTextEntry::make('available_elements')
+                            ->label(__('admin.fields.available_elements'))
+                            ->placeholder(__('admin.placeholders.analyze_feed_first'))
+                            ->columnSpanFull(),
+                        JsonTextEntry::make('sample_fields')
+                            ->label(__('admin.fields.sample_fields'))
+                            ->placeholder(__('admin.placeholders.analyze_feed_first'))
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
                 Section::make(__('admin.sections.mapping_and_import_state'))
                     ->schema([
                         TextEntry::make('schedule')

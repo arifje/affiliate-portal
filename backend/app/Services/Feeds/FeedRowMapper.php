@@ -2,8 +2,11 @@
 
 namespace App\Services\Feeds;
 
+use App\Models\CanonicalField;
+use App\Models\Feed;
 use App\Models\FeedFieldMapping;
 use App\Models\FeedMappingProfile;
+use App\Models\FeedProductFieldMapping;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
@@ -34,6 +37,40 @@ class FeedRowMapper
 
             $value = $this->valueForMapping($sourceRow, $mapping);
             $value = $this->transform($value, $mapping, $profile);
+
+            if ($this->hasValue($value)) {
+                $canonical[$field->key] = $value;
+            }
+        }
+
+        return $canonical;
+    }
+
+    /**
+     * Map a source feed row to canonical product field keys for one Feed.
+     *
+     * @param  array<string, mixed>  $sourceRow
+     * @return array<string, mixed>
+     */
+    public function mapFeed(array $sourceRow, Feed $feed): array
+    {
+        $feed->loadMissing(['productFieldMappings.canonicalField']);
+
+        $canonical = [];
+
+        foreach ($feed->productFieldMappings->sortBy('sort_order') as $mapping) {
+            if ($mapping->mapping_action === 'skip') {
+                continue;
+            }
+
+            $field = $mapping->canonicalField;
+
+            if (! $field || ! $field->is_active) {
+                continue;
+            }
+
+            $value = $this->valueForMapping($sourceRow, $mapping);
+            $value = $this->transform($value, $mapping, $feed);
 
             if ($this->hasValue($value)) {
                 $canonical[$field->key] = $value;
@@ -94,6 +131,56 @@ class FeedRowMapper
     }
 
     /**
+     * Map a source feed row directly to product table attributes for one Feed.
+     *
+     * @param  array<string, mixed>  $sourceRow
+     * @return array<string, mixed>
+     */
+    public function mapFeedToProductAttributes(array $sourceRow, Feed $feed): array
+    {
+        $feed->loadMissing(['productFieldMappings.canonicalField']);
+
+        $attributes = [
+            'raw_payload' => $sourceRow,
+        ];
+        $metadata = [];
+
+        foreach ($feed->productFieldMappings->sortBy('sort_order') as $mapping) {
+            if ($mapping->mapping_action === 'skip') {
+                continue;
+            }
+
+            $field = $mapping->canonicalField;
+
+            if (! $field || ! $field->is_active) {
+                continue;
+            }
+
+            $value = $this->transform($this->valueForMapping($sourceRow, $mapping), $mapping, $feed);
+
+            if (! $this->hasValue($value)) {
+                continue;
+            }
+
+            if ($field->target_column) {
+                $attributes[$field->target_column] = $value;
+
+                continue;
+            }
+
+            if ($field->metadata_path) {
+                Arr::set($metadata, $field->metadata_path, $value);
+            }
+        }
+
+        if ($metadata !== []) {
+            $attributes['metadata'] = $metadata;
+        }
+
+        return $attributes;
+    }
+
+    /**
      * Return canonical field keys required by the profile but missing from the row.
      *
      * @param  array<string, mixed>  $canonicalRow
@@ -113,9 +200,40 @@ class FeedRowMapper
     }
 
     /**
+     * @param  array<string, mixed>  $canonicalRow
+     * @return array<int, string>
+     */
+    public function missingRequiredFeedFields(array $canonicalRow, Feed $feed): array
+    {
+        $feed->loadMissing(['productFieldMappings.canonicalField']);
+
+        static $requiredKeys = null;
+
+        $requiredKeys ??= CanonicalField::query()
+            ->active()
+            ->where('is_required', true)
+            ->pluck('key')
+            ->all();
+
+        $mappingRequiredKeys = $feed->productFieldMappings
+            ->filter(fn (FeedProductFieldMapping $mapping): bool => $mapping->mapping_action !== 'skip'
+                && ($mapping->is_required || (bool) $mapping->canonicalField?->is_required))
+            ->map(fn (FeedProductFieldMapping $mapping): ?string => $mapping->canonicalField?->key)
+            ->filter()
+            ->values()
+            ->all();
+
+        return collect([...$requiredKeys, ...$mappingRequiredKeys])
+            ->unique()
+            ->filter(fn (string $key): bool => ! $this->hasValue($canonicalRow[$key] ?? null))
+            ->values()
+            ->all();
+    }
+
+    /**
      * @param  array<string, mixed>  $sourceRow
      */
-    private function valueForMapping(array $sourceRow, FeedFieldMapping $mapping): mixed
+    private function valueForMapping(array $sourceRow, FeedFieldMapping|FeedProductFieldMapping $mapping): mixed
     {
         $keys = array_values(array_filter([
             $mapping->source_field,
@@ -160,7 +278,7 @@ class FeedRowMapper
         return null;
     }
 
-    private function transform(mixed $value, FeedFieldMapping $mapping, FeedMappingProfile $profile): mixed
+    private function transform(mixed $value, FeedFieldMapping|FeedProductFieldMapping $mapping, FeedMappingProfile|Feed $context): mixed
     {
         if (! $this->hasValue($value)) {
             return $mapping->default_value;
@@ -178,7 +296,7 @@ class FeedRowMapper
             'array' => $this->normalizeArray($value, $mapping->transform_config ?? []),
             'availability' => $this->normalizeAvailability($value),
             'boolean' => $this->normalizeBoolean($value),
-            'decimal', 'money' => $this->normalizeDecimal($value, $profile),
+            'decimal', 'money' => $this->normalizeDecimal($value, $context),
             'integer' => $this->normalizeInteger($value),
             'lowercase' => Str::lower((string) $value),
             'uppercase' => Str::upper((string) $value),
@@ -233,7 +351,7 @@ class FeedRowMapper
         return in_array($normalized, ['1', 'true', 'yes', 'y', 'ja'], true);
     }
 
-    private function normalizeDecimal(mixed $value, FeedMappingProfile $profile): ?string
+    private function normalizeDecimal(mixed $value, FeedMappingProfile|Feed $context): ?string
     {
         if (is_numeric($value)) {
             return number_format((float) $value, 2, '.', '');
@@ -241,12 +359,12 @@ class FeedRowMapper
 
         $normalized = trim((string) $value);
 
-        if ($profile->thousands_separator) {
-            $normalized = str_replace($profile->thousands_separator, '', $normalized);
+        if ($context->thousands_separator) {
+            $normalized = str_replace($context->thousands_separator, '', $normalized);
         }
 
-        if ($profile->decimal_separator && $profile->decimal_separator !== '.') {
-            $normalized = str_replace($profile->decimal_separator, '.', $normalized);
+        if ($context->decimal_separator && $context->decimal_separator !== '.') {
+            $normalized = str_replace($context->decimal_separator, '.', $normalized);
         }
 
         if (! str_contains($normalized, '.') && substr_count($normalized, ',') === 1) {

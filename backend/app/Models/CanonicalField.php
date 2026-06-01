@@ -30,6 +30,11 @@ class CanonicalField extends Model
         return $this->hasMany(FeedFieldMapping::class);
     }
 
+    public function productFieldMappings(): HasMany
+    {
+        return $this->hasMany(FeedProductFieldMapping::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
