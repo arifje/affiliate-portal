@@ -4,48 +4,12 @@ namespace App\Services\Feeds;
 
 use App\Models\CanonicalField;
 use App\Models\Feed;
-use App\Models\FeedFieldMapping;
-use App\Models\FeedMappingProfile;
 use App\Models\FeedProductFieldMapping;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class FeedRowMapper
 {
-    /**
-     * Map a source feed row to canonical product keys.
-     *
-     * @param  array<string, mixed>  $sourceRow
-     * @return array<string, mixed>
-     */
-    public function map(array $sourceRow, FeedMappingProfile $profile): array
-    {
-        $profile->loadMissing(['fieldMappings.canonicalField']);
-
-        $canonical = [];
-
-        foreach ($profile->fieldMappings->sortBy('sort_order') as $mapping) {
-            if ($mapping->mapping_action === 'skip') {
-                continue;
-            }
-
-            $field = $mapping->canonicalField;
-
-            if (! $field || ! $field->is_active) {
-                continue;
-            }
-
-            $value = $this->valueForMapping($sourceRow, $mapping);
-            $value = $this->transform($value, $mapping, $profile);
-
-            if ($this->hasValue($value)) {
-                $canonical[$field->key] = $value;
-            }
-        }
-
-        return $canonical;
-    }
-
     /**
      * Map a source feed row to canonical product field keys for one Feed.
      *
@@ -78,56 +42,6 @@ class FeedRowMapper
         }
 
         return $canonical;
-    }
-
-    /**
-     * Map a source feed row directly to product table attributes.
-     *
-     * @param  array<string, mixed>  $sourceRow
-     * @return array<string, mixed>
-     */
-    public function mapToProductAttributes(array $sourceRow, FeedMappingProfile $profile): array
-    {
-        $profile->loadMissing(['fieldMappings.canonicalField']);
-
-        $attributes = [
-            'raw_payload' => $sourceRow,
-        ];
-        $metadata = [];
-
-        foreach ($profile->fieldMappings->sortBy('sort_order') as $mapping) {
-            if ($mapping->mapping_action === 'skip') {
-                continue;
-            }
-
-            $field = $mapping->canonicalField;
-
-            if (! $field || ! $field->is_active) {
-                continue;
-            }
-
-            $value = $this->transform($this->valueForMapping($sourceRow, $mapping), $mapping, $profile);
-
-            if (! $this->hasValue($value)) {
-                continue;
-            }
-
-            if ($field->target_column) {
-                $attributes[$field->target_column] = $value;
-
-                continue;
-            }
-
-            if ($field->metadata_path) {
-                Arr::set($metadata, $field->metadata_path, $value);
-            }
-        }
-
-        if ($metadata !== []) {
-            $attributes['metadata'] = $metadata;
-        }
-
-        return $attributes;
     }
 
     /**
@@ -181,25 +95,6 @@ class FeedRowMapper
     }
 
     /**
-     * Return canonical field keys required by the profile but missing from the row.
-     *
-     * @param  array<string, mixed>  $canonicalRow
-     * @return array<int, string>
-     */
-    public function missingRequiredFields(array $canonicalRow, FeedMappingProfile $profile): array
-    {
-        $profile->loadMissing(['fieldMappings.canonicalField']);
-
-        return $profile->fieldMappings
-            ->filter(fn (FeedFieldMapping $mapping): bool => $mapping->mapping_action !== 'skip'
-                && ($mapping->is_required || (bool) $mapping->canonicalField?->is_required))
-            ->map(fn (FeedFieldMapping $mapping): ?string => $mapping->canonicalField?->key)
-            ->filter(fn (?string $key): bool => $key !== null && ! $this->hasValue($canonicalRow[$key] ?? null))
-            ->values()
-            ->all();
-    }
-
-    /**
      * @param  array<string, mixed>  $canonicalRow
      * @return array<int, string>
      */
@@ -233,7 +128,7 @@ class FeedRowMapper
     /**
      * @param  array<string, mixed>  $sourceRow
      */
-    private function valueForMapping(array $sourceRow, FeedFieldMapping|FeedProductFieldMapping $mapping): mixed
+    private function valueForMapping(array $sourceRow, FeedProductFieldMapping $mapping): mixed
     {
         $keys = array_values(array_filter([
             $mapping->source_field,
@@ -259,6 +154,10 @@ class FeedRowMapper
     {
         if (array_key_exists($key, $sourceRow)) {
             return $sourceRow[$key];
+        }
+
+        if (str_contains($key, '*')) {
+            return $this->readWildcardValues($sourceRow, $key);
         }
 
         $pathValue = $this->readArrayPath($sourceRow, $key);
@@ -288,6 +187,42 @@ class FeedRowMapper
         }
 
         return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $sourceRow
+     * @return array<int, mixed>
+     */
+    private function readWildcardValues(array $sourceRow, string $pattern): array
+    {
+        $dotRow = Arr::dot($sourceRow);
+        $normalizedPattern = $this->normalizeFieldPattern($pattern);
+        $values = [];
+
+        foreach ($dotRow as $sourceKey => $value) {
+            if (! $this->hasValue($value)) {
+                continue;
+            }
+
+            $normalizedSourceKey = $this->normalizeFieldPattern((string) $sourceKey);
+
+            if (! Str::is($normalizedPattern, $normalizedSourceKey)) {
+                continue;
+            }
+
+            $values[] = $value;
+        }
+
+        return array_values(array_unique($values, SORT_REGULAR));
+    }
+
+    private function normalizeFieldPattern(string $value): string
+    {
+        return Str::of($value)
+            ->lower()
+            ->replaceMatches('/[^a-z0-9*]+/', '_')
+            ->trim('_')
+            ->toString();
     }
 
     /**
@@ -384,7 +319,7 @@ class FeedRowMapper
         return null;
     }
 
-    private function transform(mixed $value, FeedFieldMapping|FeedProductFieldMapping $mapping, FeedMappingProfile|Feed $context): mixed
+    private function transform(mixed $value, FeedProductFieldMapping $mapping, Feed $context): mixed
     {
         if (! $this->hasValue($value)) {
             return $mapping->default_value;
@@ -499,7 +434,7 @@ class FeedRowMapper
         return in_array($normalized, ['1', 'true', 'yes', 'y', 'ja'], true);
     }
 
-    private function normalizeDecimal(mixed $value, FeedMappingProfile|Feed $context): ?string
+    private function normalizeDecimal(mixed $value, Feed $context): ?string
     {
         if (is_numeric($value)) {
             return number_format((float) $value, 2, '.', '');

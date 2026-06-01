@@ -4,7 +4,6 @@ use App\Models\Click;
 use App\Models\Feed;
 use App\Models\FeedImportBatch;
 use App\Models\FeedImportRowError;
-use App\Models\FeedMappingProfile;
 use App\Models\FeedProductFieldMapping;
 use App\Models\Partner;
 use App\Models\Product;
@@ -78,7 +77,6 @@ Artisan::command('demo:reset-affiliate-data {--no-seed} {--force}', function ():
         FeedProductFieldMapping::query()->delete();
         Product::query()->delete();
         Feed::query()->delete();
-        FeedMappingProfile::query()->where('is_template', false)->delete();
         Partner::query()->delete();
     });
 

@@ -29,7 +29,6 @@ class FeedImporter
 
         $batch = FeedImportBatch::query()->create([
             'feed_id' => $feed->id,
-            'feed_mapping_profile_id' => $feed->mapping_profile_id,
             'status' => 'running',
             'source_url' => $this->sourceLabel($feed),
             'started_at' => now(),

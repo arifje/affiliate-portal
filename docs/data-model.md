@@ -14,8 +14,8 @@ so parked domains can be added without schema churn.
 Partners represent affiliate networks or direct merchants. Feeds represent a
 single import source for a specific site and partner. Feed metadata tracks
 provider type, URL, credentials/config, scheduling, and last import state.
-Feeds can point to a reusable mapping profile, which describes how source fields
-from Daisycon, Awin, TradeTracker, or custom feeds are normalized.
+Each feed owns its product field mappings, which describe how source fields from
+Daisycon, Awin, TradeTracker, or custom feeds are normalized.
 
 A feed belongs to one site. This keeps category mapping, product selection, and
 frontend publishing site-specific even when multiple domains use the same
@@ -23,10 +23,11 @@ affiliate network.
 
 ## Feed Mapping
 
-`canonical_fields` stores the universal product vocabulary. `feed_mapping_profiles`
-stores provider or feed-specific parsing defaults. `feed_field_mappings` connects
-source fields or paths to canonical fields and records transforms such as money,
-availability, integer, boolean, or array normalization.
+`canonical_fields` stores the universal product vocabulary.
+`feed_product_field_mappings` connects source fields or paths on a specific feed
+to canonical fields and records transforms such as money, availability, integer,
+boolean, or array normalization. Provider templates are config-only helpers used
+to create draft mappings; they are not reusable database profiles.
 
 Import runs are tracked in `feed_import_batches`; failed rows are captured in
 `feed_import_row_errors` for debugging and feed onboarding.

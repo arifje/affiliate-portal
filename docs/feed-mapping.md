@@ -2,13 +2,13 @@
 
 Affiliate networks expose overlapping product concepts under different field
 names. The platform keeps those provider details outside the product schema by
-using a canonical field registry plus reusable mapping profiles.
+using a canonical product-field registry plus feed-specific field mappings.
 
 ## Goals
 
 - Support Daisycon, Awin, TradeTracker, Google Merchant style, and custom feeds.
 - Normalize all feeds into one product shape.
-- Reuse provider templates while allowing site, partner, or feed-specific edits.
+- Use provider templates as draft suggestions, then store the final mapping on the feed.
 - Keep high-value catalog fields indexed as columns and long-tail fields in JSON.
 - Record import batches and row errors for debugging.
 
@@ -36,31 +36,37 @@ Google Merchant-style product data:
 - Variants: color, size, gender, material, pattern, age group.
 - Classification and compliance: Google category, energy label, adult flag.
 
-### Mapping profiles
+### Feed-specific mappings
 
-`feed_mapping_profiles` describes how a source file should be parsed and mapped.
-Profiles can be global templates or scoped later to a site or partner.
+Every `feeds` record stores parsing settings such as source format, delimiter,
+encoding, decimal separator, row selector, request headers, query parameters,
+credentials, schedule, and import strategy. The actual field mapping is stored
+in `feed_product_field_mappings`, scoped to that feed.
 
 Important fields:
 
 - `provider`: `awin`, `daisycon`, `tradetracker`, or `custom`.
 - `source_format`: `csv`, `xml`, `json`, or `jsonl`.
 - parsing defaults such as delimiter, encoding, decimal separator, and row selector.
-- locale, timezone, and currency defaults.
+- import strategy toggles for creating, updating, disabling, or deleting products.
 
-Seeded templates:
+Provider templates are now config-only draft helpers:
 
 - `awin-legacy`
 - `daisycon-standard`
 - `tradetracker-standard`
+- `tradetracker-json`
+- `tradetracker-xml`
 - `google-merchant`
 
-Templates are intentionally conservative. During feed onboarding, clone or edit a
-profile after previewing real rows from the partner feed.
+Templates are intentionally conservative. During feed onboarding, analyze the
+real feed, choose the primary element, create draft mappings from the feed page,
+then edit or skip individual product fields.
 
-### Field mappings
+### Product field mappings
 
-`feed_field_mappings` connects one source field to one canonical field.
+`feed_product_field_mappings` connects one source field to one canonical field
+for one feed.
 
 Each mapping can define:
 
@@ -80,7 +86,7 @@ values, and returns both canonical keys and product table attributes.
 ```mermaid
 flowchart LR
     A["Feed source"] --> B["Parse rows"]
-    B --> C["Apply mapping profile"]
+    B --> C["Apply feed product mappings"]
     C --> D["Canonical product row"]
     D --> E["Validate required fields"]
     E --> F["Upsert products"]
@@ -95,7 +101,7 @@ Expected next importer steps:
 
 1. Fetch feed content from URL or API.
 2. Parse CSV, XML, JSON, or JSONL into normalized row arrays.
-3. Map each row with the selected `FeedMappingProfile`.
+3. Map each row with the feed's `feed_product_field_mappings`.
 4. Validate required canonical fields.
 5. Resolve or create site categories.
 6. Upsert products by site, partner, and external product ID.
@@ -106,14 +112,14 @@ Expected next importer steps:
 Filament exposes the mapping setup under the `Feed imports` navigation group:
 
 - `Partners`: manage affiliate networks or merchants.
-- `Feeds`: attach a partner feed to a site and select a mapping profile.
-- `Canonical fields`: manage the universal product vocabulary.
-- `Feed mapping profiles`: manage provider templates and scoped mappings.
-- `Feed field mappings`: inspect or edit mappings across all profiles.
+- `Feeds`: attach a partner feed to a site, analyze source data, create draft
+  mappings, choose an import strategy, schedule, and run imports.
+- `Product fields`: manage the universal product vocabulary.
 - `Feed import batches`: inspect import counters and row-level failures.
 
-Most day-to-day work should happen from a mapping profile. Open a profile and
-edit its field mappings there so the mapping context stays visible.
+Most day-to-day work should happen from the feed detail page. Open a feed and
+edit its product field mappings there so the source samples and import settings
+stay visible.
 
 ## Attaching a Feed to a Site
 
@@ -122,8 +128,11 @@ The setup order is:
 1. Create or confirm the `Site`, for example `hartslagmeters.nl`.
 2. Create a `Partner` for the network or merchant, for example an Awin advertiser.
 3. Create a `Feed`.
-4. Select the Site, Partner, provider, source type, source URL, and mapping profile.
-5. Keep the feed active when it is ready for imports.
+4. Select the Site, Partner, provider, source type, source URL or uploaded file,
+   request headers/query parameters if needed, and parsing settings.
+5. Analyze the source, choose the primary element, create draft mappings, edit
+   fields, and choose the import strategy.
+6. Keep the feed active when it is ready for imports.
 
 You can create feeds from the global `Feeds` section or from a site's detail page
 under the site's `Feeds` relation tab. A feed belongs to exactly one site, so the

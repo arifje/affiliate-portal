@@ -24,11 +24,6 @@ class FeedImportBatchForm
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Select::make('feed_mapping_profile_id')
-                            ->label(__('admin.fields.mapping_profile'))
-                            ->relationship('mappingProfile', 'name')
-                            ->searchable()
-                            ->preload(),
                         Select::make('status')
                             ->label(__('admin.fields.status'))
                             ->options(__('admin.options.import_statuses'))

@@ -766,22 +766,10 @@ return [
             'navigation_label' => 'Categories',
         ],
 
-        'feed_field_mappings' => [
-            'model_label' => 'Feed field mapping',
-            'plural_label' => 'Feed field mappings',
-            'navigation_label' => 'Feed field mappings',
-        ],
-
         'feed_import_batches' => [
             'model_label' => 'Feed import batch',
             'plural_label' => 'Feed import batches',
             'navigation_label' => 'Feed import batches',
-        ],
-
-        'feed_mapping_profiles' => [
-            'model_label' => 'Mapping setup',
-            'plural_label' => 'Mapping setups',
-            'navigation_label' => 'Mapping setups',
         ],
 
         'feeds' => [

@@ -25,11 +25,6 @@ class CanonicalField extends Model
         ];
     }
 
-    public function fieldMappings(): HasMany
-    {
-        return $this->hasMany(FeedFieldMapping::class);
-    }
-
     public function productFieldMappings(): HasMany
     {
         return $this->hasMany(FeedProductFieldMapping::class);

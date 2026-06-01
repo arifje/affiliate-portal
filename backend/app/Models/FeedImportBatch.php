@@ -33,11 +33,6 @@ class FeedImportBatch extends Model
         return $this->belongsTo(Feed::class);
     }
 
-    public function mappingProfile(): BelongsTo
-    {
-        return $this->belongsTo(FeedMappingProfile::class, 'feed_mapping_profile_id');
-    }
-
     public function rowErrors(): HasMany
     {
         return $this->hasMany(FeedImportRowError::class);

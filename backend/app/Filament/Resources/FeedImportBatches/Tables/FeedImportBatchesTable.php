@@ -19,10 +19,6 @@ class FeedImportBatchesTable
                 TextColumn::make('feed.name')
                     ->label(__('admin.fields.feed'))
                     ->searchable(),
-                TextColumn::make('mappingProfile.name')
-                    ->label(__('admin.fields.mapping_profile'))
-                    ->searchable()
-                    ->toggleable(),
                 TextColumn::make('status')
                     ->label(__('admin.fields.status'))
                     ->badge()

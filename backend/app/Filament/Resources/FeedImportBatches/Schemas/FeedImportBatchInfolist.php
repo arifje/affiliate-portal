@@ -13,10 +13,6 @@ class FeedImportBatchInfolist
             ->components([
                 TextEntry::make('feed.name')
                     ->label(__('admin.fields.feed')),
-                TextEntry::make('feed_mapping_profile_id')
-                    ->label(__('admin.fields.mapping_profile'))
-                    ->numeric()
-                    ->placeholder('-'),
                 TextEntry::make('status')
                     ->label(__('admin.fields.status')),
                 TextEntry::make('source_url')
